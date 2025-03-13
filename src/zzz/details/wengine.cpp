@@ -85,7 +85,7 @@ namespace zzz::details {
 
     // WengineAdaptor
 
-    Wengine WengineAdaptor::from(const toml::value& data) {
+    Wengine ToWengineConverter::from(const toml::value& data) {
         WengineBuilder builder;
 
         builder.set_id(data.at("id").as_integer());
@@ -93,9 +93,9 @@ namespace zzz::details {
         builder.set_speciality(convert::string_to_speciality(data.at("speciality").as_string()));
 
         const auto& stats = data.at("stats").as_table();
-        builder.set_main_stat(global::stat_adaptor.from(stats.at("main").as_array()));
-        builder.set_sub_stat(global::stat_adaptor.from(stats.at("sub").as_array()));
-        builder.set_passive_stats(global::stats_grid_adaptor.from(stats.at("passive")));
+        builder.set_main_stat(global::to_stat.from(stats.at("main").as_array()));
+        builder.set_sub_stat(global::to_stat.from(stats.at("sub").as_array()));
+        builder.set_passive_stats(global::to_stats_grid.from(stats.at("passive")));
 
         return builder.get_product();
     }

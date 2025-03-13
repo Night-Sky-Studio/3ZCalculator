@@ -22,14 +22,14 @@ namespace zzz {
         operator double() const { return value; }
     };
 
-    class StatAdaptor : public lib::IConverter<stat, toml::array>, public lib::IConverter<stat, toml::table> {
+    class ToStatConverter : public lib::IConverter<stat, toml::array>, public lib::IConverter<stat, toml::table> {
     public:
         stat from(const toml::array& data) override;
         stat from(const toml::table& data) override;
     };
 
     class StatsGrid {
-        friend class StatsGridAdaptor;
+        friend class ToStatsGridConverter;
 
     public:
         using iterator = std::unordered_map<size_t, stat>::iterator;
@@ -64,14 +64,14 @@ namespace zzz {
         static size_t _gen_key(StatType type, Tag tag);
     };
 
-    class StatsGridAdaptor : public lib::IConverter<StatsGrid, toml::value> {
+    class ToStatsGridConverter : public lib::IConverter<StatsGrid, toml::value> {
     public:
         StatsGrid from(const toml::value& data) override;
     };
 }
 
 namespace zzz::global {
-    static StatAdaptor stat_adaptor;
+    static ToStatConverter to_stat;
 
-    static StatsGridAdaptor stats_grid_adaptor;
+    static ToStatsGridConverter to_stats_grid;
 }

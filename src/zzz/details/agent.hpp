@@ -23,7 +23,7 @@ namespace zzz::details {
     // TODO: make skill and anomaly one unordered_map
     class Agent {
         friend class AgentBuilder;
-        friend class AgentAdaptor;
+        friend class ToAgentConverter;
 
     public:
         // 0 - none, 1 - skill, 2 - anomaly
@@ -74,14 +74,14 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class AgentAdaptor : public lib::IConverter<Agent, toml::value> {
+    class ToAgentConverter : public lib::IConverter<Agent, toml::value> {
     public:
         Agent from(const toml::value& data) override;
     };
 }
 
 namespace zzz::global {
-    static details::AgentAdaptor agent_adaptor;
+    static details::ToAgentConverter to_agent;
 }
 
 namespace zzz {

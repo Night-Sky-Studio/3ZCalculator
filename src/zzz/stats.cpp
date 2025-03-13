@@ -7,14 +7,14 @@
 namespace zzz {
     // StatAdaptor
 
-    stat StatAdaptor::from(const toml::array& data) {
+    stat ToStatConverter::from(const toml::array& data) {
         return stat {
             .value = data[1].as_floating(),
             .type = convert::string_to_stat_type(data[0].as_string()),
             .tag = data.size() == 3 ? convert::string_to_tag(data[2].as_string()) : Tag::Universal
         };
     }
-    stat StatAdaptor::from(const toml::table& data) {
+    stat ToStatConverter::from(const toml::table& data) {
         auto tag_it = data.find("tag");
         return stat {
             .value = data.at("value").as_floating(),
@@ -96,16 +96,16 @@ namespace zzz {
 
     // StatsTableLoader
 
-    StatsGrid StatsGridAdaptor::from(const toml::value& data) {
+    StatsGrid ToStatsGridConverter::from(const toml::value& data) {
         StatsGrid result;
 
         for (const auto& it : data.as_array()) {
             switch (it.type()) {
             case toml::value_t::array:
-                result.emplace(global::stat_adaptor.from(it.as_array()));
+                result.emplace(global::to_stat.from(it.as_array()));
                 break;
             case toml::value_t::table:
-                result.emplace(global::stat_adaptor.from(it.as_table()));
+                result.emplace(global::to_stat.from(it.as_table()));
                 break;
             default:
                 throw std::runtime_error("wrong stat format");

@@ -44,7 +44,7 @@ add_executable(3ZCalculator
     "src/zzz/details/wengine.cpp"
 
     "src/backend/calculator.cpp"
-    "src/backend/adaptors.cpp"
+    "src/backend/converters.cpp"
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

@@ -15,7 +15,7 @@
 namespace zzz::details {
     class Wengine {
         friend class WengineBuilder;
-        friend class WengineAdaptor;
+        friend class ToWengineConverter;
 
     public:
         uint64_t id() const;
@@ -60,14 +60,14 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class WengineAdaptor : public lib::IConverter<Wengine, toml::value> {
+    class ToWengineConverter : public lib::IConverter<Wengine, toml::value> {
     public:
         Wengine from(const toml::value& data) override;
     };
 }
 
 namespace zzz::global {
-    static details::WengineAdaptor wengine_adaptor;
+    static details::ToWengineConverter to_wengine;
 }
 
 namespace zzz {

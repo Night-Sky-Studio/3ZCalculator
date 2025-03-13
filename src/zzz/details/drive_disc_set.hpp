@@ -19,8 +19,8 @@
 
 namespace zzz::details {
     class DriveDiscSet {
-        friend class DriveDiscSetBuilder;
-        friend class DriveDiscSetAdaptor;
+        friend class DdsBuilder;
+        friend class ToDdsConverter;
 
     public:
         uint64_t id() const;
@@ -35,12 +35,12 @@ namespace zzz::details {
         std::array<StatsGrid, 2> m_set_bonuses;
     };
 
-    class DriveDiscSetBuilder : public lib::IBuilder<DriveDiscSet> {
+    class DdsBuilder : public lib::IBuilder<DriveDiscSet> {
     public:
-        DriveDiscSetBuilder& set_id(uint64_t id);
-        DriveDiscSetBuilder& set_name(std::string name);
-        DriveDiscSetBuilder& set_p2(StatsGrid bonus);
-        DriveDiscSetBuilder& set_p4(StatsGrid bonus);
+        DdsBuilder& set_id(uint64_t id);
+        DdsBuilder& set_name(std::string name);
+        DdsBuilder& set_p2(StatsGrid bonus);
+        DdsBuilder& set_p4(StatsGrid bonus);
 
         bool is_built() const override;
         DriveDiscSet&& get_product() override;
@@ -54,14 +54,14 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class DriveDiscSetAdaptor : protected lib::IConverter<DriveDiscSet, toml::value> {
+    class ToDdsConverter : protected lib::IConverter<DriveDiscSet, toml::value> {
     public:
         DriveDiscSet from(const toml::value& data) override;
     };
 }
 
 namespace zzz::global {
-    static details::DriveDiscSetAdaptor dds_adaptor;
+    static details::ToDdsConverter to_dds;
 }
 
 namespace zzz {

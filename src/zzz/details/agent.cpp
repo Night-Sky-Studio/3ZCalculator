@@ -94,7 +94,7 @@ namespace zzz::details {
 
     // AgentAdaptor
 
-    Agent AgentAdaptor::from(const toml::value& data) {
+    Agent ToAgentConverter::from(const toml::value& data) {
         AgentBuilder agent_builder;
         const auto& table = data.as_table();
         auto element = convert::string_to_element(table.at("element").as_string());
@@ -104,7 +104,7 @@ namespace zzz::details {
         agent_builder.set_speciality(convert::string_to_speciality(table.at("speciality").as_string()));
         agent_builder.set_element(element);
         agent_builder.set_rarity(convert::char_to_rarity(table.at("rarity").as_string()[0]));
-        agent_builder.set_stats(global::stats_grid_adaptor.from(table.at("stats")));
+        agent_builder.set_stats(global::to_stats_grid.from(table.at("stats")));
 
         for (const auto& [key, value] : table.at("skills").as_table()) {
             const auto& skill_table = value.as_table();
@@ -120,7 +120,7 @@ namespace zzz::details {
             }
 
             if (auto it = skill_table.find("buffs"); it != skill_table.end())
-                skill_builder.set_buffs(global::stats_grid_adaptor.from(it->second));
+                skill_builder.set_buffs(global::to_stats_grid.from(it->second));
 
             agent_builder.add_skill(skill_builder.get_product());
         }
@@ -135,7 +135,7 @@ namespace zzz::details {
                 anomaly_builder.set_crit(anomaly_table.at("can_crit").as_boolean());
 
                 if (auto it = anomaly_table.find("buffs"); it != anomaly_table.end())
-                    anomaly_builder.set_buffs(global::stats_grid_adaptor.from(it->second));
+                    anomaly_builder.set_buffs(global::to_stats_grid.from(it->second));
 
                 agent_builder.add_anomaly(anomaly_builder.get_product());
             }
