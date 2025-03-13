@@ -1,0 +1,99 @@
+id = 1091
+name = "Hoshimi Miyabi"
+speciality = "anomaly"
+element = "ice"
+rarity = 'S'
+stats = [
+    ["hp_base", 7673.0],
+    ["def_base", 606.0],
+    ["atk_base", 955.0],
+    ["crit_rate", 0.05],
+    ["crit_dmg", 0.5],
+    ["impact_base", 86.0],
+    ["am_base", 116.0],
+    ["ap", 328.0],
+    ["ice_ratio", 0.3]
+]
+
+# anomaly
+
+[anomalies.shatter]
+scale = 500.0
+
+[anomalies.frostburn]
+scale = 1500.0
+
+# basic
+
+[skills.kazahana]
+tag = "basic"
+scales = [
+    [54.4, 21.2, "phys"],
+    [59.3, 41.2, "phys"],
+    [126.6, 70.6],
+    [193.3, 123.9],
+    [258.8, 197.0]
+]
+
+[skills.shimotsuki]
+tag = "basic"
+scales = [
+    [910.1, 66.0],
+    [1717.2, 97.2],
+    [4282.8, 567.0]
+]
+buffs = [
+    ["dmg_ratio", 0.6],
+    ["ice_res_pen", 0.3]
+]
+
+# dodge
+
+[skills.fuyubachi]
+tag = "dash"
+scales = [[52.2, 19.5, "phys"]]
+
+[skills.kan_suzume]
+tag = "counter"
+scales = [[492.3, 322.3]]
+
+# assist
+
+[skills.dancing_petals]
+tag = "quick_assist"
+scales = [[209.0, 157.3]]
+
+[skills.drifting_petals]
+tag = "defensive_assist"
+scales = [
+    [0.0, 407.7],
+    [0.0, 514.4],
+    [0.0, 193.2]
+]
+
+[skills.falling_petals]
+tag = "followup_assist"
+scales = [[676.6, 438.2]]
+
+# special
+
+[skills.miyuki]
+tag = "special"
+scales = [[72.1, 54.5]]
+
+[skills.hisetsu]
+tag = "ex_special"
+scales = [
+    [788.3, 483.4],
+    [967.2, 608.5]
+]
+
+# chain
+
+[skills.springs_call]
+tag = "chain"
+scales = [[1258.3, 284.7]]
+
+[skills.lingering_snow]
+tag = "ultimate"
+scales = [[4776.1, 556.3]]

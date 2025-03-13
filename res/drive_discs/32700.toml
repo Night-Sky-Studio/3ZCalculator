@@ -1,0 +1,9 @@
+id = 32700
+name = "Branch & Blade Song"
+
+[set_bonus]
+p2 = [["crit_dmg", 0.16]]
+p4 = [
+    ["crit_dmg", 0.3],
+    ["crit_rate", 0.12]
+]
