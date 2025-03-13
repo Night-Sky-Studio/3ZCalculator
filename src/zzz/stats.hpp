@@ -1,7 +1,6 @@
 #pragma once
 
 //std
-#include <cmath>
 #include <list>
 #include <unordered_map>
 
@@ -9,7 +8,7 @@
 #include "toml.hpp"
 
 //library
-#include "library/adaptor.hpp"
+#include "library/converter.hpp"
 
 //zzz
 #include "zzz/enums.hpp"
@@ -23,15 +22,10 @@ namespace zzz {
         operator double() const { return value; }
     };
 
-    class StatAsArrayAdaptor : public lib::IAdaptor<toml::array, stat> {
+    class StatAdaptor : public lib::IConverter<stat, toml::array>, public lib::IConverter<stat, toml::table> {
     public:
-        toml::array to_t1(const stat& data) override;
-        stat to_t2(const toml::array& data) override;
-    };
-    class StatAsObjectAdaptor : public lib::IAdaptor<toml::table, stat> {
-    public:
-        toml::table to_t1(const stat& data) override;
-        stat to_t2(const toml::table& data) override;
+        stat from(const toml::array& data) override;
+        stat from(const toml::table& data) override;
     };
 
     class StatsGrid {
@@ -70,16 +64,14 @@ namespace zzz {
         static size_t _gen_key(StatType type, Tag tag);
     };
 
-    class StatsGridAdaptor : public lib::IAdaptor<toml::value, StatsGrid> {
+    class StatsGridAdaptor : public lib::IConverter<StatsGrid, toml::value> {
     public:
-        toml::value to_t1(const StatsGrid& data) override;
-        StatsGrid to_t2(const toml::value& data) override;
+        StatsGrid from(const toml::value& data) override;
     };
 }
 
 namespace zzz::global {
-    static StatAsArrayAdaptor stat_as_array_adaptor;
-    static StatAsObjectAdaptor stat_as_object_adaptor;
+    static StatAdaptor stat_adaptor;
 
     static StatsGridAdaptor stats_grid_adaptor;
 }

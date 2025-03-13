@@ -7,31 +7,14 @@
 namespace zzz {
     // StatAdaptor
 
-    toml::array StatAsArrayAdaptor::to_t1(const stat& data) {
-        auto result = toml::array { convert::stat_type_to_string(data.type), data.value };
-
-        if (data.tag != Tag::Universal)
-            result.emplace_back(convert::tag_to_string(data.tag));
-
-        return result;
-    }
-    stat StatAsArrayAdaptor::to_t2(const toml::array& data) {
+    stat StatAdaptor::from(const toml::array& data) {
         return stat {
             .value = data[1].as_floating(),
             .type = convert::string_to_stat_type(data[0].as_string()),
             .tag = data.size() == 3 ? convert::string_to_tag(data[2].as_string()) : Tag::Universal
         };
     }
-
-    toml::table StatAsObjectAdaptor::to_t1(const stat& data) {
-        auto result = toml::table { { "type", convert::stat_type_to_string(data.type) }, { "value", data.value } };
-
-        if (data.tag != Tag::Universal)
-            result.emplace("tag", convert::tag_to_string(data.tag));
-
-        return result;
-    }
-    stat StatAsObjectAdaptor::to_t2(const toml::table& data) {
+    stat StatAdaptor::from(const toml::table& data) {
         auto tag_it = data.find("tag");
         return stat {
             .value = data.at("value").as_floating(),
@@ -113,20 +96,16 @@ namespace zzz {
 
     // StatsTableLoader
 
-    // TODO
-    toml::value StatsGridAdaptor::to_t1(const StatsGrid& data) {
-        return {};
-    }
-    StatsGrid StatsGridAdaptor::to_t2(const toml::value& data) {
+    StatsGrid StatsGridAdaptor::from(const toml::value& data) {
         StatsGrid result;
 
         for (const auto& it : data.as_array()) {
             switch (it.type()) {
             case toml::value_t::array:
-                result.emplace(global::stat_as_array_adaptor.to_t2(it.as_array()));
+                result.emplace(global::stat_adaptor.from(it.as_array()));
                 break;
             case toml::value_t::table:
-                result.emplace(global::stat_as_object_adaptor.to_t2(it.as_table()));
+                result.emplace(global::stat_adaptor.from(it.as_table()));
                 break;
             default:
                 throw std::runtime_error("wrong stat format");

@@ -5,7 +5,7 @@
 #include <string>
 
 //library
-#include "library/adaptor.hpp"
+#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -60,10 +60,9 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class WengineAdaptor : public lib::IAdaptor<toml::value, Wengine> {
+    class WengineAdaptor : public lib::IConverter<Wengine, toml::value> {
     public:
-        toml::value to_t1(const Wengine& data) override;
-        Wengine to_t2(const toml::value& data) override;
+        Wengine from(const toml::value& data) override;
     };
 }
 

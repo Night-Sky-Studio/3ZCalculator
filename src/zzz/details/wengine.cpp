@@ -68,8 +68,13 @@ namespace zzz::details {
     }
 
     bool WengineBuilder::is_built() const {
-        return _is_set.id && _is_set.name && _is_set.rarity && _is_set.speciality && _is_set.main_stat && _is_set.
-            sub_stat && _is_set.passive_stats;
+        return _is_set.id
+            && _is_set.name
+            && _is_set.rarity
+            && _is_set.speciality
+            && _is_set.main_stat
+            && _is_set.sub_stat
+            && _is_set.passive_stats;
     }
     Wengine&& WengineBuilder::get_product() {
         if (!is_built())
@@ -80,11 +85,7 @@ namespace zzz::details {
 
     // WengineAdaptor
 
-    // TODO
-    toml::value WengineAdaptor::to_t1(const Wengine& data) {
-        return {};
-    }
-    Wengine WengineAdaptor::to_t2(const toml::value& data) {
+    Wengine WengineAdaptor::from(const toml::value& data) {
         WengineBuilder builder;
 
         builder.set_id(data.at("id").as_integer());
@@ -92,9 +93,9 @@ namespace zzz::details {
         builder.set_speciality(convert::string_to_speciality(data.at("speciality").as_string()));
 
         const auto& stats = data.at("stats").as_table();
-        builder.set_main_stat(global::stat_as_array_adaptor.to_t2(stats.at("main").as_array()));
-        builder.set_sub_stat(global::stat_as_array_adaptor.to_t2(stats.at("sub").as_array()));
-        builder.set_passive_stats(global::stats_grid_adaptor.to_t2(stats.at("passive")));
+        builder.set_main_stat(global::stat_adaptor.from(stats.at("main").as_array()));
+        builder.set_sub_stat(global::stat_adaptor.from(stats.at("sub").as_array()));
+        builder.set_passive_stats(global::stats_grid_adaptor.from(stats.at("passive")));
 
         return builder.get_product();
     }

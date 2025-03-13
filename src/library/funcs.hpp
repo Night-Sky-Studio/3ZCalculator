@@ -8,10 +8,10 @@ namespace lib::ext {
 }
 
 namespace lib {
-	inline size_t hash_string(const std::string& what) {
-		return ext::crc64(0, what.data(), what.size());
-	}
-	constexpr size_t hash_cstr(const char* what, size_t length) {
-		return ext::crc64(0, what, length);
-	}
+    inline size_t hash_string(const std::string& what) {
+        return ext::crc64(0, what.data(), what.size());
+    }
+    constexpr size_t hash_cstr(const char* what, size_t length) {
+        return ext::crc64(0, what, length);
+    }
 }

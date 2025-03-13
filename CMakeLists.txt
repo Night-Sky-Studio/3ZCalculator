@@ -5,7 +5,7 @@ project(
     LANGUAGES CXX
     VERSION 0.1.0
     DESCRIPTION "Calculates damage of ZZZ character with rough approximation"
-    HOMEPAGE_URL ""
+    HOMEPAGE_URL "https://github.com/Night-Sky-Studio/3ZCalculator"
 )
 set(CMAKE_CXX_STANDARD 20)
 

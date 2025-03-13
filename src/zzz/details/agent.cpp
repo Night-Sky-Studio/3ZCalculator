@@ -79,7 +79,11 @@ namespace zzz::details {
     }
 
     bool AgentBuilder::is_built() const {
-        return _is_set.id && _is_set.name && _is_set.speciality && _is_set.element && _is_set.rarity;
+        return _is_set.id
+            && _is_set.name
+            && _is_set.speciality
+            && _is_set.element
+            && _is_set.rarity;
     }
     Agent&& AgentBuilder::get_product() {
         if (!is_built())
@@ -90,21 +94,17 @@ namespace zzz::details {
 
     // AgentAdaptor
 
-    // TODO
-    toml::value AgentAdaptor::to_t1(const Agent& data) {
-        return {};
-    }
-    Agent AgentAdaptor::to_t2(const toml::value& data) {
+    Agent AgentAdaptor::from(const toml::value& data) {
         AgentBuilder agent_builder;
         const auto& table = data.as_table();
+        auto element = convert::string_to_element(table.at("element").as_string());
 
         agent_builder.set_id(table.at("id").as_integer());
         agent_builder.set_name(table.at("name").as_string());
         agent_builder.set_speciality(convert::string_to_speciality(table.at("speciality").as_string()));
-        auto element = convert::string_to_element(table.at("element").as_string());
         agent_builder.set_element(element);
         agent_builder.set_rarity(convert::char_to_rarity(table.at("rarity").as_string()[0]));
-        agent_builder.set_stats(global::stats_grid_adaptor.to_t2(table.at("stats")));
+        agent_builder.set_stats(global::stats_grid_adaptor.from(table.at("stats")));
 
         for (const auto& [key, value] : table.at("skills").as_table()) {
             const auto& skill_table = value.as_table();
@@ -115,11 +115,12 @@ namespace zzz::details {
 
             for (const auto& it : skill_table.at("scales").as_array()) {
                 const toml::array& scale_data = it.as_array();
-                skill_builder.add_scale(scale_data[0].as_floating(), scale_data[1].as_floating(), scale_data.size() == 3 ? convert::string_to_element(scale_data[2].as_string()) : element);
+                skill_builder.add_scale(scale_data[0].as_floating(), scale_data[1].as_floating(),
+                    scale_data.size() == 3 ? convert::string_to_element(scale_data[2].as_string()) : element);
             }
 
             if (auto it = skill_table.find("buffs"); it != skill_table.end())
-                skill_builder.set_buffs(global::stats_grid_adaptor.to_t2(it->second));
+                skill_builder.set_buffs(global::stats_grid_adaptor.from(it->second));
 
             agent_builder.add_skill(skill_builder.get_product());
         }
@@ -134,7 +135,7 @@ namespace zzz::details {
                 anomaly_builder.set_crit(anomaly_table.at("can_crit").as_boolean());
 
                 if (auto it = anomaly_table.find("buffs"); it != anomaly_table.end())
-                    anomaly_builder.set_buffs(global::stats_grid_adaptor.to_t2(it->second));
+                    anomaly_builder.set_buffs(global::stats_grid_adaptor.from(it->second));
 
                 agent_builder.add_anomaly(anomaly_builder.get_product());
             }

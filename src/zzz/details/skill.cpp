@@ -40,7 +40,8 @@ namespace zzz::details {
     }
 
     bool SkillBuilder::is_built() const {
-        return _is_set.name && _is_set.tag;
+        return _is_set.name
+            && _is_set.tag;
     }
     Skill&& SkillBuilder::get_product() {
         if (!is_built())

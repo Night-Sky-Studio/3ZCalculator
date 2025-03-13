@@ -6,159 +6,86 @@
 //frozen
 #include "frozen/unordered_map.h"
 
-namespace zzz::convert_info {
-    static constexpr std::array<frozen::string, (size_t) StatType::Count> stat_type2cstr = {
-        "none",
-        "hp_total",
-        "hp_base",
-        "hp_ratio",
-        "hp_flat",
-        "atk_total",
-        "atk_base",
-        "atk_ratio",
-        "atk_flat",
-        "def_total",
-        "def_base",
-        "def_ratio",
-        "def_flat",
-        "crit_rate",
-        "crit_dmg",
-        "def_pen_ratio",
-        "def_pen_flat",
-        "ap",
-        "am_total",
-        "am_base",
-        "am_ratio",
-        "ab_rate",
-        "ab_pen",
-        "impact_total",
-        "impact_base",
-        "impact_ratio",
-        "er_total",
-        "er_base",
-        "er_ratio",
-        "shield_effect",
-        "received_dmg_reduction",
-        "vulnerability",
-        "dmg_ratio",
-        "phys_ratio",
-        "fire_ratio",
-        "ice_ratio",
-        "electric_ratio",
-        "ether_ratio",
-        "res_pen",
-        "phys_res_pen",
-        "fire_res_pen",
-        "ice_res_pen",
-        "electric_res_pen",
-        "ether_res_pen"
-    };
-    static constexpr frozen::unordered_map<frozen::string, StatType, (size_t) StatType::Count> cstr2stat_type = {
-        { "none", StatType::None },
-        { "hp_total", StatType::HpTotal },
-        { "hp_base", StatType::HpBase },
-        { "hp_ratio", StatType::HpRatio },
-        { "hp_flat", StatType::HpFlat },
-        { "atk_total", StatType::AtkTotal },
-        { "atk_base", StatType::AtkBase },
-        { "atk_ratio", StatType::AtkRatio },
-        { "atk_flat", StatType::AtkFlat },
-        { "def_total", StatType::DefTotal },
-        { "def_base", StatType::DefBase },
-        { "def_ratio", StatType::DefRatio },
-        { "def_flat", StatType::DefFlat },
-        { "crit_rate", StatType::CritRate },
-        { "crit_dmg", StatType::CritDmg },
-        { "def_pen_ratio", StatType::DefPenRatio },
-        { "def_pen_flat", StatType::DefPenFlat },
-        { "ap", StatType::Ap },
-        { "am_total", StatType::AmTotal },
-        { "am_base", StatType::AmBase },
-        { "am_ratio", StatType::AmRatio },
-        { "ab_rate", StatType::AbRate },
-        { "ab_pen", StatType::AbPen },
-        { "impact_total", StatType::ImpactTotal },
-        { "impact_base", StatType::ImpactBase },
-        { "impact_ratio", StatType::ImpactRatio },
-        { "er_total", StatType::ErTotal },
-        { "er_base", StatType::ErBase },
-        { "er_ratio", StatType::ErRatio },
-        { "shield_effect", StatType::ShieldEffect },
-        { "received_dmg_reduction", StatType::ReceivedDmgReduction },
-        { "vulnerability", StatType::Vulnerability },
-        { "dmg_ratio", StatType::DmgRatio },
-        { "phys_ratio", StatType::PhysRatio },
-        { "fire_ratio", StatType::FireRatio },
-        { "ice_ratio", StatType::IceRatio },
-        { "electric_ratio", StatType::ElectricRatio },
-        { "ether_ratio", StatType::EtherRatio },
-        { "res_pen", StatType::ResPen },
-        { "phys_res_pen", StatType::PhysResPen },
-        { "fire_res_pen", StatType::FireResPen },
-        { "ice_res_pen", StatType::IceResPen },
-        { "electric_res_pen", StatType::ElectricResPen },
-        { "ether_res_pen", StatType::EtherResPen }
-    };
+namespace zzz::convert_info::inline stat_type_enum {
+    using enum StatType;
 
-    static constexpr std::array<frozen::string, (size_t) Tag::Count> tag2cstr = {
+    static constexpr std::array<frozen::string, (size_t) Count> stat_type2cstr = {
+        "none",
+        "hp_total", "hp_base", "hp_ratio", "hp_flat",
+        "atk_total", "atk_base", "atk_ratio", "atk_flat",
+        "def_total", "def_base", "def_ratio", "def_flat",
+        "crit_rate", "crit_dmg",
+        "def_pen_ratio", "def_pen_flat",
+        "ap", "am_total", "am_base", "am_ratio", "ab_rate", "ab_pen",
+        "impact_total", "impact_base", "impact_ratio",
+        "er_total", "er_base", "er_ratio",
+        "shield_effect", "received_dmg_reduction", "vulnerability",
+        "dmg_ratio", "phys_ratio", "fire_ratio", "ice_ratio", "electric_ratio", "ether_ratio",
+        "res_pen", "phys_res_pen", "fire_res_pen", "ice_res_pen", "electric_res_pen", "ether_res_pen"
+    };
+    static constexpr frozen::unordered_map<frozen::string, StatType, (size_t) Count> cstr2stat_type = {
+        { "none", None },
+        { "hp_total", HpTotal }, { "hp_base", HpBase }, { "hp_ratio", HpRatio }, { "hp_flat", HpFlat },
+        { "atk_total", AtkTotal }, { "atk_base", AtkBase }, { "atk_ratio", AtkRatio }, { "atk_flat", AtkFlat },
+        { "def_total", DefTotal }, { "def_base", DefBase }, { "def_ratio", DefRatio }, { "def_flat", DefFlat },
+        { "crit_rate", CritRate }, { "crit_dmg", CritDmg },
+        { "def_pen_ratio", DefPenRatio }, { "def_pen_flat", DefPenFlat },
+        { "ap", Ap }, { "am_total", AmTotal }, { "am_base", AmBase }, { "am_ratio", AmRatio },
+        { "ab_rate", AbRate }, { "ab_pen", AbPen },
+        { "impact_total", ImpactTotal }, { "impact_base", ImpactBase }, { "impact_ratio", ImpactRatio },
+        { "er_total", ErTotal }, { "er_base", ErBase }, { "er_ratio", ErRatio },
+        { "shield_effect", ShieldEffect }, { "received_dmg_reduction", ReceivedDmgReduction },
+        { "vulnerability", Vulnerability },
+        { "dmg_ratio", DmgRatio }, { "phys_ratio", PhysRatio }, { "fire_ratio", FireRatio },
+        { "ice_ratio", IceRatio }, { "electric_ratio", ElectricRatio }, { "ether_ratio", EtherRatio },
+        { "res_pen", ResPen }, { "phys_res_pen", PhysResPen }, { "fire_res_pen", FireResPen },
+        { "ice_res_pen", IceResPen }, { "electric_res_pen", ElectricResPen }, { "ether_res_pen", EtherResPen }
+    };
+}
+
+namespace zzz::convert_info::inline tag_enum {
+    using enum Tag;
+
+    static constexpr std::array<frozen::string, (size_t) Count> tag2cstr = {
         "universal",
         "anomaly",
         "basic",
-        "dash",
-        "counter",
-        "quick_assist",
-        "assist_followup",
-        "defensive_assist",
-        "evasive_assist",
-        "special",
-        "ex_special",
-        "chain",
-        "ultimate"
+        "dash", "counter",
+        "quick_assist", "followup_assist", "defensive_assist", "evasive_assist",
+        "special", "ex_special",
+        "chain", "ultimate"
     };
-    static constexpr frozen::unordered_map<frozen::string, Tag, (size_t) Tag::Count> cstr2tag = {
-        { "universal", Tag::Universal },
-        { "anomaly", Tag::Anomaly },
-        { "basic", Tag::Basic },
-        { "dash", Tag::Dash },
-        { "counter", Tag::Counter },
-        { "quick_assist", Tag::QuickAssist },
-        { "followup_assist", Tag::FollowupAssist },
-        { "defensive_assist", Tag::DefensiveAssist },
-        { "evasive_assist", Tag::EvasiveAssist },
-        { "special", Tag::Special },
-        { "ex_special", Tag::ExSpecial },
-        { "chain", Tag::Chain },
-        { "ultimate", Tag::Ultimate }
+    static constexpr frozen::unordered_map<frozen::string, Tag, (size_t) Count> cstr2tag = {
+        { "universal", Universal },
+        { "anomaly", Anomaly },
+        { "basic", Basic },
+        { "dash", Dash }, { "counter", Counter },
+        { "quick_assist", QuickAssist }, { "followup_assist", FollowupAssist },
+        { "defensive_assist", DefensiveAssist }, { "evasive_assist", EvasiveAssist },
+        { "special", Special }, { "ex_special", ExSpecial },
+        { "chain", Chain }, { "ultimate", Ultimate }
     };
+}
 
-    static constexpr std::array<frozen::string, (size_t) Speciality::Count> speciality2cstr = {
-        "attack",
-        "anomaly",
-        "stun",
-        "support",
-        "defense"
-    };
-    static constexpr frozen::unordered_map<frozen::string, Speciality, (size_t) Speciality::Count> cstr2speciality = {
-        { "attack", Speciality::Attack },
-        { "anomaly", Speciality::Anomaly },
-        { "stun", Speciality::Stun },
-        { "support", Speciality::Support },
-        { "defense", Speciality::Defense }
-    };
+namespace zzz::convert_info::inline speciality_enum {
+    using enum Speciality;
 
-    static constexpr std::array<frozen::string, (size_t) Element::Count> element2cstr = {
-        "phys",
-        "fire",
-        "ice",
-        "electric",
-        "ether"
+    static constexpr std::array<frozen::string, (size_t) Count> speciality2cstr = {
+        "attack", "anomaly", "stun", "support", "defense"
     };
-    static constexpr frozen::unordered_map<frozen::string, Element, (size_t) Element::Count> cstr2element = {
-        { "phys", Element::Physical },
-        { "fire", Element::Fire },
-        { "ice", Element::Ice },
-        { "electric", Element::Electric },
-        { "ether", Element::Ether }
+    static constexpr frozen::unordered_map<frozen::string, Speciality, (size_t) Count> cstr2speciality = {
+        { "attack", Attack }, { "anomaly", Anomaly }, { "stun", Stun }, { "support", Support }, { "defense", Defense }
+    };
+}
+
+namespace zzz::convert_info::inline element_enum {
+    using enum Element;
+
+    static constexpr std::array<frozen::string, (size_t) Count> element2cstr = {
+        "phys", "fire", "ice", "electric", "ether"
+    };
+    static constexpr frozen::unordered_map<frozen::string, Element, (size_t) Count> cstr2element = {
+        { "phys", Physical }, { "fire", Fire }, { "ice", Ice }, { "electric", Electric }, { "ether", Ether }
     };
 }
 

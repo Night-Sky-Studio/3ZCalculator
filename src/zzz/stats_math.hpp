@@ -1,5 +1,8 @@
 #pragma once
 
+//std
+#include <cmath>
+
 //zzz
 #include "zzz/stats.hpp"
 

@@ -138,8 +138,9 @@ namespace zzz::combat {
         if (m_product->m_main_stat.type == type)
             throw std::runtime_error("you can't have same main and sub stat");
 
+        auto rarity_index = (size_t) m_product->m_rarity - 2;
         m_product->m_sub_stats[_current_sub_stat++] = {
-            .value = drive_disc_info::sub_stat_convertion_table.at(type)[(size_t) m_product->m_rarity - 2] * (level + 1),
+            .value = drive_disc_info::sub_stat_convertion_table.at(type)[rarity_index] * (level + 1),
             .type = type,
             .tag = Tag::Universal
         };
@@ -147,8 +148,11 @@ namespace zzz::combat {
     }
 
     bool DdpBuilder::is_built() const {
-        return _is_set.disc_id && _is_set.slot && _is_set.rarity && _is_set.main_stat && _current_sub_stat >= (size_t)
-            m_product->m_rarity - 1;
+        return _is_set.disc_id
+            && _is_set.slot
+            && _is_set.rarity
+            && _is_set.main_stat
+            && _current_sub_stat >= (size_t) m_product->m_rarity - 1;
     }
     DriveDiscPiece&& DdpBuilder::get_product() {
         if (!is_built())

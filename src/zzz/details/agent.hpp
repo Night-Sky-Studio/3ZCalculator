@@ -10,7 +10,7 @@
 #include "toml.hpp"
 
 //library
-#include "library/adaptor.hpp"
+#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -20,7 +20,7 @@
 #include "zzz/details/skill.hpp"
 
 namespace zzz::details {
-    // TODO: make skill and anomaly one unoredered_map
+    // TODO: make skill and anomaly one unordered_map
     class Agent {
         friend class AgentBuilder;
         friend class AgentAdaptor;
@@ -74,10 +74,9 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class AgentAdaptor : public lib::IAdaptor<toml::value, Agent> {
+    class AgentAdaptor : public lib::IConverter<Agent, toml::value> {
     public:
-        toml::value to_t1(const Agent& data) override;
-        Agent to_t2(const toml::value& data) override;
+        Agent from(const toml::value& data) override;
     };
 }
 

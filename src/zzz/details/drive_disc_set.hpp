@@ -10,7 +10,7 @@
 #include "toml.hpp"
 
 //library
-#include "library/adaptor.hpp"
+#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -54,10 +54,9 @@ namespace zzz::details {
         } _is_set;
     };
 
-    class DriveDiscSetAdaptor : protected lib::IAdaptor<toml::value, DriveDiscSet> {
+    class DriveDiscSetAdaptor : protected lib::IConverter<DriveDiscSet, toml::value> {
     public:
-        toml::value to_t1(const DriveDiscSet& data) override;
-        DriveDiscSet to_t2(const toml::value& data) override;
+        DriveDiscSet from(const toml::value& data) override;
     };
 }
 
