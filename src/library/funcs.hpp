@@ -28,7 +28,7 @@ namespace lib {
         auto splitted_content = std::views::split(source, ' ');
 
         for (auto it : splitted_content)
-            result.emplace_back(std::string_view(it.data(), it.data() + it.size()));
+            result.emplace_back(it.data(), it.data() + it.size());
 
         return result;
     }
