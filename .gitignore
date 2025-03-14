@@ -1,4 +1,4 @@
 .git/*
 .vs/*
 out/*
-*.log
+res/*.log

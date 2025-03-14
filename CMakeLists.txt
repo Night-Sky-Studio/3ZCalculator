@@ -40,6 +40,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tabulate)
 
+# fmtlib - 10.2.1
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_TAG        e69e5f977d458f2650bb346dadf2ad30c5320281
+)
+FetchContent_MakeAvailable(fmt)
+
 add_executable(3ZCalculator
     "main.cpp"
 
@@ -55,7 +63,7 @@ add_executable(3ZCalculator
 
     "src/backend/calculator.cpp"
     "src/backend/converters.cpp"
-)
+ "src/backend/object_manager.cpp")
 
 target_include_directories(3ZCalculator PRIVATE
     src
@@ -69,3 +77,4 @@ target_include_directories(3ZCalculator PRIVATE
 target_link_libraries(3ZCalculator PRIVATE frozen-headers)
 target_link_libraries(3ZCalculator PRIVATE toml11::toml11)
 target_link_libraries(3ZCalculator PRIVATE tabulate::tabulate)
+target_link_libraries(3ZCalculator PRIVATE fmt::fmt)

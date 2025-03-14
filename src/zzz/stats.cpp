@@ -1,9 +1,11 @@
 #include "zzz/stats.hpp"
 
 //std
-#include <format>
 #include <ranges>
 #include <stdexcept>
+
+//fmtlib
+#include "fmt/format.h"
 
 //tabulate
 #include "tabulate/table.hpp"
@@ -37,7 +39,7 @@ namespace zzz {
         table.add_row({ "stat_type", "tag", "value" });
 
         for (const auto& stat : _content | std::views::values) {
-            auto value = std::vformat("{:.4f}", std::make_format_args(stat.value));
+            auto value = fmt::vformat("{:.4f}", fmt::make_format_args(stat.value));
             size_t end = value.find_last_not_of('0');
             if (end != std::string::npos) {
                 value = value.substr(0, end + (value[end] == '.' ? 0 : 1));
