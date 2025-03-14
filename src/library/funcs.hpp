@@ -27,7 +27,7 @@ namespace lib {
         std::vector<std::string_view> result;
         auto splitted_content = std::views::split(source, ' ');
 
-        for (auto it : splitted_content)
+        for (std::ranges::subrange it : splitted_content)
             result.emplace_back(it.data(), it.data() + it.size());
 
         return result;
