@@ -29,7 +29,7 @@ namespace lib {
             std::views::split(source, ' '),
             std::back_inserter(result),
             [](const auto& it) {
-                return std::string_view(it.begin(), it.end());
+                return std::string_view(it.data(), it.data() + it.size());
             }
         );
         return result;
