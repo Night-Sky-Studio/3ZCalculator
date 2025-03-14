@@ -3,7 +3,6 @@
 //std
 #include <charconv>
 #include <concepts>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -23,19 +22,33 @@ namespace lib {
         return ext::crc64(0, what, length);
     }
 
-    inline std::vector<std::string_view> split_as_view(const std::string_view& source, const std::string& delim) {
+    inline std::vector<std::string_view> split_as_view(const std::string_view& source, char delim) {
         std::vector<std::string_view> result;
+        size_t pos = 0;
 
-        for (std::ranges::subrange it : std::views::split(source, ' '))
-            result.emplace_back(it.data(), it.data() + it.size());
+        for (size_t i = 0; i < source.size(); i++) {
+            if (source[i] == delim) {
+                result.emplace_back(source.data() + pos, source.data() + i);
+                pos = i + 1;
+            }
+        }
+        if (pos != source.size())
+            result.emplace_back(source.data() + pos, source.data() + source.size());
 
         return result;
     }
-    inline std::vector<std::string> split_as_copy(const std::string_view& source, const std::string& delim) {
+    inline std::vector<std::string> split_as_copy(const std::string_view& source, char delim) {
         std::vector<std::string> result;
+        size_t pos = 0;
 
-        for (std::ranges::subrange it : std::views::split(source, ' '))
-            result.emplace_back(it.data(), it.data() + it.size());
+        for (size_t i = 0; i < source.size(); i++) {
+            if (source[i] == delim) {
+                result.emplace_back(source.begin() + pos, source.begin() + i);
+                pos = i + 1;
+            }
+        }
+        if (pos != source.size())
+            result.emplace_back(source.begin() + pos, source.end());
 
         return result;
     }

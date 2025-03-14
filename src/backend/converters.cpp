@@ -3,7 +3,6 @@
 //std
 #include <map>
 #include <ranges>
-#include <stdexcept>
 
 //library
 #include "library/funcs.hpp"
@@ -19,7 +18,7 @@ namespace backend::inline converter_details {
         return { std::string(splitted[0]), index };
     }
     details::rotation_cell to_rotation_cell(const std::string_view& text) {
-        return to_rotation_cell(lib::split_as_view(text, " "));
+        return to_rotation_cell(lib::split_as_view(text, ' '));
     }
 
     size_t calc_loops(const std::vector<std::string_view>& splitted) {
@@ -58,7 +57,7 @@ namespace backend {
             rotation_details on_emplace;
 
             for (const auto& it : value->second) {
-                auto splitted = lib::split_as_view(it, " ");
+                auto splitted = lib::split_as_view(it, ' ');
 
                 if (auto jt = by_name.find(std::string(splitted[0])); jt != by_name.end()) {
                     for (size_t i = 0; i < calc_loops(splitted); i++)
@@ -74,7 +73,7 @@ namespace backend {
         rotation_details result;
 
         for (const auto& value : data.at("rotation").as_array()) {
-            auto splitted = lib::split_as_view(value.as_string(), " ");
+            auto splitted = lib::split_as_view(value.as_string(), ' ');
 
             if (auto it = mini_rotations.find(std::string(splitted[0])); it != mini_rotations.end()) {
                 for (size_t i = 0; i < splitted.size() * calc_loops(splitted); i++)
