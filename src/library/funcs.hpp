@@ -25,22 +25,18 @@ namespace lib {
 
     inline std::vector<std::string_view> split_as_view(const std::string_view& source, const std::string& delim) {
         std::vector<std::string_view> result;
-        auto splitted_content = std::views::split(source, ' ');
 
-        for (auto it : splitted_content)
+        for (std::ranges::subrange it : std::views::split(source, ' '))
             result.emplace_back(it.data(), it.data() + it.size());
 
         return result;
     }
     inline std::vector<std::string> split_as_copy(const std::string_view& source, const std::string& delim) {
         std::vector<std::string> result;
-        std::ranges::transform(
-            std::views::split(source, ' '),
-            std::back_inserter(result),
-            [](const auto& it) {
-                return std::string(it.begin(), it.end());
-            }
-        );
+
+        for (std::ranges::subrange it : std::views::split(source, ' '))
+            result.emplace_back(it.data(), it.data() + it.size());
+
         return result;
     }
 
