@@ -49,7 +49,7 @@ namespace zzz::details {
 
     // DriveDiscSetAdaptor
 
-    DriveDiscSet ToDdsConverter::from(const toml::value& data) {
+    DriveDiscSet ToDdsConverter::from(const toml::value& data) const {
         DdsBuilder builder;
 
         builder.set_id(data.at("id").as_integer());

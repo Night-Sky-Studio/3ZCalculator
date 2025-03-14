@@ -2,11 +2,11 @@
 
 namespace lib {
     // TPrimary suits for class name
-    template<typename TPrimary, typename TSecondary>
+    template<typename TResult, typename... TArgs>
     class IConverter {
     public:
         virtual ~IConverter() = default;
 
-        virtual TPrimary from(const TSecondary& data) = 0;
+        virtual TResult from(const TArgs&... data) const = 0;
     };
 }

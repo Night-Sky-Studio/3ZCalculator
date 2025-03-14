@@ -94,7 +94,7 @@ namespace zzz::details {
 
     // AgentAdaptor
 
-    Agent ToAgentConverter::from(const toml::value& data) {
+    Agent ToAgentConverter::from(const toml::value& data) const {
         AgentBuilder agent_builder;
         const auto& table = data.as_table();
         auto element = convert::string_to_element(table.at("element").as_string());
@@ -132,7 +132,9 @@ namespace zzz::details {
 
                 anomaly_builder.set_name(key);
                 anomaly_builder.set_scale(anomaly_table.at("scale").as_floating());
-                anomaly_builder.set_crit(anomaly_table.at("can_crit").as_boolean());
+
+                auto can_crit_it = anomaly_table.find("can_crit");
+                anomaly_builder.set_crit(can_crit_it != anomaly_table.end() ? can_crit_it->second.as_boolean() : false);
 
                 if (auto it = anomaly_table.find("buffs"); it != anomaly_table.end())
                     anomaly_builder.set_buffs(global::to_stats_grid.from(it->second));

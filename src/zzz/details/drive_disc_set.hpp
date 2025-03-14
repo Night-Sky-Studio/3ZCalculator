@@ -56,12 +56,12 @@ namespace zzz::details {
 
     class ToDdsConverter : protected lib::IConverter<DriveDiscSet, toml::value> {
     public:
-        DriveDiscSet from(const toml::value& data) override;
+        DriveDiscSet from(const toml::value& data) const override;
     };
 }
 
 namespace zzz::global {
-    static details::ToDdsConverter to_dds;
+    static const details::ToDdsConverter to_dds;
 }
 
 namespace zzz {

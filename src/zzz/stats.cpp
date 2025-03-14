@@ -7,14 +7,14 @@
 namespace zzz {
     // StatAdaptor
 
-    stat ToStatConverter::from(const toml::array& data) {
+    stat ToStatConverter::from(const toml::array& data) const {
         return stat {
             .value = data[1].as_floating(),
             .type = convert::string_to_stat_type(data[0].as_string()),
             .tag = data.size() == 3 ? convert::string_to_tag(data[2].as_string()) : Tag::Universal
         };
     }
-    stat ToStatConverter::from(const toml::table& data) {
+    stat ToStatConverter::from(const toml::table& data) const {
         auto tag_it = data.find("tag");
         return stat {
             .value = data.at("value").as_floating(),
@@ -28,11 +28,11 @@ namespace zzz {
     stat StatsGrid::no_value = { .value = 0.0, .type = StatType::None, .tag = Tag::Universal };
 
     stat StatsGrid::get(StatType type) const {
-        const auto it = _content.find(_gen_key(type, Tag::Universal));
+        auto it = _content.find(_gen_key(type, Tag::Universal));
         return it != _content.end() ? it->second : no_value;
     }
     stat StatsGrid::get_all(StatType type, Tag tag) const {
-        const auto universal_it = _content.find(_gen_key(type, Tag::Universal));
+        auto universal_it = _content.find(_gen_key(type, Tag::Universal));
         auto result = universal_it != _content.end() ? universal_it->second : no_value;
 
         if (tag != Tag::Universal) {
@@ -43,24 +43,27 @@ namespace zzz {
         return result;
     }
     stat StatsGrid::get_only(StatType type, Tag tag) const {
-        const auto it = _content.find(_gen_key(type, tag));
+        auto it = _content.find(_gen_key(type, tag));
         return it != _content.end() ? it->second : no_value;
     }
 
     stat& StatsGrid::at(StatType type, Tag tag) {
-        return _content.at(_gen_key(type, tag));
+        auto key = _gen_key(type, tag);
+        auto it = _content.find(key);
+
+        if (it == _content.end())
+            it = _content.emplace(key, stat { .value = 0.0, .type = type, .tag = tag }).first;
+
+        return it->second;
     }
     stat StatsGrid::at(StatType type, Tag tag) const {
-        const auto it = _content.find(_gen_key(type, tag));
+        auto it = _content.find(_gen_key(type, tag));
         return it != _content.end() ? it->second : stat {};
     }
 
     bool StatsGrid::emplace(stat what) {
         auto key = _gen_key(what.type, what.tag);
         auto [it, flag] = _content.emplace(key, what);
-
-        if (flag)
-            _content_by_tag.at(it->second.tag).emplace_back(&it->second);
 
         return flag;
     }
@@ -82,7 +85,7 @@ namespace zzz {
             _content.emplace(key, s);
     }
 
-    std::list<const stat*> StatsGrid::get_stats_by_tag(Tag tag) const { return _content_by_tag.at(tag); }
+    //std::list<const stat*> StatsGrid::get_stats_by_tag(Tag tag) const { return _content_by_tag.at(tag); }
 
     StatsGrid::iterator StatsGrid::begin() { return _content.begin(); }
     StatsGrid::iterator StatsGrid::end() { return _content.end(); }
@@ -96,7 +99,7 @@ namespace zzz {
 
     // StatsTableLoader
 
-    StatsGrid ToStatsGridConverter::from(const toml::value& data) {
+    StatsGrid ToStatsGridConverter::from(const toml::value& data) const {
         StatsGrid result;
 
         for (const auto& it : data.as_array()) {

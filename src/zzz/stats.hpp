@@ -24,8 +24,8 @@ namespace zzz {
 
     class ToStatConverter : public lib::IConverter<stat, toml::array>, public lib::IConverter<stat, toml::table> {
     public:
-        stat from(const toml::array& data) override;
-        stat from(const toml::table& data) override;
+        stat from(const toml::array& data) const override;
+        stat from(const toml::table& data) const override;
     };
 
     class StatsGrid {
@@ -49,8 +49,6 @@ namespace zzz {
         void add(const StatsGrid& another);
         void add(stat s);
 
-        std::list<const stat*> get_stats_by_tag(Tag tag) const;
-
         iterator begin();
         iterator end();
 
@@ -59,19 +57,18 @@ namespace zzz {
 
     private:
         std::unordered_map<size_t, stat> _content;
-        std::unordered_map<Tag, std::list<const stat*>> _content_by_tag;
 
         static size_t _gen_key(StatType type, Tag tag);
     };
 
     class ToStatsGridConverter : public lib::IConverter<StatsGrid, toml::value> {
     public:
-        StatsGrid from(const toml::value& data) override;
+        StatsGrid from(const toml::value& data) const override;
     };
 }
 
 namespace zzz::global {
-    static ToStatConverter to_stat;
+    static const ToStatConverter to_stat;
 
-    static ToStatsGridConverter to_stats_grid;
+    static const ToStatsGridConverter to_stats_grid;
 }

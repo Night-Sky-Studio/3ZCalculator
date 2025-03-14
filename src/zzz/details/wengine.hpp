@@ -62,12 +62,12 @@ namespace zzz::details {
 
     class ToWengineConverter : public lib::IConverter<Wengine, toml::value> {
     public:
-        Wengine from(const toml::value& data) override;
+        Wengine from(const toml::value& data) const override;
     };
 }
 
 namespace zzz::global {
-    static details::ToWengineConverter to_wengine;
+    static const details::ToWengineConverter to_wengine;
 }
 
 namespace zzz {

@@ -2,12 +2,11 @@
 
 project(
     3ZCalculator
-    LANGUAGES CXX
     VERSION 0.1.0
     DESCRIPTION "Calculates damage of ZZZ character with rough approximation"
     HOMEPAGE_URL "https://github.com/Night-Sky-Studio/3ZCalculator"
 )
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # FetchContent
 
@@ -46,10 +45,6 @@ add_executable(3ZCalculator
     "src/backend/calculator.cpp"
     "src/backend/converters.cpp"
 )
-
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-    set_property(TARGET 3ZCalculator PROPERTY CXX_STANDARD 20)
-endif ()
 
 target_include_directories(3ZCalculator PRIVATE
     src

@@ -9,22 +9,23 @@
 //frozen
 #include "frozen/string.h"
 
+//library
+#include "library/funcs.hpp"
+
 //zzz
 #include "zzz/combat/drive_disc_piece.hpp"
 
 //backend
+#include "backend/converters.hpp"
 #include "backend/calculator.hpp"
 #include "backend/export_data.hpp"
 
-using namespace zzz;
-
-toml::value load_by_id(const std::string& folder, uint64_t id) {
-    std::fstream file(folder + '/' + std::to_string(id) + ".toml");
-    return toml::parse(file);
-}
-
 int main() {
-    auto agent = load_by_id("agent", 1091);
+    backend::ToEvalDataConverter::init();
+
+    auto toml = lib::load_by_id("players", 1500438496);
+    auto input = backend::global::to_eval_data.from(toml);
+    auto result = backend::Calculator::eval(input);
 
     return 0;
 }

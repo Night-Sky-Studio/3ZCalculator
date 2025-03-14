@@ -1,0 +1,75 @@
+name = "LilyStilson"
+primary_agent_id = 1091 # Miyabi
+primary_wengine_id = 14109 # Hailstorm Shrine
+
+[1091.1]
+set = 31000
+rarity = 'S'
+main = "hp_flat"
+level = 15
+subs = [
+    ["hp_ratio", 1],
+    ["crit_dmg", 0],
+    ["crit_rate", 2],
+    ["atk_ratio", 2]
+]
+
+[1091.2]
+set = 32800
+rarity = 'S'
+main = "atk_flat"
+level = 15
+subs = [
+    ["ap", 2],
+    ["atk_ratio", 0],
+    ["crit_dmg", 2],
+    ["crit_rate", 1]
+]
+
+[1091.3]
+set = 31000
+rarity = 'S'
+main = "def_flat"
+level = 15
+subs = [
+    ["crit_rate", 0],
+    ["ap", 2],
+    ["crit_dmg", 2],
+    ["def_pen_flat", 0]
+]
+
+[1091.4]
+set = 32800
+rarity = 'S'
+main = "crit_dmg"
+level = 15
+subs = [
+    ["hp_flat", 1],
+    ["hp_ratio", 1],
+    ["crit_rate", 3],
+    ["def_pen_flat", 0]
+]
+
+[1091.5]
+set = 32800
+rarity = 'S'
+main = "atk_ratio"
+level = 15
+subs = [
+    ["hp_ratio", 1],
+    ["crit_rate", 2],
+    ["crit_dmg", 1],
+    ["ap", 0]
+]
+
+[1091.6]
+set = 32800
+rarity = 'S'
+main = "atk_ratio"
+level = 15
+subs = [
+    ["hp_flat", 1],
+    ["crit_dmg", 1],
+    ["atk_flat", 2],
+    ["crit_rate", 1]
+]

@@ -76,12 +76,12 @@ namespace zzz::details {
 
     class ToAgentConverter : public lib::IConverter<Agent, toml::value> {
     public:
-        Agent from(const toml::value& data) override;
+        Agent from(const toml::value& data) const override;
     };
 }
 
 namespace zzz::global {
-    static details::ToAgentConverter to_agent;
+    static const details::ToAgentConverter to_agent;
 }
 
 namespace zzz {

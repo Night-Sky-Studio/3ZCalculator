@@ -6,7 +6,7 @@
 using namespace zzz;
 
 namespace backend {
-    std::tuple<double, std::vector<double>> Calculator::eval(const eval_data& data) {
+    std::tuple<double, std::vector<double>> Calculator::eval(const eval_data_details& data) {
         double total_dmg = 0.0;
         std::vector<double> dmg_per_skill;
 
@@ -14,8 +14,8 @@ namespace backend {
 
         dmg_per_skill.reserve(data.rotation.size());
         for (const auto& [ability_name, index] : data.rotation) {
-            double dmg = AgentDetails::is_skill_or_anomaly(data.agent, ability_name)
-                ? _calc_regular_dmg(data.agent.skill(ability_name), index, stats, data.enemy)
+            double dmg = AgentDetails::is_skill_or_anomaly(data.agent, ability_name) == 1
+                ? _calc_regular_dmg(data.agent.skill(ability_name), index - 1, stats, data.enemy)
                 : _calc_anomaly_dmg(data.agent.anomaly(ability_name), data.agent.element(), stats, data.enemy);
 
             total_dmg += dmg;
@@ -25,7 +25,7 @@ namespace backend {
         return { total_dmg, dmg_per_skill };
     }
 
-    StatsGrid Calculator::_precalc_stats(const eval_data& data) {
+    StatsGrid Calculator::_precalc_stats(const eval_data_details& data) {
         StatsGrid result;
 
         result.add(data.agent.stats());
@@ -33,11 +33,11 @@ namespace backend {
         result.add(data.wengine.sub_stat());
         result.add(data.wengine.passive_stats());
         for (const auto& it : data.drive_disks) {
-            result.add(it->main_stat());
-            result.add(it->sub_stat(0));
-            result.add(it->sub_stat(1));
-            result.add(it->sub_stat(2));
-            result.add(it->sub_stat(3));
+            result.add(it.main_stat());
+            result.add(it.sub_stat(0));
+            result.add(it.sub_stat(1));
+            result.add(it.sub_stat(2));
+            result.add(it.sub_stat(3));
         }
 
         return result;
@@ -67,7 +67,7 @@ namespace backend {
     }
     // TODO
     double Calculator::_calc_stun_mult(const enemy_details& enemy, const StatsGrid& stats) {
-        return 1.0 + (enemy.is_stunned ? enemy.stun_mult : 0.0);
+        return enemy.is_stunned ? enemy.stun_mult : 1.0;
     }
 
     double Calculator::_calc_regular_dmg(
