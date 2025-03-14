@@ -4,8 +4,12 @@
 #include <fstream>
 #include <ranges>
 
+//fmtlib
+#include "fmt/format.h"
+
 //zzz
 #include "zzz/stats_math.hpp"
+
 
 using namespace zzz;
 
@@ -32,13 +36,14 @@ namespace backend {
             size_t rounded_total_dmg = total_dmg;
 
             dmg_log.add_row({ "ability", "dmg" });
-            dmg_log.add_row({ "total", std::vformat("{}", std::make_format_args(rounded_total_dmg)) });
+            dmg_log.add_row({ "total", fmt::vformat("{}", fmt::make_format_args(rounded_total_dmg)) });
 
-            for (auto [i, cell] : std::views::enumerate(data.rotation)) {
-                size_t rounded_dmg = dmg_per_skill[i];
+            size_t i = 0;
+            for (const auto& cell : data.rotation) {
+                size_t rounded_dmg = dmg_per_skill[i++];
                 dmg_log.add_row({ 
                     cell.command + ' ' + std::to_string(cell.index),
-                    std::vformat("{}", std::make_format_args(rounded_dmg))
+                    fmt::vformat("{}", fmt::make_format_args(rounded_dmg))
                 });
             }
 
