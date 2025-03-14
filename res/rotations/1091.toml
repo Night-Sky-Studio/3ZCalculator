@@ -1,6 +1,6 @@
 rotation = [
     "opener", 
-    "baseline x2", 
+    #"baseline x2", 
     "burst"
 ]
 

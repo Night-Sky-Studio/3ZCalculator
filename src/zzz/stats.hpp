@@ -11,6 +11,7 @@
 #include "library/converter.hpp"
 
 //zzz
+#include "tabulate/table.hpp"
 #include "zzz/enums.hpp"
 
 namespace zzz {
@@ -36,6 +37,8 @@ namespace zzz {
         using const_iterator = std::unordered_map<size_t, stat>::const_iterator;
 
         static stat no_value;
+
+        tabulate::Table get_debug_table() const;
 
         stat get(StatType type) const;
         stat get_all(StatType type, Tag tag) const;

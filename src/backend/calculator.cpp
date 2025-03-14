@@ -1,5 +1,9 @@
 #include "backend/calculator.hpp"
 
+//std
+#include <fstream>
+#include <ranges>
+
 //zzz
 #include "zzz/stats_math.hpp"
 
@@ -13,6 +17,7 @@ namespace backend {
         auto stats = _precalc_stats(data);
 
         dmg_per_skill.reserve(data.rotation.size());
+
         for (const auto& [ability_name, index] : data.rotation) {
             double dmg = AgentDetails::is_skill_or_anomaly(data.agent, ability_name) == 1
                 ? _calc_regular_dmg(data.agent.skill(ability_name), index - 1, stats, data.enemy)
@@ -22,22 +27,59 @@ namespace backend {
             dmg_per_skill.emplace_back(dmg);
         }
 
+        {
+            tabulate::Table dmg_log;
+            size_t rounded_total_dmg = total_dmg;
+
+            dmg_log.add_row({ "ability", "dmg" });
+            dmg_log.add_row({ "total", std::vformat("{}", std::make_format_args(rounded_total_dmg)) });
+
+            for (auto [i, cell] : std::views::enumerate(data.rotation)) {
+                size_t rounded_dmg = dmg_per_skill[i];
+                dmg_log.add_row({ 
+                    cell.command + ' ' + std::to_string(cell.index),
+                    std::vformat("{}", std::make_format_args(rounded_dmg))
+                });
+            }
+
+            std::fstream file("dmg.log", std::ios::out);
+            dmg_log.print(file);
+        }
+
         return { total_dmg, dmg_per_skill };
     }
 
+    // TODO: add debug mode
     StatsGrid Calculator::_precalc_stats(const eval_data_details& data) {
-        StatsGrid result;
+        StatsGrid result, wengine_stats, discs_stats;
+
+        wengine_stats.add(data.wengine.main_stat());
+        wengine_stats.add(data.wengine.sub_stat());
+        wengine_stats.add(data.wengine.passive_stats());
+
+        for (const auto& it : data.drive_disks) {
+            discs_stats.add(it.main_stat());
+            for (size_t i = 0; i < 4; i++)
+                discs_stats.add(it.sub_stat(i));
+        }
 
         result.add(data.agent.stats());
-        result.add(data.wengine.main_stat());
-        result.add(data.wengine.sub_stat());
-        result.add(data.wengine.passive_stats());
-        for (const auto& it : data.drive_disks) {
-            result.add(it.main_stat());
-            result.add(it.sub_stat(0));
-            result.add(it.sub_stat(1));
-            result.add(it.sub_stat(2));
-            result.add(it.sub_stat(3));
+        result.add(wengine_stats);
+        result.add(discs_stats);
+
+        {
+            tabulate::Table stats_log;
+
+            stats_log.add_row({ "agent", "wengine", "discs", "total" });
+            stats_log.add_row({
+                data.agent.stats().get_debug_table(),
+                wengine_stats.get_debug_table(),
+                discs_stats.get_debug_table(),
+                result.get_debug_table()
+            });
+
+            std::fstream debug_file("stats.log", std::ios::out);
+            stats_log.print(debug_file);
         }
 
         return result;
@@ -104,7 +146,7 @@ namespace backend {
         stats.add(anomaly.buffs());
         stats.at(StatType::AtkTotal).value = _calc_total_atk(stats, Tag::Anomaly);
 
-        double base_dmg = anomaly.scale() * stats.get(StatType::AtkTotal);
+        double base_dmg = anomaly.scale() / 100 * stats.get(StatType::AtkTotal);
         double crit_mult = 1.0 + (anomaly.can_crit()
             ? stats.get_only(StatType::CritRate, Tag::Anomaly) * stats.get_only(StatType::CritDmg, Tag::Anomaly)
             : 0.0);

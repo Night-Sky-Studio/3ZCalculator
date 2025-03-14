@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD 23)
 
 include(FetchContent)
 
+set(USE_BOOST_KARMA OFF)
+
 # FrozenLib
 FetchContent_Declare(
     FrozenLib
@@ -28,6 +30,15 @@ FetchContent_Declare(
     GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(toml11)
+
+# tabulate
+FetchContent_Declare(
+    tabulate
+    GIT_REPOSITORY https://github.com/p-ranav/tabulate.git
+    GIT_TAG v1.5
+    GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(tabulate)
 
 add_executable(3ZCalculator
     "main.cpp"
@@ -57,3 +68,4 @@ target_include_directories(3ZCalculator PRIVATE
 
 target_link_libraries(3ZCalculator PRIVATE frozen-headers)
 target_link_libraries(3ZCalculator PRIVATE toml11::toml11)
+target_link_libraries(3ZCalculator PRIVATE tabulate::tabulate)

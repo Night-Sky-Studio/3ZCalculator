@@ -6,7 +6,7 @@ rarity = 'S'
 stats = [
     ["hp_base", 7673.0],
     ["def_base", 606.0],
-    ["atk_base", 955.0],
+    ["atk_base", 880.0],
     ["crit_rate", 0.05],
     ["crit_dmg", 0.5],
     ["impact_base", 86.0],

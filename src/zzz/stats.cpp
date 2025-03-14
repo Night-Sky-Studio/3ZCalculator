@@ -1,8 +1,12 @@
 #include "zzz/stats.hpp"
 
 //std
+#include <format>
 #include <ranges>
 #include <stdexcept>
+
+//tabulate
+#include "tabulate/table.hpp"
 
 namespace zzz {
     // StatAdaptor
@@ -26,6 +30,28 @@ namespace zzz {
     // StatsTable
 
     stat StatsGrid::no_value = { .value = 0.0, .type = StatType::None, .tag = Tag::Universal };
+
+    tabulate::Table StatsGrid::get_debug_table() const {
+        tabulate::Table table;
+
+        table.add_row({ "stat_type", "tag", "value" });
+
+        for (const auto& stat : _content | std::views::values) {
+            auto value = std::vformat("{:.4f}", std::make_format_args(stat.value));
+            size_t end = value.find_last_not_of('0');
+            if (end != std::string::npos) {
+                value = value.substr(0, end + (value[end] == '.' ? 0 : 1));
+            }
+
+            table.add_row({
+                convert::stat_type_to_string(stat.type),
+                convert::tag_to_string(stat.tag),
+                value
+            });
+        }
+
+        return table;
+    }
 
     stat StatsGrid::get(StatType type) const {
         auto it = _content.find(_gen_key(type, Tag::Universal));
