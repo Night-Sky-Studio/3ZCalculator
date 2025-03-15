@@ -63,7 +63,7 @@ add_executable(3ZCalculator
 
     "src/backend/calculator.cpp"
     "src/backend/converters.cpp"
- "src/backend/object_manager.cpp")
+ "src/backend/object_manager.cpp" "src/zzz/details/rotation.cpp")
 
 target_include_directories(3ZCalculator PRIVATE
     src

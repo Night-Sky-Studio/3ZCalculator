@@ -10,11 +10,6 @@
 #include "backend/details.hpp"
 
 namespace backend {
-    class ToRotationConverter : lib::IConverter<rotation_details, toml::value> {
-    public:
-        rotation_details from(const toml::value& data) const override;
-    };
-
     class ToEvalDataConverter : lib::IConverter<eval_data_details, toml::value> {
     public:
         static void init();
@@ -29,12 +24,11 @@ namespace backend {
         static std::unordered_map<size_t, zzz::AgentDetails> _agents;
         static std::unordered_map<size_t, zzz::WengineDetails> _wengines;
         static std::unordered_map<size_t, zzz::DdsDetails> _dds;
-        static std::unordered_map<size_t, rotation_details> _rotations;
+        static std::unordered_map<size_t, zzz::rotation_details> _rotations;
         static const enemy_details enemy;
     };
 }
 
 namespace backend::global {
-    static const ToRotationConverter to_rotation;
     static const ToEvalDataConverter to_eval_data;
 }

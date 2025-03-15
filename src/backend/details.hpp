@@ -2,9 +2,6 @@
 
 //std
 #include <array>
-#include <cstdint>
-#include <list>
-#include <string>
 
 //zzz
 #include "zzz/combat.hpp"
@@ -17,23 +14,16 @@ namespace backend::details {
         bool is_stunned;
     };
 
-    struct rotation_cell {
-        std::string command;
-        uint64_t index;
-    };
-    using rotation = std::list<rotation_cell>;
-
     struct eval_data {
         const zzz::AgentDetails& agent;
         const zzz::WengineDetails& wengine;
         std::array<zzz::Ddp, 6> drive_disks;
-        const rotation& rotation;
+        const zzz::rotation_details& rotation;
         const enemy& enemy;
     };
 }
 
 namespace backend {
     using enemy_details = details::enemy;
-    using rotation_details = details::rotation;
     using eval_data_details = details::eval_data;
 }
