@@ -1,4 +1,6 @@
 .git/*
 .vs/*
+.idea/*
+cmake-build-debug/*
 out/*
 res/*.log
