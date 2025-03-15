@@ -7,9 +7,6 @@
 #include <stdexcept>
 #include <thread>
 
-//fmtlib
-#include "fmt/format.h"
-
 //library
 #include "library/funcs.hpp"
 
@@ -68,7 +65,7 @@ namespace backend {
                     if (obj.cycles_since_last_usage == cycles_limit) {
                         obj.ptr = nullptr;
 #ifdef DEBUG_STATUS
-                        std::string message = fmt::vformat("{} object is deleted", fmt::make_format_args(key));
+                        std::string message = lib::format("{} object is deleted", key);
                         std::cerr << message;
 #endif
                     }
@@ -99,7 +96,7 @@ namespace backend {
             std::string path = util.folder + '/' + std::to_string(key) + ".toml";
             std::fstream file(path, std::ios::in | std::ios::binary);
             if (!file.is_open())
-                throw std::runtime_error(fmt::vformat("file {} is not found", fmt::make_format_args(path)));
+                throw std::runtime_error(lib::format("file {} is not found", path));
             auto toml = toml::parse(file);
             file.close();
 

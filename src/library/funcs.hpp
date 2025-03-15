@@ -10,6 +10,9 @@
 //toml11
 #include "toml.hpp"
 
+//fmtlib
+#include "fmt/format.h"
+
 namespace lib::ext {
 #include "library/crc64.hpp"
 }
@@ -66,5 +69,10 @@ namespace lib {
         if (!file.is_open())
             throw std::runtime_error("file is not found");
         return toml::parse(file);
+    }
+
+    template<typename... TArgs>
+    std::string format(const std::string& fmt, TArgs... args) {
+        return fmt::vformat(fmt, fmt::make_format_args(args...));
     }
 }

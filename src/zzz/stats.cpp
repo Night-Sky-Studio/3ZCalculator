@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #ifdef DEBUG_STATUS
-#include "fmt/format.h"
+#include "library/funcs.hpp"
 #include "tabulate/table.hpp"
 #endif
 
@@ -39,7 +39,7 @@ namespace zzz {
         table.add_row({ "stat_type", "tag", "value" });
 
         for (const auto& stat : _content | std::views::values) {
-            auto value = fmt::vformat("{:.4f}", fmt::make_format_args(stat.value));
+            auto value = lib::format("{:.4f}", stat.value);
             size_t end = value.find_last_not_of('0');
             if (end != std::string::npos) {
                 value = value.substr(0, end + (value[end] == '.' ? 0 : 1));

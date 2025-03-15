@@ -9,7 +9,7 @@
 
 #ifdef DEBUG_STATUS
 #include <fstream>
-#include "fmt/format.h"
+#include "library/funcs.hpp"
 #include "tabulate/table.hpp"
 #endif
 
@@ -122,14 +122,14 @@ namespace backend {
             size_t rounded_total_dmg = total_dmg;
 
             dmg_log.add_row({ "ability", "dmg" });
-            dmg_log.add_row({ "total", fmt::vformat("{}", fmt::make_format_args(rounded_total_dmg)) });
+            dmg_log.add_row({ "total", lib::format("{}", rounded_total_dmg) });
 
             size_t i = 0;
             for (const auto& cell : *rotation) {
                 size_t rounded_dmg = dmg_per_skill[i++];
                 dmg_log.add_row({ 
                     cell.command + ' ' + std::to_string(cell.index),
-                    fmt::vformat("{}", fmt::make_format_args(rounded_dmg))
+                    lib::format("{}", rounded_dmg)
                 });
             }
 
