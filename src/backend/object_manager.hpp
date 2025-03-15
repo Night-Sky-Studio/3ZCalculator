@@ -1,17 +1,19 @@
 #pragma once
 
 //std
+#include <atomic>
 #include <functional>
+#include <future>
 #include <memory>
-#include <shared_mutex>
 #include <string>
-#include <thread>
+
+//toml
+#include "toml.hpp"
 
 namespace backend {
     using any_ptr = std::shared_ptr<void>;
 
-    using any_ptr_loader = std::function<any_ptr(const std::string&)>;
-    //using any_ptr_deleter = std::function<bool(void*)>;
+    using any_ptr_loader = std::function<any_ptr(const toml::value&)>;
 
     class ObjectManager {
         struct object {
@@ -26,12 +28,16 @@ namespace backend {
             any_ptr_loader loader;
         };
 
-        ObjectManager();
+        ~ObjectManager();
 
+        std::future<any_ptr> get(size_t key);
+
+        // blocks thread until object is gotten
         template<typename T>
-        const std::shared_ptr<T>& at(size_t key) const {
-            std::shared_lock lock(*_mutex);
-            auto result = std::static_pointer_cast<T>(_content.at(key).ptr);
+        const std::shared_ptr<T>& at(size_t key) {
+            auto future = get_as_future(key, std::launch::deferred);
+            auto result = std::static_pointer_cast<T>(future.get());
+
             return std::move(result);
         }
 
@@ -41,11 +47,13 @@ namespace backend {
         void add_object(size_t utility_id, size_t id);
         void add_object(const std::string& folder, size_t id);
 
-    private:
-        static constexpr size_t cycles_limit = 60;
+        void launch();
 
-        std::unordered_map<size_t, object> _content;
-        std::unordered_map<size_t, utility_funcs> _utility_funcs;
-        std::unique_ptr<std::shared_mutex> _mutex;
+    protected:
+        std::atomic_bool m_is_active = false, m_is_ended = false;
+        std::unordered_map<size_t, object> m_content;
+        std::unordered_map<size_t, utility_funcs> m_utility_funcs;
+
+        std::future<any_ptr> get_as_future(size_t key, std::launch policy);
     };
 }

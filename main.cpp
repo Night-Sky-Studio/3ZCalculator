@@ -1,7 +1,4 @@
-﻿//std
-#include <fstream>
-
-//toml11
+﻿//toml11
 #include "toml.hpp"
 
 //library
@@ -12,28 +9,47 @@
 #include "backend/converters.hpp"
 #include "backend/object_manager.hpp"
 
-int main() {
-    backend::ToEvalDataConverter::init();
-    backend::ObjectManager manager;
+void alloc_object_manager(backend::ObjectManager& manager) {
+    std::fstream file("loadable_objects.toml");
+    auto toml = toml::parse(file);
 
     manager.add_utility_funcs({
         .folder = "agents",
-        .loader = [](const std::string& path) {
-            std::fstream file(path, std::ios::in | std::ios::binary);
-            if (!file.is_open())
-                throw std::runtime_error("file is not found");
-
-            auto toml = toml::parse(file);
-            file.close();
-
+        .loader = [](const toml::value& toml) {
             auto result = std::make_shared<zzz::AgentDetails>(global::to_agent.from(toml));
             return std::static_pointer_cast<void>(result);
         }
     });
+    for (const auto& it : toml.at("agents").as_array())
+        manager.add_object("agents", it.as_integer());
 
-    manager.add_object("agents", 1091);
+    manager.add_utility_funcs({
+        .folder = "wengines",
+        .loader = [](const toml::value& toml) {
+            auto result = std::make_shared<zzz::WengineDetails>(global::to_wengine.from(toml));
+            return std::static_pointer_cast<void>(result);
+        }
+    });
+    for (const auto& it : toml.at("wengines").as_array())
+        manager.add_object("wengines", it.as_integer());
 
-    auto agent = manager.at<zzz::AgentDetails>(1091);
+    manager.add_utility_funcs({
+        .folder = "dds",
+        .loader = [](const toml::value& toml) {
+            auto result = std::make_shared<zzz::DdsDetails>(global::to_dds.from(toml));
+            return std::static_pointer_cast<void>(result);
+        }
+    });
+    for (const auto& it : toml.at("dds").as_array())
+        manager.add_object("dds", it.as_integer());
+}
+
+int main() {
+    backend::ToEvalDataConverter::init();
+    backend::ObjectManager manager;
+
+    alloc_object_manager(manager);
+    manager.launch();
 
     //auto toml = lib::load_by_id("players", 1500438496);
     //auto input = backend::global::to_eval_data.from(toml);
