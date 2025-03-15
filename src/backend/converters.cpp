@@ -10,26 +10,6 @@
 #include "zzz/details.hpp"
 
 namespace backend {
-    void ToEvalDataConverter::init() {
-        for (auto id : characters_ids) {
-            auto agent_toml = lib::load_by_id("agents", id);
-            _agents.emplace(id, global::to_agent.from(agent_toml));
-
-            auto rotation_toml = lib::load_by_id("rotations", id);
-            _rotations.emplace(id, global::to_rotation.from(rotation_toml));
-        }
-
-        for (auto id : wengines_ids) {
-            auto toml = lib::load_by_id("wengines", id);
-            _wengines.emplace(id, global::to_wengine.from(toml));
-        }
-
-        for (auto id : dds_ids) {
-            auto toml = lib::load_by_id("drive_discs", id);
-            _dds.emplace(id, global::to_dds.from(toml));
-        }
-    }
-
     eval_data_details ToEvalDataConverter::from(const toml::value& data) const {
         uint64_t agent_id = data.at("primary_agent_id").as_integer();
         std::string agent_id_as_str = std::to_string(agent_id);
@@ -62,22 +42,13 @@ namespace backend {
         }
 
         return eval_data_details {
-            .agent = _agents.at(agent_id),
-            .wengine = _wengines.at(wengine_id),
+            .agent_id = agent_id,
+            .wengine_id = wengine_id,
+            .rotation_id = agent_id,
             .drive_disks = drive_discs,
-            .rotation = _rotations.at(agent_id),
             .enemy = enemy
         };
     }
-
-    const uint64_t ToEvalDataConverter::characters_ids[1] = { 1091 };
-    const uint64_t ToEvalDataConverter::wengines_ids[1] = { 14109 };
-    const uint64_t ToEvalDataConverter::dds_ids[3] = { 31000, 32700, 32800 };
-
-    std::unordered_map<size_t, zzz::AgentDetails> ToEvalDataConverter::_agents;
-    std::unordered_map<size_t, zzz::WengineDetails> ToEvalDataConverter::_wengines;
-    std::unordered_map<size_t, zzz::DdsDetails> ToEvalDataConverter::_dds;
-    std::unordered_map<size_t, zzz::rotation_details> ToEvalDataConverter::_rotations;
 
     const enemy_details ToEvalDataConverter::enemy = {
         .dmg_reduction = 0.2,

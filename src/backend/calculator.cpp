@@ -2,7 +2,9 @@
 
 //std
 #include <fstream>
+#include <map>
 #include <ranges>
+#include <unordered_map>
 
 //fmtlib
 #include "fmt/format.h"
@@ -13,18 +15,99 @@
 using namespace zzz;
 
 namespace backend {
-    std::tuple<double, std::vector<double>> Calculator::eval(const eval_data_details& data) {
+    std::tuple<double, std::vector<double>> Calculator::eval(ObjectManager& manager, const eval_data_details& data) {
         double total_dmg = 0.0;
         std::vector<double> dmg_per_skill;
+        StatsGrid stats;
 
-        auto stats = _precalc_stats(data);
+        AgentDetailsPtr agent;
+        WengineDetailsPtr wengine;
+        std::multimap<size_t, DdsDetailsPtr> dds;
+        rotation_details_ptr rotation;
 
-        dmg_per_skill.reserve(data.rotation.size());
+        {
+            auto agent_future = manager.get(data.agent_id);
+            auto wengine_future = manager.get(data.wengine_id);
+            auto rotation_future = manager.get(data.rotation_id);
 
-        for (const auto& [ability_name, index] : data.rotation) {
-            double dmg = AgentDetails::is_skill_or_anomaly(data.agent, ability_name) == 1
-                ? _calc_regular_dmg(data.agent.skill(ability_name), index - 1, stats, data.enemy)
-                : _calc_anomaly_dmg(data.agent.anomaly(ability_name), data.agent.element(), stats, data.enemy);
+            std::map<uint64_t, size_t> dds_count;
+            for (const auto& it : data.drive_disks) {
+                if (auto jt = dds_count.find(it.disc_id()); jt != dds_count.end())
+                    jt->second++;
+                else
+                    dds_count[it.disc_id()] = 1;
+            }
+
+            std::list<std::future<any_ptr>> dds_futures;
+            for (const auto& [id, count] : dds_count) {
+                if (count >= 2)
+                    dds_futures.emplace_back(manager.get(id));
+            }
+
+            agent = std::static_pointer_cast<AgentDetails>(agent_future.get());
+            wengine = std::static_pointer_cast<WengineDetails>(wengine_future.get());
+            rotation = std::static_pointer_cast<rotation_details>(rotation_future.get());
+
+            for (auto& future : dds_futures) {
+                auto ptr = std::static_pointer_cast<DdsDetails>(future.get());
+                auto id = dds_count.at(ptr->id());
+
+                if (id >= 2)
+                    dds.emplace(2, ptr);
+                if (id >= 4)
+                    dds.emplace(4, ptr);
+            }
+        }
+
+        {
+            StatsGrid agent_stats, wengine_stats, ddp_stats, dds_stats;
+
+            agent_stats.add(agent->stats());
+
+            wengine_stats.add(wengine->main_stat());
+            wengine_stats.add(wengine->sub_stat());
+            wengine_stats.add(wengine->passive_stats());
+
+            for (const auto& it : data.drive_disks) {
+                ddp_stats.add(it.main_stat());
+                for (size_t i = 0; i < 4; i++)
+                    ddp_stats.add(it.sub_stat(i));
+            }
+
+            for (const auto& [count, set] : dds) {
+                if (count == 2)
+                    dds_stats.add(set->p2());
+                if (count == 4)
+                    dds_stats.add(set->p4());
+            }
+
+            stats.add(agent_stats);
+            stats.add(wengine_stats);
+            stats.add(ddp_stats);
+            stats.add(dds_stats);
+
+            {
+                tabulate::Table stats_log;
+
+                stats_log.add_row({ "agent", "wengine", "ddp", "dds", "total" });
+                stats_log.add_row({
+                    agent_stats.get_debug_table(),
+                    wengine_stats.get_debug_table(),
+                    ddp_stats.get_debug_table(),
+                    dds_stats.get_debug_table(),
+                    stats.get_debug_table()
+                });
+
+                std::fstream debug_file("stats.log", std::ios::out);
+                stats_log.print(debug_file);
+            }
+        }
+
+        dmg_per_skill.reserve(rotation->size());
+        for (const auto& [ability_name, index] : *rotation) {
+            double dmg = AgentDetails::is_skill_or_anomaly(*agent, ability_name) == 1
+                ? _calc_regular_dmg(agent->skill(ability_name), index - 1, stats, data.enemy)
+                : _calc_anomaly_dmg(agent->anomaly(ability_name), agent->element(), stats, data.enemy);
 
             total_dmg += dmg;
             dmg_per_skill.emplace_back(dmg);
@@ -38,7 +121,7 @@ namespace backend {
             dmg_log.add_row({ "total", fmt::vformat("{}", fmt::make_format_args(rounded_total_dmg)) });
 
             size_t i = 0;
-            for (const auto& cell : data.rotation) {
+            for (const auto& cell : *rotation) {
                 size_t rounded_dmg = dmg_per_skill[i++];
                 dmg_log.add_row({ 
                     cell.command + ' ' + std::to_string(cell.index),
@@ -51,42 +134,6 @@ namespace backend {
         }
 
         return { total_dmg, dmg_per_skill };
-    }
-
-    // TODO: add debug mode
-    StatsGrid Calculator::_precalc_stats(const eval_data_details& data) {
-        StatsGrid result, wengine_stats, discs_stats;
-
-        wengine_stats.add(data.wengine.main_stat());
-        wengine_stats.add(data.wengine.sub_stat());
-        wengine_stats.add(data.wengine.passive_stats());
-
-        for (const auto& it : data.drive_disks) {
-            discs_stats.add(it.main_stat());
-            for (size_t i = 0; i < 4; i++)
-                discs_stats.add(it.sub_stat(i));
-        }
-
-        result.add(data.agent.stats());
-        result.add(wengine_stats);
-        result.add(discs_stats);
-
-        {
-            tabulate::Table stats_log;
-
-            stats_log.add_row({ "agent", "wengine", "discs", "total" });
-            stats_log.add_row({
-                data.agent.stats().get_debug_table(),
-                wengine_stats.get_debug_table(),
-                discs_stats.get_debug_table(),
-                result.get_debug_table()
-            });
-
-            std::fstream debug_file("stats.log", std::ios::out);
-            stats_log.print(debug_file);
-        }
-
-        return result;
     }
 
     // TODO: make part of StatsGrid

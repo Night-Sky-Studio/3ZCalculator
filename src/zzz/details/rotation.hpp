@@ -2,8 +2,9 @@
 
 //std
 #include <cstdint>
-#include <string>
 #include <list>
+#include <memory>
+#include <string>
 
 //toml11
 #include "toml.hpp"
@@ -26,6 +27,7 @@ namespace zzz::details {
 
 namespace zzz {
     using rotation_details = details::rotation;
+    using rotation_details_ptr = std::shared_ptr<details::rotation>;
 }
 
 namespace global {

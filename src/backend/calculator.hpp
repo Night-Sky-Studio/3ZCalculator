@@ -5,6 +5,7 @@
 
 //backend
 #include "backend/details.hpp"
+#include "backend/object_manager.hpp"
 
 //zzz
 #include "zzz/details.hpp"
@@ -16,11 +17,9 @@ namespace backend {
         static constexpr double buff_level_mult = 1.0 + (level - 1.0) / 59.0;
         static constexpr double level_coefficient = 794.0;
 
-        static std::tuple<double, std::vector<double>> eval(const eval_data_details& data);
+        static std::tuple<double, std::vector<double>> eval(ObjectManager& manager, const eval_data_details& data);
 
     private:
-        static zzz::StatsGrid _precalc_stats(const eval_data_details& data);
-
         static double _calc_total_atk(const zzz::StatsGrid& stats, zzz::Tag tag);
 
         static double _calc_def_mult(const enemy_details& enemy, const zzz::StatsGrid& stats, zzz::Tag tag);

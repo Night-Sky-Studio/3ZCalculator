@@ -15,10 +15,8 @@ namespace backend::details {
     };
 
     struct eval_data {
-        const zzz::AgentDetails& agent;
-        const zzz::WengineDetails& wengine;
+        size_t agent_id, wengine_id, rotation_id;
         std::array<zzz::Ddp, 6> drive_disks;
-        const zzz::rotation_details& rotation;
         const enemy& enemy;
     };
 }
