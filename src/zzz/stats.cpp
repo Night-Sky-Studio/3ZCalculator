@@ -4,11 +4,10 @@
 #include <ranges>
 #include <stdexcept>
 
-//fmtlib
+#ifdef DEBUG_STATUS
 #include "fmt/format.h"
-
-//tabulate
 #include "tabulate/table.hpp"
+#endif
 
 namespace zzz {
     // StatAdaptor
@@ -33,6 +32,7 @@ namespace zzz {
 
     stat StatsGrid::no_value = { .value = 0.0, .type = StatType::None, .tag = Tag::Universal };
 
+#ifdef DEBUG_STATUS
     tabulate::Table StatsGrid::get_debug_table() const {
         tabulate::Table table;
 
@@ -54,6 +54,7 @@ namespace zzz {
 
         return table;
     }
+#endif
 
     stat StatsGrid::get(StatType type) const {
         auto it = _content.find(_gen_key(type, Tag::Universal));

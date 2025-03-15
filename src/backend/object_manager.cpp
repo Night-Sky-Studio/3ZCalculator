@@ -3,7 +3,6 @@
 //std
 #include <chrono>
 #include <fstream>
-#include <iostream>
 #include <ranges>
 #include <stdexcept>
 #include <thread>
@@ -13,6 +12,10 @@
 
 //library
 #include "library/funcs.hpp"
+
+#ifdef DEBUG_STATUS
+#include <iostream>
+#endif
 
 namespace backend {
     static constexpr auto cycles_limit = 2ul;
@@ -48,7 +51,6 @@ namespace backend {
         return add_object(lib::hash_string(folder), id);
     }
 
-    // TODO: debug
     void ObjectManager::launch() {
         m_is_active = true;
         std::thread thread([this] {
@@ -65,8 +67,10 @@ namespace backend {
 
                     if (obj.cycles_since_last_usage == cycles_limit) {
                         obj.ptr = nullptr;
-                        std::string message = std::to_string(key) + " is deleted\n";
+#ifdef DEBUG_STATUS
+                        std::string message = fmt::vformat("{} object is deleted", fmt::make_format_args(key));
                         std::cerr << message;
+#endif
                     }
                 }
 

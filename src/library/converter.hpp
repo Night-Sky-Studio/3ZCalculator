@@ -1,7 +1,6 @@
 #pragma once
 
 namespace lib {
-    // TPrimary suits for class name
     template<typename TResult, typename... TArgs>
     class IConverter {
     public:

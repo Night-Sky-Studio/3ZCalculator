@@ -17,7 +17,7 @@ namespace zzz {
 
         CritRate, CritDmg,
         DefPenRatio, DefPenFlat,
-        // anomaly proficiency, anomly mastery, anomaly buildup rate and penetration
+        // anomaly proficiency, anomaly mastery, anomaly buildup rate and penetration
         Ap, AmTotal, AmBase, AmRatio, AbRate, AbPen,
 
         ImpactTotal, ImpactBase, ImpactRatio,

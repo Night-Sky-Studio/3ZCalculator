@@ -24,8 +24,12 @@ namespace backend {
 
         static double _calc_def_mult(const enemy_details& enemy, const zzz::StatsGrid& stats, zzz::Tag tag);
         static double _calc_dmg_taken_mult(const enemy_details& enemy, const zzz::StatsGrid& stats, zzz::Tag tag);
-        static double _calc_res_mult(const enemy_details& enemy, const zzz::StatsGrid& stats, zzz::Element element,
-            zzz::Tag tag);
+        static double _calc_res_mult(
+            const enemy_details& enemy,
+            const zzz::StatsGrid& stats,
+            zzz::Element element,
+            zzz::Tag tag
+        );
         static double _calc_stun_mult(const enemy_details& enemy, const zzz::StatsGrid& stats);
 
         static double _calc_regular_dmg(

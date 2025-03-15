@@ -1,16 +1,17 @@
 #include "backend/calculator.hpp"
 
 //std
-#include <fstream>
 #include <map>
 #include <ranges>
-#include <unordered_map>
-
-//fmtlib
-#include "fmt/format.h"
 
 //zzz
 #include "zzz/stats_math.hpp"
+
+#ifdef DEBUG_STATUS
+#include <fstream>
+#include "fmt/format.h"
+#include "tabulate/table.hpp"
+#endif
 
 using namespace zzz;
 
@@ -86,6 +87,7 @@ namespace backend {
             stats.add(ddp_stats);
             stats.add(dds_stats);
 
+#ifdef DEBUG_STATS
             {
                 tabulate::Table stats_log;
 
@@ -101,6 +103,7 @@ namespace backend {
                 std::fstream debug_file("stats.log", std::ios::out);
                 stats_log.print(debug_file);
             }
+#endif
         }
 
         dmg_per_skill.reserve(rotation->size());
@@ -113,6 +116,7 @@ namespace backend {
             dmg_per_skill.emplace_back(dmg);
         }
 
+#ifdef DEBUG_STATUS
         {
             tabulate::Table dmg_log;
             size_t rounded_total_dmg = total_dmg;
@@ -132,6 +136,7 @@ namespace backend {
             std::fstream file("dmg.log", std::ios::out);
             dmg_log.print(file);
         }
+#endif
 
         return { total_dmg, dmg_per_skill };
     }

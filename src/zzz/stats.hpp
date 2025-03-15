@@ -11,8 +11,11 @@
 #include "library/converter.hpp"
 
 //zzz
-#include "tabulate/table.hpp"
 #include "zzz/enums.hpp"
+
+#ifdef DEBUG_STATUS
+#include "tabulate/table.hpp"
+#endif
 
 namespace zzz {
     struct stat {
@@ -38,7 +41,9 @@ namespace zzz {
 
         static stat no_value;
 
+#ifdef DEBUG_STATUS
         tabulate::Table get_debug_table() const;
+#endif
 
         stat get(StatType type) const;
         stat get_all(StatType type, Tag tag) const;

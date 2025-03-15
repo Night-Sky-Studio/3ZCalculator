@@ -8,7 +8,7 @@ namespace zzz::details {
 
     const std::string& Skill::name() const { return m_name; }
     Tag Skill::tag() const { return m_tag; }
-    std::span<const Skill::scale> Skill::scales() const { return std::span(m_scales.data(), m_scales.size()); }
+    std::span<const Skill::scale> Skill::scales() const { return { m_scales.data(), m_scales.size() }; }
     const StatsGrid& Skill::buffs() const { return m_buffs; }
 
     // SkillBuilder
