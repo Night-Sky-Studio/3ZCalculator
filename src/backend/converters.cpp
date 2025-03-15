@@ -13,20 +13,20 @@ namespace backend {
     void ToEvalDataConverter::init() {
         for (auto id : characters_ids) {
             auto agent_toml = lib::load_by_id("agents", id);
-            _agents.emplace(id, zzz::global::to_agent.from(agent_toml));
+            _agents.emplace(id, global::to_agent.from(agent_toml));
 
             auto rotation_toml = lib::load_by_id("rotations", id);
-            _rotations.emplace(id, zzz::global::to_rotation.from(rotation_toml));
+            _rotations.emplace(id, global::to_rotation.from(rotation_toml));
         }
 
         for (auto id : wengines_ids) {
             auto toml = lib::load_by_id("wengines", id);
-            _wengines.emplace(id, zzz::global::to_wengine.from(toml));
+            _wengines.emplace(id, global::to_wengine.from(toml));
         }
 
         for (auto id : dds_ids) {
             auto toml = lib::load_by_id("drive_discs", id);
-            _dds.emplace(id, zzz::global::to_dds.from(toml));
+            _dds.emplace(id, global::to_dds.from(toml));
         }
     }
 

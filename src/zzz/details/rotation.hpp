@@ -28,6 +28,6 @@ namespace zzz {
     using rotation_details = details::rotation;
 }
 
-namespace zzz::global {
-    static const details::ToRotationConverter to_rotation;
+namespace global {
+    static const zzz::details::ToRotationConverter to_rotation;
 }

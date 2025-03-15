@@ -66,11 +66,11 @@ namespace zzz::details {
     };
 }
 
-namespace zzz::global {
-    static const details::ToWengineConverter to_wengine;
-}
-
 namespace zzz {
     using WengineDetails = details::Wengine;
     using WengineDetailsPtr = std::shared_ptr<details::Wengine>;
+}
+
+namespace global {
+    static const zzz::details::ToWengineConverter to_wengine;
 }

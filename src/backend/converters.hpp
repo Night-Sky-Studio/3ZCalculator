@@ -29,6 +29,6 @@ namespace backend {
     };
 }
 
-namespace backend::global {
-    static const ToEvalDataConverter to_eval_data;
+namespace global {
+    static const backend::ToEvalDataConverter to_eval_data;
 }

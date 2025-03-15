@@ -80,11 +80,11 @@ namespace zzz::details {
     };
 }
 
-namespace zzz::global {
-    static const details::ToAgentConverter to_agent;
-}
-
 namespace zzz {
     using AgentDetails = details::Agent;
     using AgentDetailsPtr = std::shared_ptr<details::Agent>;
+}
+
+namespace global {
+    static const zzz::details::ToAgentConverter to_agent;
 }

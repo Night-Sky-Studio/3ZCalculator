@@ -26,7 +26,7 @@ int main() {
             auto toml = toml::parse(file);
             file.close();
 
-            auto result = std::make_shared<zzz::AgentDetails>(zzz::global::to_agent.from(toml));
+            auto result = std::make_shared<zzz::AgentDetails>(global::to_agent.from(toml));
             return std::static_pointer_cast<void>(result);
         }
     });

@@ -60,11 +60,11 @@ namespace zzz::details {
     };
 }
 
-namespace zzz::global {
-    static const details::ToDdsConverter to_dds;
-}
-
 namespace zzz {
     using DdsDetails = details::DriveDiscSet;
     using DdsDetailsPtr = std::shared_ptr<details::DriveDiscSet>;
+}
+
+namespace global {
+    static const zzz::details::ToDdsConverter to_dds;
 }

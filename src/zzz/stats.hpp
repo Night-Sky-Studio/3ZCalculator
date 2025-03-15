@@ -70,8 +70,7 @@ namespace zzz {
     };
 }
 
-namespace zzz::global {
-    static const ToStatConverter to_stat;
-
-    static const ToStatsGridConverter to_stats_grid;
+namespace global {
+    static const zzz::ToStatConverter to_stat;
+    static const zzz::ToStatsGridConverter to_stats_grid;
 }
