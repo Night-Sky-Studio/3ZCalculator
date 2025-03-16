@@ -2,6 +2,7 @@
 
 //std
 #include <array>
+#include <string>
 
 //zzz
 #include "zzz/combat.hpp"
@@ -15,8 +16,8 @@ namespace backend::details {
     };
 
     struct eval_data {
-        size_t agent_id, wengine_id, rotation_id;
-        std::array<zzz::Ddp, 6> drive_disks;
+        std::string agent_id, wengine_id, rotation_id;
+        std::array<zzz::Ddp, 6> drive_discs;
         const enemy& enemy;
     };
 }

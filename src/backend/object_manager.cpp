@@ -5,10 +5,6 @@
 #include <fstream>
 #include <ranges>
 #include <stdexcept>
-#include <thread>
-
-//library
-#include "library/funcs.hpp"
 
 #ifdef DEBUG_STATUS
 #include <iostream>
@@ -25,27 +21,22 @@ namespace backend {
         m_is_ended.wait(false);
     }
 
-    std::future<any_ptr> ObjectManager::get(size_t key) {
-        return get_as_future(key, std::launch::async);
+    std::future<any_ptr> ObjectManager::get(const std::string& key) {
+        return get_as_future(lib::hash_string(key), std::launch::async);
     }
 
-    void ObjectManager::add_utility_funcs(uint64_t utility_id, utility_funcs value) {
-        m_utility_funcs.emplace(utility_id, std::move(value));
-    }
     void ObjectManager::add_utility_funcs(utility_funcs value) {
         auto hashed_key = lib::hash_string(value.folder);
-        return add_utility_funcs(hashed_key, std::move(value));
+        m_utility_funcs.emplace(hashed_key, std::move(value));;
     }
 
-    void ObjectManager::add_object(size_t utility_id, size_t id) {
-        m_content.emplace(id, object {
+    void ObjectManager::add_object(const std::string& folder, const std::string& name) {
+        m_content.emplace(lib::hash_string(name), object {
             .ptr = nullptr,
-            .utility_id = utility_id,
+            .name = name,
+            .utility_id = lib::hash_string(folder),
             .cycles_since_last_usage = 0
         });
-    }
-    void ObjectManager::add_object(const std::string& folder, size_t id) {
-        return add_object(lib::hash_string(folder), id);
     }
 
     void ObjectManager::launch() {
@@ -93,14 +84,23 @@ namespace backend {
 
             const auto& util = m_utility_funcs.at(object.utility_id);
 
-            std::string path = util.folder + '/' + std::to_string(key) + ".toml";
+            std::string path = object.name + ".toml";
             std::fstream file(path, std::ios::in | std::ios::binary);
-            if (!file.is_open())
-                throw std::runtime_error(lib::format("file {} is not found", path));
+            if (!file.is_open()) {
+                std::string message = lib::format("file {} is not found", path);
+#ifdef DEBUG_STATUS
+                std::cerr << message;
+#endif
+                throw std::runtime_error(message);
+            }
             auto toml = toml::parse(file);
             file.close();
 
             object.ptr = util.loader(toml);
+#ifdef DEBUG_STATUS
+            std::string message = lib::format("object {}/{} is loaded\n", util.folder, key);
+            std::cerr << message;
+#endif
             object.cycles_since_last_usage = 0;
 
             return object.ptr;

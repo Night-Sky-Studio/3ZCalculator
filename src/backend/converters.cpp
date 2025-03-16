@@ -15,6 +15,7 @@ namespace backend {
         std::string agent_id_as_str = std::to_string(agent_id);
 
         uint64_t wengine_id = data.at("primary_wengine_id").as_integer();
+        std::string wengine_id_as_str = std::to_string(wengine_id);
 
         size_t current_disk = 0;
         std::array<zzz::Ddp, 6> drive_discs;
@@ -42,10 +43,10 @@ namespace backend {
         }
 
         return eval_data_details {
-            .agent_id = agent_id,
-            .wengine_id = wengine_id,
-            .rotation_id = agent_id,
-            .drive_disks = drive_discs,
+            .agent_id = "agents/" + agent_id_as_str,
+            .wengine_id = "wengines/" + wengine_id_as_str,
+            .rotation_id = "rotations/" + agent_id_as_str,
+            .drive_discs = drive_discs,
             .enemy = enemy
         };
     }

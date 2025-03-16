@@ -10,6 +10,9 @@
 //toml
 #include "toml.hpp"
 
+//library
+#include "library/funcs.hpp"
+
 namespace backend {
     using any_ptr = std::shared_ptr<void>;
 
@@ -18,6 +21,7 @@ namespace backend {
     class ObjectManager {
         struct object {
             any_ptr ptr;
+            std::string name;
             size_t utility_id;
             size_t cycles_since_last_usage;
         };
@@ -30,22 +34,21 @@ namespace backend {
 
         ~ObjectManager();
 
-        std::future<any_ptr> get(size_t key);
+        std::future<any_ptr> get(const std::string& key);
 
         // blocks thread until object is gotten
         template<typename T>
-        const std::shared_ptr<T>& at(size_t key) {
-            auto future = get_as_future(key, std::launch::deferred);
+        const std::shared_ptr<T>& at(const std::string& name) {
+            auto hashed_key = lib::hash_string(name);
+            auto future = get_as_future(hashed_key, std::launch::deferred);
             auto result = std::static_pointer_cast<T>(future.get());
 
             return std::move(result);
         }
 
-        void add_utility_funcs(size_t utility_id, utility_funcs value);
         void add_utility_funcs(utility_funcs value);
 
-        void add_object(size_t utility_id, size_t id);
-        void add_object(const std::string& folder, size_t id);
+        void add_object(const std::string& folder, const std::string& name);
 
         void launch();
 

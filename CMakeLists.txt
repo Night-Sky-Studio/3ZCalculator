@@ -18,7 +18,7 @@ set(USE_BOOST_KARMA OFF)
 FetchContent_Declare(
     FrozenLib
     GIT_REPOSITORY https://github.com/serge-sans-paille/frozen
-    GIT_TAG master
+    GIT_TAG        master
 )
 FetchContent_MakeAvailable(FrozenLib)
 
@@ -26,8 +26,8 @@ FetchContent_MakeAvailable(FrozenLib)
 FetchContent_Declare(
     toml11
     GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
-    GIT_TAG v4.4.0
-    GIT_PROGRESS TRUE
+    GIT_TAG        v4.4.0
+    GIT_PROGRESS   TRUE
 )
 FetchContent_MakeAvailable(toml11)
 
@@ -35,15 +35,15 @@ FetchContent_MakeAvailable(toml11)
 FetchContent_Declare(
     tabulate
     GIT_REPOSITORY https://github.com/p-ranav/tabulate.git
-    GIT_TAG v1.5
-    GIT_PROGRESS TRUE
+    GIT_TAG        v1.5
+    GIT_PROGRESS   TRUE
 )
 FetchContent_MakeAvailable(tabulate)
 
 # fmtlib - 10.2.1
 FetchContent_Declare(
     fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG        11.1.4
 )
 FetchContent_MakeAvailable(fmt)
@@ -54,16 +54,19 @@ add_executable(3ZCalculator
     "src/zzz/enums.cpp"
     "src/zzz/stats.cpp"
 
+    "src/zzz/combat/drive_disc_piece.cpp"
+
     "src/zzz/details/agent.cpp"
     "src/zzz/details/anomaly.cpp"
     "src/zzz/details/drive_disc_set.cpp"
-    "src/zzz/combat/drive_disc_piece.cpp"
+    "src/zzz/details/rotation.cpp"
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"
 
     "src/backend/calculator.cpp"
     "src/backend/converters.cpp"
- "src/backend/object_manager.cpp" "src/zzz/details/rotation.cpp")
+    "src/backend/object_manager.cpp" 
+)
 
 target_include_directories(3ZCalculator PRIVATE
     src
@@ -78,3 +81,5 @@ target_link_libraries(3ZCalculator PRIVATE frozen-headers)
 target_link_libraries(3ZCalculator PRIVATE toml11::toml11)
 target_link_libraries(3ZCalculator PRIVATE tabulate::tabulate)
 target_link_libraries(3ZCalculator PRIVATE fmt::fmt)
+
+#add_compile_definitions(DEBUG_STATUS)
