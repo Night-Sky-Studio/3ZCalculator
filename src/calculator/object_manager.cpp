@@ -1,4 +1,4 @@
-#include "backend/object_manager.hpp"
+#include "calculator/object_manager.hpp"
 
 //std
 #include <chrono>
@@ -10,7 +10,7 @@
 #include <iostream>
 #endif
 
-namespace backend {
+namespace calculator {
     static constexpr auto cycles_limit = 2ul;
     static constexpr auto sleep_time = std::chrono::seconds(1);
 

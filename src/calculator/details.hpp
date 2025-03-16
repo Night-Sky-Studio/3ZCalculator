@@ -8,7 +8,7 @@
 #include "zzz/combat.hpp"
 #include "zzz/details.hpp"
 
-namespace backend::details {
+namespace calculator::details {
     struct enemy {
         double dmg_reduction, defense, stun_mult;
         std::array<double, 5> res;
@@ -22,7 +22,7 @@ namespace backend::details {
     };
 }
 
-namespace backend {
+namespace calculator {
     using enemy_details = details::enemy;
     using eval_data_details = details::eval_data;
 }

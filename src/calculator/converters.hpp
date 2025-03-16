@@ -7,9 +7,9 @@
 #include "library/converter.hpp"
 
 //backend
-#include "backend/details.hpp"
+#include "calculator/details.hpp"
 
-namespace backend {
+namespace calculator {
     class ToEvalDataConverter : lib::IConverter<eval_data_details, toml::value> {
     public:
         eval_data_details from(const toml::value& data) const override;
@@ -20,5 +20,5 @@ namespace backend {
 }
 
 namespace global {
-    static const backend::ToEvalDataConverter to_eval_data;
+    static const calculator::ToEvalDataConverter to_eval_data;
 }

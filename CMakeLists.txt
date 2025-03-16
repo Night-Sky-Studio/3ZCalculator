@@ -63,9 +63,9 @@ add_executable(3ZCalculator
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"
 
-    "src/backend/calculator.cpp"
-    "src/backend/converters.cpp"
-    "src/backend/object_manager.cpp"
+    "src/calculator/calculator.cpp"
+    "src/calculator/converters.cpp"
+    "src/calculator/object_manager.cpp"
 )
 
 target_include_directories(3ZCalculator PRIVATE

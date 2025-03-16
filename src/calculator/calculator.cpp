@@ -1,4 +1,4 @@
-#include "backend/calculator.hpp"
+#include "calculator/calculator.hpp"
 
 //std
 #include <map>
@@ -9,16 +9,14 @@
 
 using namespace zzz;
 
-namespace backend {
+namespace calculator {
     struct eval_data_composed {
         AgentDetailsPtr agent;
         WengineDetailsPtr wengine;
         std::multimap<size_t, DdsDetailsPtr> dds;
         rotation_details_ptr rotation;
     };
-}
 
-namespace backend::calculator_eval {
     constexpr size_t level = 60;
     constexpr double buff_level_mult = 1.0 + (level - 1.0) / 59.0;
     constexpr double level_coefficient = 794.0;
@@ -114,7 +112,7 @@ namespace backend::calculator_eval {
 //library
 #include "library/funcs.hpp"
 
-namespace backend::calculator_requests {
+namespace backend::inline debug {
     eval_data_composed request_data(ObjectManager& manager, const eval_data_details& details) {
         eval_data_composed result;
 
@@ -261,7 +259,7 @@ namespace backend::calculator_requests {
     }
 }
 #else
-namespace backend::calculator_requests {
+namespace calculator {
     eval_data_composed request_data(ObjectManager& manager, const eval_data_details& details) {
         eval_data_composed result;
 
@@ -269,8 +267,8 @@ namespace backend::calculator_requests {
         auto wengine_future = manager.get(details.wengine_id);
         auto rotation_future = manager.get(details.rotation_id);
 
-        std::map<uint64_t, size_t> dds_count;
-        for (const auto& it : details.drive_disks) {
+        std::map<size_t, size_t> dds_count;
+        for (const auto& it : details.drive_discs) {
             if (auto jt = dds_count.find(it.disc_id()); jt != dds_count.end())
                 jt->second++;
             else
@@ -279,8 +277,10 @@ namespace backend::calculator_requests {
 
         std::list<std::future<any_ptr>> dds_futures;
         for (const auto& [id, count] : dds_count) {
-            if (count >= 2)
-                dds_futures.emplace_back(manager.get(id));
+            if (count >= 2) {
+                auto key = "dds/" + std::to_string(id);
+                dds_futures.emplace_back(manager.get(key));
+            }
         }
 
         result.agent = std::static_pointer_cast<AgentDetails>(agent_future.get());
@@ -309,7 +309,7 @@ namespace backend::calculator_requests {
         result.add(composed.wengine->sub_stat());
         result.add(composed.wengine->passive_stats());
 
-        for (const auto& it : details.drive_disks) {
+        for (const auto& it : details.drive_discs) {
             result.add(it.main_stat());
             for (size_t i = 0; i < 4; i++)
                 result.add(it.sub_stat(i));
@@ -339,7 +339,7 @@ namespace backend::calculator_requests {
 
             switch (id) {
             case 1:
-                dmg = calculator_eval::calc_regular_dmg(
+                dmg = calc_regular_dmg(
                     composed.agent->skill(ability_name),
                     index - 1,
                     stats,
@@ -347,7 +347,7 @@ namespace backend::calculator_requests {
                 );
                 break;
             case 2:
-                dmg = calculator_eval::calc_anomaly_dmg(
+                dmg = calc_anomaly_dmg(
                     composed.agent->anomaly(ability_name),
                     composed.agent->element(),
                     stats,
@@ -367,11 +367,11 @@ namespace backend::calculator_requests {
 }
 #endif
 
-namespace backend {
+namespace calculator {
     std::tuple<double, std::vector<double>> Calculator::eval(ObjectManager& manager, const eval_data_details& details) {
-        auto composed = calculator_requests::request_data(manager, details);
-        auto stats = calculator_requests::request_stats(composed, details);
-        auto result = calculator_requests::request_dmg(stats, composed, details);
+        auto composed = request_data(manager, details);
+        auto stats = request_stats(composed, details);
+        auto result = request_dmg(stats, composed, details);
         return result;
     }
 }

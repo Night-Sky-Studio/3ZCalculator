@@ -1,4 +1,4 @@
-#include "backend/converters.hpp"
+#include "calculator/converters.hpp"
 
 //std
 #include <ranges>
@@ -9,7 +9,7 @@
 //zzz
 #include "zzz/details.hpp"
 
-namespace backend {
+namespace calculator {
     eval_data_details ToEvalDataConverter::from(const toml::value& data) const {
         uint64_t agent_id = data.at("primary_agent_id").as_integer();
         std::string agent_id_as_str = std::to_string(agent_id);
