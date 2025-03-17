@@ -96,55 +96,36 @@ namespace calc {
 
 namespace calc {
     StatsGrid calc_stats(const request_t& request) {
-        StatsGrid result_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
+        StatsGrid result;
 
-        agent_stats.add(request.agent.ptr->stats());
+        result.add(request.agent.ptr->stats());
 
-        wengine_stats.add(request.wengine.ptr->main_stat());
-        wengine_stats.add(request.wengine.ptr->sub_stat());
-        wengine_stats.add(request.wengine.ptr->passive_stats());
+        result.add(request.wengine.ptr->main_stat());
+        result.add(request.wengine.ptr->sub_stat());
+        result.add(request.wengine.ptr->passive_stats());
 
         for (const auto& it : request.ddps) {
-            ddp_stats.add(it.main_stat());
+            result.add(it.main_stat());
             for (size_t i = 0; i < 4; i++)
-                ddp_stats.add(it.sub_stat(i));
+                result.add(it.sub_stat(i));
         }
 
         for (const auto& [count, set] : request.dds) {
             if (count == 2)
-                dds_stats.add(set.ptr->p2());
+                result.add(set.ptr->p2());
             if (count == 4)
-                dds_stats.add(set.ptr->p4());
+                result.add(set.ptr->p4());
         }
 
-        result_stats.add(agent_stats);
-        result_stats.add(wengine_stats);
-        result_stats.add(ddp_stats);
-        result_stats.add(dds_stats);
-
-        tabulate::Table stats_log;
-
-        stats_log.add_row({ "agent", "wengine", "ddp", "dds", "total" });
-        stats_log.add_row({
-            agent_stats.get_debug_table(),
-            wengine_stats.get_debug_table(),
-            ddp_stats.get_debug_table(),
-            dds_stats.get_debug_table(),
-            result_stats.get_debug_table()
-        });
-
-        std::fstream debug_file("stats.log", std::ios::out);
-        stats_log.print(debug_file);
-
-        return result_stats;
+        return result;
     }
 
     std::tuple<double, std::vector<double>> request_dmg(const request_t& request) {
         double total_dmg = 0.0;
-        std::vector<double> dmg_per_skill;
+        std::vector<double> dmg_per_ability;
         auto stats = calc_stats(request);
 
-        dmg_per_skill.reserve(request.rotation.ptr->size());
+        dmg_per_ability.reserve(request.rotation.ptr->size());
         for (const auto& [ability_name, index] : *request.rotation.ptr) {
             size_t id = AgentDetails::is_skill_or_anomaly(*request.agent.ptr, ability_name);
             double dmg;
@@ -171,10 +152,10 @@ namespace calc {
             }
 
             total_dmg += dmg;
-            dmg_per_skill.emplace_back(dmg);
+            dmg_per_ability.emplace_back(dmg);
         }
 
-        return { total_dmg, dmg_per_skill };
+        return { total_dmg, dmg_per_ability };
     }
 }
 
@@ -231,7 +212,7 @@ namespace calc {
         return stats_log;
     }
     tabulate::Table Calculator::debug_damage(const request_t& request, const result_t& damage) {
-        const auto& [total_dmg, dmg_per_skill] = damage;
+        const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
         size_t rounded_total_dmg = total_dmg;
@@ -241,7 +222,7 @@ namespace calc {
 
         size_t i = 0;
         for (const auto& cell : *request.rotation.ptr) {
-            size_t rounded_dmg = dmg_per_skill[i++];
+            size_t rounded_dmg = dmg_per_ability[i++];
             dmg_log.add_row({
                 cell.command + ' ' + std::to_string(cell.index),
                 lib::format("{}", rounded_dmg)

@@ -1,0 +1,10 @@
+{
+    "total": "number",
+    "per_ability": [
+        "number",
+        "number",
+        "number",
+        "number",
+        "number"
+    ]
+}

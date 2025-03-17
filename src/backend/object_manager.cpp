@@ -11,7 +11,7 @@
 #endif
 
 namespace backend {
-    static constexpr auto cycles_limit = 2ul;
+    static constexpr auto cycles_limit = 15ul;
     static constexpr auto sleep_time = std::chrono::seconds(1);
 
     // ObjectManager
@@ -56,7 +56,11 @@ namespace backend {
                     if (obj.cycles_since_last_usage == cycles_limit) {
                         obj.ptr = nullptr;
 #ifdef DEBUG_STATUS
-                        std::string message = lib::format("{} object is deleted", key);
+                        std::string message = lib::format(
+                            "{}/{} object is deleted\n",
+                            m_utility_funcs[obj.utility_id].folder,
+                            obj.name
+                        );
                         std::cerr << message;
 #endif
                     }
@@ -87,7 +91,7 @@ namespace backend {
             std::string path = object.name + ".toml";
             std::fstream file(path, std::ios::in | std::ios::binary);
             if (!file.is_open()) {
-                std::string message = lib::format("file {} is not found", path);
+                std::string message = lib::format("file {} is not found\n", path);
 #ifdef DEBUG_STATUS
                 std::cerr << message;
 #endif

@@ -1,0 +1,10 @@
+{
+    "name": "string",
+    "agent": "id",
+    "rotation": [
+        "ability_name scale_index",
+        "ability_name scale_index",
+        "ability_name scale_index",
+        "ability_name scale_index"
+    ]
+}

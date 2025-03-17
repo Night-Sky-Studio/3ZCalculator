@@ -1,0 +1,13 @@
+{
+    "aid": "number",
+    "wid": "number",
+    "discs": [
+        {
+            "id": "number",
+            "rarity": "S",
+            "stats": ["main_stat_type_id", "sub_stat_type_id", "sub_stat_type_id", "sub_stat_type_id", "sub_stat_type_id"],
+            "levels": ["main_stat_level", "sub_stat_level", "sub_stat_level", "sub_stat_level", "sub_stat_level"]
+        }
+    ],
+    "rotation": "string or array"
+}

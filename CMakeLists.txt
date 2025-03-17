@@ -34,26 +34,28 @@ FetchContent_MakeAvailable(FrozenLib)
 # toml11
 FetchContent_Declare(
     toml11
-    GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
-    GIT_TAG        v4.4.0
-    GIT_PROGRESS   TRUE
+    URL https://github.com/ToruNiina/toml11/archive/refs/tags/v4.4.0.tar.gz
 )
 FetchContent_MakeAvailable(toml11)
+
+# nlohmann::json
+FetchContent_Declare(
+    json 
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
 
 # tabulate
 FetchContent_Declare(
     tabulate
-    GIT_REPOSITORY https://github.com/p-ranav/tabulate.git
-    GIT_TAG        v1.5
-    GIT_PROGRESS   TRUE
+    URL https://github.com/p-ranav/tabulate/archive/refs/tags/v1.5.tar.gz
 )
 FetchContent_MakeAvailable(tabulate)
 
-# fmtlib - 10.2.1
+# fmtlib
 FetchContent_Declare(
     fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG        11.1.4
+    URL https://github.com/fmtlib/fmt/archive/refs/tags/11.1.4.tar.gz
 )
 FetchContent_MakeAvailable(fmt)
 
@@ -89,6 +91,7 @@ target_include_directories(3ZCalculator PRIVATE src)
 target_link_libraries(3ZCalculator PRIVATE 
     frozen-headers
     toml11::toml11
+    nlohmann_json::nlohmann_json
     tabulate::tabulate
     fmt::fmt
     Crow::Crow

@@ -112,6 +112,9 @@ namespace zzz::convert {
             return Rarity::NotSet;
         }
     }
+
+    std::string rarity_to_string(Rarity source);
+    Rarity string_to_rarity(const std::string& source);
 }
 
 inline zzz::StatType operator+(zzz::StatType lhs, zzz::Element rhs) {
