@@ -39,10 +39,7 @@ namespace backend {
         // blocks thread until object is gotten
         template<typename T>
         const std::shared_ptr<T>& at(const std::string& name) {
-            auto hashed_key = lib::hash_string(name);
-            auto future = get_as_future(hashed_key, std::launch::deferred);
-            auto result = std::static_pointer_cast<T>(future.get());
-
+            auto result = std::static_pointer_cast<T>(get_or_load(name));
             return std::move(result);
         }
 
@@ -57,6 +54,6 @@ namespace backend {
         std::unordered_map<size_t, object> m_content;
         std::unordered_map<size_t, utility_funcs> m_utility_funcs;
 
-        std::future<any_ptr> get_as_future(size_t key, std::launch policy);
+        any_ptr get_or_load(const std::string& key);
     };
 }

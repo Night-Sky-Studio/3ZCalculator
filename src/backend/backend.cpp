@@ -85,8 +85,6 @@ namespace backend {
     void prepare_request_details(calc::request_t& what, const nlohmann::json& source) {
         // agent
 
-        /*if (!source.contains("aid"))
-            throw std::runtime_error("aid was not found");*/
         what.agent.id = source["aid"];
 
         // wengine
@@ -171,8 +169,7 @@ namespace backend {
                 it.ptr = ptr;
             }
         } catch (const std::runtime_error& e) {
-            std::string message = lib::format("error: {}\n", e.what());
-            std::cerr << message;
+            CROW_LOG_ERROR << lib::format("error: {}", e.what());
         }
     }
 }
@@ -244,22 +241,24 @@ namespace backend {
                 .loader = loader
             });
             for (const auto& it : toml.at(folder).as_array()) {
-                std::string name;
+                std::string name = folder + '/';
 
                 switch (it.type()) {
                 case toml::value_t::integer:
-                    name = std::to_string(it.as_integer());
+                    name += std::to_string(it.as_integer());
                     break;
                 case toml::value_t::string:
-                    name = it.as_string();
+                    name += it.as_string();
                     break;
                 default:
                     throw std::runtime_error("wrong type");
                 }
 
                 allocated_objects++;
-                m_manager.add_object(folder, folder + '/' + name);
-                std::cout << lib::format("added object {}\n", folder + '/' + name);
+                m_manager.add_object(folder, name);
+#ifdef DEBUG_STATUS
+                CROW_LOG_INFO << lib::format("added object {}", name);
+#endif
             }
         };
 

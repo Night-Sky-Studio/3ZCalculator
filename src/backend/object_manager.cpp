@@ -7,11 +7,11 @@
 #include <stdexcept>
 
 #ifdef DEBUG_STATUS
-#include <iostream>
+#include "crow.h"
 #endif
 
 namespace backend {
-    static constexpr auto cycles_limit = 15ul;
+    static constexpr auto cycles_limit = 60ul;
     static constexpr auto sleep_time = std::chrono::seconds(1);
 
     // ObjectManager
@@ -22,7 +22,9 @@ namespace backend {
     }
 
     std::future<any_ptr> ObjectManager::get(const std::string& key) {
-        return get_as_future(lib::hash_string(key), std::launch::async);
+        return std::async(std::launch::async, [&] {
+            return this->get_or_load(key);
+        });
     }
 
     void ObjectManager::add_utility_funcs(utility_funcs value) {
@@ -44,7 +46,7 @@ namespace backend {
         std::thread thread([this] {
             while (m_is_active) {
                 // resets object from memory when passed enough time
-                for (auto& [key, obj] : m_content) {
+                for (auto& obj : m_content | std::views::values) {
                     if (!obj.ptr)
                         continue;
 
@@ -56,12 +58,7 @@ namespace backend {
                     if (obj.cycles_since_last_usage == cycles_limit) {
                         obj.ptr = nullptr;
 #ifdef DEBUG_STATUS
-                        std::string message = lib::format(
-                            "{}/{} object is deleted\n",
-                            m_utility_funcs[obj.utility_id].folder,
-                            obj.name
-                        );
-                        std::cerr << message;
+                        CROW_LOG_INFO << lib::format("{} object is deleted", obj.name);
 #endif
                     }
                 }
@@ -75,39 +72,31 @@ namespace backend {
         thread.detach();
     }
 
-    std::future<any_ptr> ObjectManager::get_as_future(size_t key, std::launch policy) {
-        return std::async(policy, [this, key] {
-            auto it = m_content.find(key);
-            auto& object = it->second;
+    any_ptr ObjectManager::get_or_load(const std::string& key) {
+        auto it = m_content.find(lib::hash_string(key));
+        auto& object = it->second;
 
-            if (it == m_content.end())
-                throw std::runtime_error("object doesn't exist");
+        if (it == m_content.end())
+            throw std::runtime_error("object doesn't exist");
 
-            if (it->second.ptr.get() != nullptr)
-                return object.ptr;
-
-            const auto& util = m_utility_funcs.at(object.utility_id);
-
-            std::string path = object.name + ".toml";
-            std::fstream file(path, std::ios::in | std::ios::binary);
-            if (!file.is_open()) {
-                std::string message = lib::format("file {} is not found\n", path);
-#ifdef DEBUG_STATUS
-                std::cerr << message;
-#endif
-                throw std::runtime_error(message);
-            }
-            auto toml = toml::parse(file);
-            file.close();
-
-            object.ptr = util.loader(toml);
-#ifdef DEBUG_STATUS
-            std::string message = lib::format("object {}/{} is loaded\n", util.folder, key);
-            std::cerr << message;
-#endif
-            object.cycles_since_last_usage = 0;
-
+        if (it->second.ptr.get() != nullptr)
             return object.ptr;
-        });
+
+        const auto& util = m_utility_funcs.at(object.utility_id);
+
+        std::string path = object.name + ".toml";
+        std::fstream file(path, std::ios::in | std::ios::binary);
+        if (!file.is_open())
+            throw std::runtime_error("file is not found");
+        auto toml = toml::parse(file);
+        file.close();
+
+        object.ptr = util.loader(toml);
+
+#ifdef DEBUG_STATUS
+        CROW_LOG_INFO << lib::format("{} is loaded", object.name);
+#endif
+
+        return object.ptr;
     }
 }
