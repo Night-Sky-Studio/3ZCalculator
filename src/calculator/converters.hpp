@@ -10,15 +10,15 @@
 #include "calculator/details.hpp"
 
 namespace calculator {
-    class ToEvalDataConverter : lib::IConverter<eval_data_details, toml::value> {
+    class ToEvalDataDetailsConverter : lib::IConverter<eval_data_details, toml::value> {
     public:
         eval_data_details from(const toml::value& data) const override;
 
     private:
-        static const enemy_details enemy;
+        static const enemy enemy;
     };
 }
 
 namespace global {
-    static const calculator::ToEvalDataConverter to_eval_data;
+    static const calculator::ToEvalDataDetailsConverter to_eval_data_details;
 }

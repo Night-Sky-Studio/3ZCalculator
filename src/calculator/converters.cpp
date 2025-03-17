@@ -10,7 +10,7 @@
 #include "zzz/details.hpp"
 
 namespace calculator {
-    eval_data_details ToEvalDataConverter::from(const toml::value& data) const {
+    eval_data_details ToEvalDataDetailsConverter::from(const toml::value& data) const {
         uint64_t agent_id = data.at("primary_agent_id").as_integer();
         std::string agent_id_as_str = std::to_string(agent_id);
 
@@ -51,7 +51,7 @@ namespace calculator {
         };
     }
 
-    const enemy_details ToEvalDataConverter::enemy = {
+    const enemy_details ToEvalDataDetailsConverter::enemy = {
         .dmg_reduction = 0.2,
         .defense = 953,
         .stun_mult = 1.5,

@@ -10,13 +10,6 @@
 using namespace zzz;
 
 namespace calculator {
-    struct eval_data_composed {
-        AgentDetailsPtr agent;
-        WengineDetailsPtr wengine;
-        std::multimap<size_t, DdsDetailsPtr> dds;
-        rotation_details_ptr rotation;
-    };
-
     constexpr size_t level = 60;
     constexpr double buff_level_mult = 1.0 + (level - 1.0) / 59.0;
     constexpr double level_coefficient = 794.0;
@@ -27,24 +20,24 @@ namespace calculator {
             + stats.get(StatType::AtkFlat);
     }
 
-    double calc_def_mult(const enemy_details& enemy, const StatsGrid& stats, Tag tag) {
+    double calc_def_mult(const enemy& enemy, const StatsGrid& stats, Tag tag) {
         double effective_def = enemy.defense * (1 - stats.get_all(StatType::DefPenRatio, tag))
             - stats.get_all(StatType::DefPenFlat, tag);
         return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);
     }
-    double calc_dmg_taken_mult(const enemy_details& enemy, const StatsGrid& stats, Tag tag) {
+    double calc_dmg_taken_mult(const enemy& enemy, const StatsGrid& stats, Tag tag) {
         return 1.0
             - enemy.dmg_reduction
             + stats.get_all(StatType::Vulnerability, tag);
     }
-    double calc_res_mult(const enemy_details& enemy, const StatsGrid& stats, Element element, Tag tag) {
+    double calc_res_mult(const enemy& enemy, const StatsGrid& stats, Element element, Tag tag) {
         return 1.0
             - enemy.res[(size_t) element]
             + stats.get_all(StatType::ResPen, tag)
             + stats.get_all(StatType::ResPen + element, tag);
     }
     // TODO
-    double calc_stun_mult(const enemy_details& enemy, const StatsGrid& stats) {
+    double calc_stun_mult(const enemy& enemy, const StatsGrid& stats) {
         return enemy.is_stunned ? enemy.stun_mult : 1.0;
     }
 
@@ -52,7 +45,7 @@ namespace calculator {
         const SkillDetails& skill,
         size_t index,
         StatsGrid stats,
-        const enemy_details& enemy) {
+        const enemy& enemy) {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
@@ -77,7 +70,7 @@ namespace calculator {
         const AnomalyDetails& anomaly,
         Element element,
         StatsGrid stats,
-        const enemy_details& enemy) {
+        const enemy& enemy) {
         stats.add(anomaly.buffs());
         stats.at(StatType::AtkTotal).value = calc_total_atk(stats, Tag::Anomaly);
 
@@ -260,46 +253,6 @@ namespace backend::inline debug {
 }
 #else
 namespace calculator {
-    eval_data_composed request_data(ObjectManager& manager, const eval_data_details& details) {
-        eval_data_composed result;
-
-        auto agent_future = manager.get(details.agent_id);
-        auto wengine_future = manager.get(details.wengine_id);
-        auto rotation_future = manager.get(details.rotation_id);
-
-        std::map<size_t, size_t> dds_count;
-        for (const auto& it : details.drive_discs) {
-            if (auto jt = dds_count.find(it.disc_id()); jt != dds_count.end())
-                jt->second++;
-            else
-                dds_count[it.disc_id()] = 1;
-        }
-
-        std::list<std::future<any_ptr>> dds_futures;
-        for (const auto& [id, count] : dds_count) {
-            if (count >= 2) {
-                auto key = "dds/" + std::to_string(id);
-                dds_futures.emplace_back(manager.get(key));
-            }
-        }
-
-        result.agent = std::static_pointer_cast<AgentDetails>(agent_future.get());
-        result.wengine = std::static_pointer_cast<WengineDetails>(wengine_future.get());
-        result.rotation = std::static_pointer_cast<rotation_details>(rotation_future.get());
-
-        for (auto& future : dds_futures) {
-            auto ptr = std::static_pointer_cast<DdsDetails>(future.get());
-            auto id = dds_count.at(ptr->id());
-
-            if (id >= 2)
-                result.dds.emplace(2, ptr);
-            if (id >= 4)
-                result.dds.emplace(4, ptr);
-        }
-
-        return result;
-    }
-
     StatsGrid request_stats(const eval_data_composed& composed, const eval_data_details& details) {
         StatsGrid result;
 
@@ -325,7 +278,7 @@ namespace calculator {
         return result;
     }
 
-    std::tuple<double, std::vector<double>> request_dmg(
+    Calculator::result_t request_dmg(
         const StatsGrid& stats,
         const eval_data_composed& composed,
         const eval_data_details& details) {
@@ -368,8 +321,7 @@ namespace calculator {
 #endif
 
 namespace calculator {
-    std::tuple<double, std::vector<double>> Calculator::eval(ObjectManager& manager, const eval_data_details& details) {
-        auto composed = request_data(manager, details);
+    Calculator::result_t Calculator::eval(const eval_data_composed& composed, const eval_data_details& details) {
         auto stats = request_stats(composed, details);
         auto result = request_dmg(stats, composed, details);
         return result;

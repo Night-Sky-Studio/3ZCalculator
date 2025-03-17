@@ -13,7 +13,7 @@
 //library
 #include "library/funcs.hpp"
 
-namespace calculator {
+namespace backend {
     using any_ptr = std::shared_ptr<void>;
 
     using any_ptr_loader = std::function<any_ptr(const toml::value&)>;
