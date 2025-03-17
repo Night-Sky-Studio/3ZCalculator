@@ -3,6 +3,7 @@
 //std
 #include <fstream>
 #include <memory>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -15,8 +16,99 @@
 //zzz
 #include "zzz/details.hpp"
 
-//calculator
-#include "calculator/converters.hpp"
+namespace backend {
+    void prepare_request_details(calc::request_t& what, const toml::value& source) {
+        // agent
+
+        what.agent.id = source.at("primary_agent_id").as_integer();
+        std::string agent_as_str = std::to_string(what.agent.id);
+
+        // wengine
+
+        what.wengine.id = source.at("primary_wengine_id").as_integer();
+
+        // rotation
+
+        what.rotation.id = what.agent.id;
+
+        // ddps and dds_count
+
+        size_t current_disk = 0;
+        std::map<size_t, size_t> dds_count;
+
+        for (const auto& [key, value] : source.at(agent_as_str).as_table()) {
+            // ddps
+
+            const auto& table = value.as_table();
+            zzz::combat::DdpBuilder builder;
+
+            builder.set_slot(std::stoul(key));
+
+            uint64_t disc_id = table.at("set").as_integer();
+            builder.set_disc_id(disc_id);
+
+            builder.set_rarity(zzz::convert::char_to_rarity(table.at("rarity").as_string()[0]));
+
+            builder.set_main_stat(
+                zzz::convert::string_to_stat_type(table.at("main").as_string()),
+                table.at("level").as_integer()
+            );
+
+            for (const auto& it : table.at("subs").as_array()) {
+                const auto& array = it.as_array();
+                builder.add_sub_stat(
+                    zzz::convert::string_to_stat_type(array[0].as_string()),
+                    array[1].as_integer()
+                );
+            }
+
+            what.ddps[current_disk++] = builder.get_product();
+
+            // prepare dds_count
+
+            if (auto jt = dds_count.find(disc_id); jt != dds_count.end())
+                jt->second++;
+            else
+                dds_count[disc_id] = 1;
+        }
+
+        // dds
+
+        for (const auto& [count, id] : dds_count) {
+            if (count >= 2)
+                what.dds.emplace(2, calc::request_t::cell_t<zzz::DdsDetails> {
+                    .id = id,
+                    .ptr = nullptr
+                });
+            if (count >= 4)
+                what.dds.emplace(4, calc::request_t::cell_t<zzz::DdsDetails> {
+                    .id = id,
+                    .ptr = nullptr
+                });
+        }
+    }
+    void prepare_request_composed(calc::request_t& what, ObjectManager& source) {
+        auto agent_future = source.get("agents/" + std::to_string(what.agent.id));
+        auto wengine_future = source.get("wengines/" + std::to_string(what.wengine.id));
+        auto rotation_future = source.get("rotations/" + std::to_string(what.rotation.id));
+
+        std::list<std::future<any_ptr>> dds_futures;
+        for (const auto& cell : what.dds | std::views::values)
+            dds_futures.emplace_back(source.get("dds/" + std::to_string(cell.id)));
+
+        try {
+            what.agent.ptr = std::static_pointer_cast<zzz::AgentDetails>(agent_future.get());
+            what.wengine.ptr = std::static_pointer_cast<zzz::WengineDetails>(wengine_future.get());
+            what.rotation.ptr = std::static_pointer_cast<zzz::rotation_details>(rotation_future.get());
+
+            for (auto& future : dds_futures)
+                auto ptr = std::static_pointer_cast<zzz::DdsDetails>(future.get());
+        } catch (const std::runtime_error& e) {
+            std::string message = lib::format("error: {}\n", e.what());
+            std::cerr << message;
+        }
+    }
+}
 
 namespace backend {
     // getters
@@ -35,49 +127,18 @@ namespace backend {
 
     // requesters
 
-    calculator::eval_data_details Backend::request_eval_data_details(const toml::value& toml) {
-        return global::to_eval_data_details.from(toml);
-    }
-    calculator::eval_data_composed Backend::request_eval_data_composed(const calculator::eval_data_details& details) {
-        calculator::eval_data_composed result;
+    calc::request_t Backend::toml_to_request(const toml::value& toml) {
+        calc::request_t result;
 
-        auto agent_future = m_manager.get(details.agent_id);
-        auto wengine_future = m_manager.get(details.wengine_id);
-        auto rotation_future = m_manager.get(details.rotation_id);
-
-        std::map<size_t, size_t> dds_count;
-        for (const auto& it : details.drive_discs) {
-            if (auto jt = dds_count.find(it.disc_id()); jt != dds_count.end())
-                jt->second++;
-            else
-                dds_count[it.disc_id()] = 1;
-        }
-
-        std::list<std::future<any_ptr>> dds_futures;
-        for (const auto& [id, count] : dds_count) {
-            if (count >= 2) {
-                auto key = "dds/" + std::to_string(id);
-                dds_futures.emplace_back(m_manager.get(key));
-            }
-        }
-
-        result.agent = std::static_pointer_cast<zzz::AgentDetails>(agent_future.get());
-        result.wengine = std::static_pointer_cast<zzz::WengineDetails>(wengine_future.get());
-        result.rotation = std::static_pointer_cast<zzz::rotation_details>(rotation_future.get());
-
-        for (auto& future : dds_futures) {
-            auto ptr = std::static_pointer_cast<zzz::DdsDetails>(future.get());
-            auto id = dds_count.at(ptr->id());
-
-            if (id >= 2)
-                result.dds.emplace(2, ptr);
-            if (id >= 4)
-                result.dds.emplace(4, ptr);
-        }
+        prepare_request_details(result, toml);
+        prepare_request_composed(result, m_manager);
 
         return result;
     }
-    calculator::Calculator::result_t Backend::request_calcs() {}
+
+    calc::Calculator::result_t Backend::request_calcs(const calc::request_t& request) {
+        return calc::Calculator::eval(request);
+    }
 
     // initializers
 

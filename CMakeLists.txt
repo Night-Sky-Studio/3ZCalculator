@@ -78,8 +78,7 @@ add_executable(3ZCalculator
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"
 
-    "src/calculator/calculator.cpp"
-    "src/calculator/converters.cpp"
+    "src/calc/calculator.cpp"
 
     "src/backend/backend.cpp"
     "src/backend/object_manager.cpp"
@@ -96,4 +95,4 @@ target_link_libraries(3ZCalculator PRIVATE
     asio::asio
 )
 
-#add_compile_definitions(DEBUG_STATUS)
+add_compile_definitions(DEBUG_STATUS)
