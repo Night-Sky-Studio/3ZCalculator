@@ -185,8 +185,7 @@ namespace backend {
 
     void Backend::run() {
         m_manager.launch();
-        m_app.port(port)
-            .run();
+        m_app.port(port).multithreaded().run();
     }
 
     // requesters
