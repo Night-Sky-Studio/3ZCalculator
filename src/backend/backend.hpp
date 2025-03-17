@@ -10,8 +10,8 @@
 #include "crow.h"
 
 //calculator
-#include "calculator/calculator.hpp"
-#include "calculator/details.hpp"
+#include "calc/calculator.hpp"
+#include "calc/details.hpp"
 
 //backend
 #include "backend/object_manager.hpp"
@@ -31,9 +31,8 @@ namespace backend {
         ObjectManager m_manager;
         crow::SimpleApp m_app;
 
-        calculator::eval_data_details request_eval_data_details(const toml::value& toml);
-        calculator::eval_data_composed request_eval_data_composed(const calculator::eval_data_details& details);
-        calculator::Calculator::result_t request_calcs();
+        calc::request_t toml_to_request(const toml::value& toml);
+        static calc::Calculator::result_t request_calcs(const calc::request_t& request);
 
     private:
         size_t _init_object_manager();
