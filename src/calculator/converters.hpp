@@ -6,7 +6,7 @@
 //library
 #include "library/converter.hpp"
 
-//backend
+//calculator
 #include "calculator/details.hpp"
 
 namespace calculator {

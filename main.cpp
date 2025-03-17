@@ -7,13 +7,16 @@
 //library
 #include "library/funcs.hpp"
 
-//backend
+//zzz
+#include "backend/backend.hpp"
+#include "zzz/details.hpp"
+
+//calculator
 #include "calculator/calculator.hpp"
 #include "calculator/converters.hpp"
-#include "calculator/object_manager.hpp"
 
-//zzz
-#include "zzz/details.hpp"
+//backend
+#include "backend/object_manager.hpp"
 
 size_t alloc_object_manager(calculator::ObjectManager& manager) {
     size_t allocated_objects = 0;
@@ -68,6 +71,7 @@ size_t alloc_object_manager(calculator::ObjectManager& manager) {
 
 int main() {
     calculator::ObjectManager manager;
+    backend::Backend server;
 
     size_t allocated_object = alloc_object_manager(manager);
     std::cout << allocated_object << '\n';
@@ -76,6 +80,9 @@ int main() {
     auto toml = lib::load_by_id("players", 1500438496);
     auto input = global::to_eval_data.from(toml);
     auto result = calculator::Calculator::eval(manager, input);
+
+    server.init();
+    server.run();
 
     return 0;
 }

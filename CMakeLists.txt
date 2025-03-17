@@ -9,10 +9,19 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 
 # FetchContent
-
 include(FetchContent)
 
 set(USE_BOOST_KARMA OFF)
+
+# CPM.cmake
+
+file(
+  DOWNLOAD
+  https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.38.3/CPM.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake
+  EXPECTED_HASH SHA256=cc155ce02e7945e7b8967ddfaff0b050e958a723ef7aad3766d368940cb15494
+)
+include(${CMAKE_CURRENT_BINARY_DIR}/cmake/CPM.cmake)
 
 # FrozenLib
 FetchContent_Declare(
@@ -48,6 +57,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fmt)
 
+# asio - for crow library
+IF (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    # using vcpkg
+    find_package(Crow CONFIG REQUIRED)
+ENDIF()
+
 add_executable(3ZCalculator
     "main.cpp"
 
@@ -65,23 +80,20 @@ add_executable(3ZCalculator
 
     "src/calculator/calculator.cpp"
     "src/calculator/converters.cpp"
-    "src/calculator/object_manager.cpp"
+
+    "src/backend/backend.cpp"
+    "src/backend/object_manager.cpp"
 )
 
-target_include_directories(3ZCalculator PRIVATE
-    lib
-    lib/crow
-    src
-    src/backend
-    src/library
-    src/zzz
-    src/zzz/combat
-    src/zzz/details
-)
+target_include_directories(3ZCalculator PRIVATE src)
 
-target_link_libraries(3ZCalculator PRIVATE frozen-headers)
-target_link_libraries(3ZCalculator PRIVATE toml11::toml11)
-target_link_libraries(3ZCalculator PRIVATE tabulate::tabulate)
-target_link_libraries(3ZCalculator PRIVATE fmt::fmt)
+target_link_libraries(3ZCalculator PRIVATE 
+    frozen-headers
+    toml11::toml11
+    tabulate::tabulate
+    fmt::fmt
+    Crow::Crow
+    asio::asio
+)
 
 #add_compile_definitions(DEBUG_STATUS)

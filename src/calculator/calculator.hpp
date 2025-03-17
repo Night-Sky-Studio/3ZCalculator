@@ -3,7 +3,7 @@
 //std
 #include <vector>
 
-//backend
+//calculator
 #include "calculator/details.hpp"
 #include "calculator/object_manager.hpp"
 
