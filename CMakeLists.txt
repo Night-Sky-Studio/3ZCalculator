@@ -60,10 +60,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(fmt)
 
 # asio - for crow library
-IF (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # using vcpkg
-    find_package(Crow CONFIG REQUIRED)
-ENDIF()
+find_package(Crow CONFIG REQUIRED)
 
 add_executable(3ZCalculator
     "main.cpp"
