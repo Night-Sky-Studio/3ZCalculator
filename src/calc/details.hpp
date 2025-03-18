@@ -15,17 +15,25 @@ namespace calc {
         bool is_stunned;
     };
 
+    // TODO: properly organize
     struct request_t {
-        template<typename T>
-        struct cell_t {
-            size_t id;
-            std::shared_ptr<T> ptr;
-        };
-
-        cell_t<zzz::AgentDetails> agent;
-        cell_t<zzz::WengineDetails> wengine;
-        cell_t<zzz::rotation_details> rotation;
+        struct {
+            uint64_t id = 0;
+            zzz::AgentDetailsPtr ptr = nullptr;
+        } agent;
+        struct {
+            uint64_t id = 0;
+            zzz::WengineDetailsPtr ptr = nullptr;
+        } wengine;
+        struct {
+            uint64_t id = 0;
+            zzz::rotation_details_ptr ptr = nullptr;
+        } rotation;
         std::array<zzz::Ddp, 6> ddps;
-        std::multimap<size_t, cell_t<zzz::DdsDetails>> dds;
+
+        struct {
+            std::multimap<size_t, zzz::DdsDetailsPtr*> by_count;
+            std::list<std::tuple<uint64_t, zzz::DdsDetailsPtr>> uniques;
+        } dds;
     };
 }

@@ -110,11 +110,11 @@ namespace calc {
                 result.add(it.sub_stat(i));
         }
 
-        for (const auto& [count, set] : request.dds) {
+        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                result.add(set.ptr->p2());
-            if (count == 4)
-                result.add(set.ptr->p4());
+                result.add((*set)->p2());
+            else if (count == 4)
+                result.add((*set)->p4());
         }
 
         return result;
@@ -183,11 +183,11 @@ namespace calc {
                 ddp_stats.add(it.sub_stat(i));
         }
 
-        for (const auto& [count, set] : request.dds) {
+        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                dds_stats.add(set.ptr->p2());
+                dds_stats.add((*set)->p2());
             if (count == 4)
-                dds_stats.add(set.ptr->p4());
+                dds_stats.add((*set)->p4());
         }
 
         summed_stats.add(agent_stats);

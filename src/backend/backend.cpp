@@ -3,10 +3,12 @@
 //std
 #include <fstream>
 #include <memory>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <thread>
+
+//toml
+#include "toml.hpp"
 
 //library
 #include "library/funcs.hpp"
@@ -20,74 +22,6 @@
 #endif
 
 namespace backend {
-    void prepare_request_details(calc::request_t& what, const toml::value& source) {
-        // agent
-
-        what.agent.id = source.at("primary_agent_id").as_integer();
-        std::string agent_as_str = std::to_string(what.agent.id);
-
-        // wengine
-
-        what.wengine.id = source.at("primary_wengine_id").as_integer();
-
-        // rotation
-
-        what.rotation.id = what.agent.id;
-
-        // ddps and dds_count
-
-        std::map<size_t, size_t> dds_count;
-
-        for (const auto& [key, value] : source.at(agent_as_str).as_table()) {
-            // ddps
-
-            const auto& table = value.as_table();
-            zzz::combat::DdpBuilder builder;
-
-            uint64_t slot = std::stoul(key);
-            uint64_t disc_id = table.at("set").as_integer();
-
-            builder.set_slot(slot);
-            builder.set_disc_id(disc_id);
-            builder.set_rarity((zzz::Rarity)table.at("rarity").as_integer());
-
-            builder.set_main_stat(
-                zzz::convert::string_to_stat_type(table.at("main").as_string()),
-                table.at("level").as_integer()
-            );
-            for (const auto& it : table.at("subs").as_array()) {
-                const auto& array = it.as_array();
-                builder.add_sub_stat(
-                    zzz::convert::string_to_stat_type(array[0].as_string()),
-                    array[1].as_integer()
-                );
-            }
-
-            what.ddps[slot] = builder.get_product();
-
-            // prepare dds_count
-
-            if (auto jt = dds_count.find(disc_id); jt != dds_count.end())
-                jt->second++;
-            else
-                dds_count[disc_id] = 1;
-        }
-
-        // dds
-
-        for (const auto& [id, count] : dds_count) {
-            if (count >= 2)
-                what.dds.emplace(2, calc::request_t::cell_t<zzz::DdsDetails> {
-                    .id = id,
-                    .ptr = nullptr
-                });
-            if (count >= 4)
-                what.dds.emplace(4, calc::request_t::cell_t<zzz::DdsDetails> {
-                    .id = id,
-                    .ptr = nullptr
-                });
-        }
-    }
     void prepare_request_details(calc::request_t& what, const nlohmann::json& source) {
         // agent
 
@@ -99,7 +33,22 @@ namespace backend {
 
         // rotation
 
-        what.rotation.id = source["rotation"];
+        if (!source["rotation"].is_array())
+            what.rotation.id = source["rotation"];
+        else {
+            what.rotation.ptr = std::make_shared<zzz::rotation_details>();
+
+            const auto& rotations = source["rotation"].get<std::vector<std::string>>();
+            for (const auto& it : rotations) {
+                auto splitted = lib::split_as_copy(it, ' ');
+                auto index = splitted.size() > 1
+                    ? std::stoul(splitted[1])
+                    : 0;
+                what.rotation.ptr->emplace_back(splitted[0], index);
+            }
+
+            // TODO: add rotation to the object manager and save it on disk
+        }
 
         // ddps and dds_count
 
@@ -134,46 +83,41 @@ namespace backend {
         // dds
 
         for (const auto& [id, count] : dds_count) {
-            if (count >= 2)
-                what.dds.emplace(2, calc::request_t::cell_t<zzz::DdsDetails> {
-                    .id = id,
-                    .ptr = nullptr
-                });
-            if (count >= 4)
-                what.dds.emplace(4, calc::request_t::cell_t<zzz::DdsDetails> {
-                    .id = id,
-                    .ptr = nullptr
-                });
+            if (count < 2)
+                continue;
+
+            auto& [_, ptr] = what.dds.uniques.emplace_back(id, nullptr);
+            what.dds.by_count.emplace(2, &ptr);
+
+            if (count < 4)
+                continue;
+
+            what.dds.by_count.emplace(4, &ptr);
         }
     }
 
+    // remake with unordered_map or list
     void prepare_request_composed(calc::request_t& what, ObjectManager& source) {
-        auto agent_future = source.get("agents/" + std::to_string(what.agent.id));
-        auto wengine_future = source.get("wengines/" + std::to_string(what.wengine.id));
-        auto rotation_future = source.get("rotations/" + std::to_string(what.rotation.id));
+        auto agent_future = source.get(lib::format("agents/{}", what.agent.id));
+        auto wengine_future = source.get(lib::format("wengines/{}", what.wengine.id));
 
-        std::unordered_map<uint64_t, std::future<any_ptr>> dds_futures;
-        for (const auto& cell : what.dds | std::views::values)
-            dds_futures.try_emplace(cell.id, source.get("dds/" + std::to_string(cell.id)));
+        std::future<any_ptr> rotation_future;
+        if (what.rotation.ptr == nullptr)
+            rotation_future = source.get(lib::format("rotations/{}/{}", what.agent.id, what.rotation.id));
+
+        std::list<std::tuple<zzz::DdsDetailsPtr*, std::future<any_ptr>>> dds_futures;
+        for (auto& [id, ptr] : what.dds.uniques)
+            dds_futures.emplace_back(&ptr, source.get(lib::format("dds/{}", id)));
 
         try {
             what.agent.ptr = std::static_pointer_cast<zzz::AgentDetails>(agent_future.get());
             what.wengine.ptr = std::static_pointer_cast<zzz::WengineDetails>(wengine_future.get());
-            what.rotation.ptr = std::static_pointer_cast<zzz::rotation_details>(rotation_future.get());
 
-            std::unordered_map<uint64_t, zzz::DdsDetailsPtr> unique_dds;
-            for (auto& it : what.dds | std::views::values) {
-                zzz::DdsDetailsPtr ptr;
+            if (what.rotation.ptr == nullptr)
+                what.rotation.ptr = std::static_pointer_cast<zzz::rotation_details>(rotation_future.get());
 
-                if (auto jt = unique_dds.find(it.id); jt != unique_dds.end())
-                    ptr = jt->second;
-                else {
-                    ptr = std::static_pointer_cast<zzz::DdsDetails>(dds_futures[it.id].get());
-                    unique_dds.emplace(it.id, ptr);
-                }
-
-                it.ptr = ptr;
-            }
+            for (auto& [ptr, future] : dds_futures)
+                *ptr = std::static_pointer_cast<zzz::DdsDetails>(future.get());
         } catch (const std::runtime_error& e) {
             CROW_LOG_ERROR << lib::format("error: {}", e.what());
         }
@@ -196,7 +140,7 @@ namespace backend {
     void Backend::run() {
         m_manager.launch();
 
-        size_t max_threads = std::thread::hardware_concurrency();
+        uint16_t max_threads = std::thread::hardware_concurrency();
         m_app.port(port)
             .concurrency(max_threads < max_thread_load ? max_threads : max_thread_load)
             .run();
@@ -204,14 +148,6 @@ namespace backend {
 
     // requesters
 
-    calc::request_t Backend::toml_to_request(const toml::value& toml) {
-        calc::request_t result;
-
-        prepare_request_details(result, toml);
-        prepare_request_composed(result, m_manager);
-
-        return result;
-    }
     calc::request_t Backend::json_to_request(const nlohmann::json& json) {
         calc::request_t result;
 
