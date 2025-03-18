@@ -1,7 +1,7 @@
 id = 14109
 name = "Hailstorm Shrine"
 speciality = "anomaly"
-rarity = 'S'
+rarity = 4
 
 [stats]
 main = ["atk_base", 743.0]

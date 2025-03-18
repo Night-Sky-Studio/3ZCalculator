@@ -2,7 +2,7 @@ id = 1091
 name = "Hoshimi Miyabi"
 speciality = "anomaly"
 element = "ice"
-rarity = 'S'
+rarity = 4
 stats = [
     ["hp_base", 7673.0],
     ["def_base", 606.0],

@@ -90,7 +90,7 @@ namespace zzz::details {
 
         builder.set_id(data.at("id").as_integer());
         builder.set_name(data.at("name").as_string());
-        builder.set_rarity(convert::char_to_rarity(data.at("rarity").as_string()[0]));
+        builder.set_rarity((Rarity)data.at("rarity").as_integer());
         builder.set_speciality(convert::string_to_speciality(data.at("speciality").as_string()));
 
         const auto& stats = data.at("stats").as_table();

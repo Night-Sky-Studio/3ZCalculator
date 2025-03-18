@@ -103,7 +103,7 @@ namespace zzz::details {
         agent_builder.set_name(table.at("name").as_string());
         agent_builder.set_speciality(convert::string_to_speciality(table.at("speciality").as_string()));
         agent_builder.set_element(element);
-        agent_builder.set_rarity(convert::char_to_rarity(table.at("rarity").as_string()[0]));
+        agent_builder.set_rarity((Rarity)table.at("rarity").as_integer());
         agent_builder.set_stats(global::to_stats_grid.from(table.at("stats")));
 
         for (const auto& [key, value] : table.at("skills").as_table()) {
