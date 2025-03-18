@@ -10,21 +10,24 @@
 #include "nlohmann/json.hpp"
 
 //crow
-#include "crow.h"
+#include "crow/app.h"
 
 //calculator
 #include "calc/calculator.hpp"
 #include "calc/details.hpp"
 
 //backend
+#include "backend/logger.hpp"
 #include "backend/object_manager.hpp"
 
 namespace backend {
     class Backend {
     public:
+        static constexpr auto max_thread_load = 2ul;
         static constexpr auto port = 8080;
         static constexpr frozen::string ip = "192.168.1.2";
 
+        explicit Backend(const std::string& logger_file);
         ObjectManager& manager();
 
         void init();
@@ -33,6 +36,7 @@ namespace backend {
     protected:
         ObjectManager m_manager;
         crow::SimpleApp m_app;
+        Logger m_logger;
 
         calc::request_t toml_to_request(const toml::value& toml);
         calc::request_t json_to_request(const nlohmann::json& json);

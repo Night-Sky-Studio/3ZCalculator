@@ -2,7 +2,7 @@
 #include "backend/backend.hpp"
 
 int main() {
-    backend::Backend server;
+    backend::Backend server("server.log");
 
     server.init();
     server.run();

@@ -52,3 +52,9 @@ async function test_get_dmg() {
 
     console.log(end - start)
 }
+
+async function test_stop() {
+    const response = await fetch("https://localhost:8080/stop", {
+        method: "GET"
+    })
+}

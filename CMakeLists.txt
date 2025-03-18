@@ -80,6 +80,7 @@ add_executable(3ZCalculator
     "src/calc/calculator.cpp"
 
     "src/backend/backend.cpp"
+    "src/backend/logger.cpp"
     "src/backend/object_manager.cpp"
 )
 

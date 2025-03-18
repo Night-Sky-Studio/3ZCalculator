@@ -6,12 +6,18 @@
 #include <ranges>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 //library
 #include "library/funcs.hpp"
 
 //zzz
 #include "zzz/details.hpp"
+
+#ifdef DEBUG_STATUS
+//crow
+#include "crow/logging.h"
+#endif
 
 namespace backend {
     void prepare_request_details(calc::request_t& what, const toml::value& source) {
@@ -177,6 +183,10 @@ namespace backend {
 namespace backend {
     // getters
 
+    Backend::Backend(const std::string& logger_file) :
+        m_logger(logger_file) {
+    }
+
     ObjectManager& Backend::manager() {
         return m_manager;
     }
@@ -185,7 +195,11 @@ namespace backend {
 
     void Backend::run() {
         m_manager.launch();
-        m_app.port(port).multithreaded().run();
+
+        size_t max_threads = std::thread::hardware_concurrency();
+        m_app.port(port)
+            .concurrency(max_threads < max_thread_load ? max_threads : max_thread_load)
+            .run();
     }
 
     // requesters
@@ -224,6 +238,9 @@ namespace backend {
     // initializers
 
     void Backend::init() {
+        crow::logger::setHandler(&m_logger);
+        crow::logger::setLogLevel(crow::LogLevel::INFO);
+
         _init_object_manager();
         _init_crow_app();
     }
@@ -283,6 +300,10 @@ namespace backend {
     void Backend::_init_crow_app() {
         CROW_ROUTE(m_app, "/")([] {
             return "main page";
+        });
+        CROW_ROUTE(m_app, "/stop").methods("GET"_method)([this](const crow::request& req) {
+            m_app.stop();
+            return crow::response(503, "server.stop() was called");
         });
         CROW_ROUTE(m_app, "/get_dmg").methods("POST"_method)([this](const crow::request& req) {
             crow::response response;
