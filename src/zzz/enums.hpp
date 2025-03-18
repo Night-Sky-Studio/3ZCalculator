@@ -87,34 +87,6 @@ namespace zzz::convert {
     std::string element_to_string(Element source);
     constexpr Element cstr_to_element(const frozen::string& source);
     Element string_to_element(const std::string& source);
-
-    constexpr char rarity_to_char(Rarity source) {
-        switch (source) {
-        case Rarity::B:
-            return 'B';
-        case Rarity::A:
-            return 'A';
-        case Rarity::S:
-            return 'S';
-        default:
-            return '\0';
-        }
-    }
-    constexpr Rarity char_to_rarity(char source) {
-        switch (source) {
-        case 'B':
-            return Rarity::B;
-        case 'A':
-            return Rarity::A;
-        case 'S':
-            return Rarity::S;
-        default:
-            return Rarity::NotSet;
-        }
-    }
-
-    std::string rarity_to_string(Rarity source);
-    Rarity string_to_rarity(const std::string& source);
 }
 
 inline zzz::StatType operator+(zzz::StatType lhs, zzz::Element rhs) {

@@ -49,7 +49,7 @@ namespace backend {
 
             builder.set_slot(slot);
             builder.set_disc_id(disc_id);
-            builder.set_rarity(zzz::convert::string_to_rarity(table.at("rarity").as_string()));
+            builder.set_rarity((zzz::Rarity)table.at("rarity").as_integer());
 
             builder.set_main_stat(
                 zzz::convert::string_to_stat_type(table.at("main").as_string()),
@@ -115,7 +115,7 @@ namespace backend {
 
             builder.set_disc_id(disc_id);
             builder.set_slot(current_disk + 1);
-            builder.set_rarity(zzz::convert::string_to_rarity(it["rarity"]));
+            builder.set_rarity(it["rarity"]);
 
             builder.set_main_stat((zzz::StatType) stats[0], levels[0]);
             for (size_t i = 1; i < 5; i++)
@@ -299,7 +299,7 @@ namespace backend {
     }
     void Backend::_init_crow_app() {
         CROW_ROUTE(m_app, "/")([] {
-            return "main page";
+            return "3Z Calculator Backend";
         });
         CROW_ROUTE(m_app, "/stop").methods("GET"_method)([this](const crow::request& req) {
             m_app.stop();
@@ -315,8 +315,10 @@ namespace backend {
                 auto output = calcs_to_json(calcs).dump();
 
                 response = { 200, std::move(output) };
+                response.add_header("Access-Control-Allow-Origin", "*");
             } catch (const std::exception& e) {
                 response = { 400, e.what() };
+                response.add_header("Access-Control-Allow-Origin", "*");
             }
 
             return response;
