@@ -165,23 +165,4 @@ namespace zzz::convert {
     Element string_to_element(const std::string& source) {
         return convert_info::cstr2element.at(frozen::string(source.data(), source.size()));
     }
-
-    // Rarity
-
-    std::string rarity_to_string(Rarity source) {
-        switch (source) {
-        case Rarity::B:
-            return "B";
-        case Rarity::A:
-            return "A";
-        case Rarity::S:
-            return "S";
-        default:
-            return "";
-        }
-    }
-    Rarity string_to_rarity(const std::string& source) {
-        auto it = convert_info::cstr2rarity.find(frozen::string(source.data(), source.size()));
-        return it != convert_info::cstr2rarity.end() ? it->second : Rarity::NotSet;
-    }
 }
