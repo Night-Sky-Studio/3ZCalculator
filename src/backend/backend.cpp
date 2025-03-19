@@ -11,7 +11,8 @@
 #include "toml.hpp"
 
 //library
-#include "library/funcs.hpp"
+#include "library/format.hpp"
+#include "library/string_funcs.hpp"
 
 //zzz
 #include "zzz/details.hpp"

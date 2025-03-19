@@ -165,7 +165,7 @@ namespace calc {
 #include <fstream>
 
 //library
-#include "library/funcs.hpp"
+#include "library/format.hpp"
 
 namespace calc {
     tabulate::Table Calculator::debug_stats(const request_t& request) {

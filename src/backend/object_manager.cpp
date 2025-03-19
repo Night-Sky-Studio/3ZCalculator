@@ -7,7 +7,8 @@
 #include <stdexcept>
 
 //library
-#include "library/funcs.hpp"
+#include "library/format.hpp"
+#include "library/string_funcs.hpp"
 
 #ifdef DEBUG_STATUS
 #include "crow/logging.h"
@@ -31,16 +32,16 @@ namespace backend {
     }
 
     void ObjectManager::add_utility_funcs(utility_funcs value) {
-        auto hashed_key = lib::hash_string(value.folder);
+        auto hashed_key = lib::hash(value.folder);
         m_utility_funcs.emplace(hashed_key, std::move(value));
     }
 
     void ObjectManager::add_object(const std::string& folder, const std::string& name) {
-        m_content.emplace(lib::hash_string(name), object {
+        m_content.emplace(lib::hash(name), object {
             .ptr = nullptr,
             .cycles_since_last_usage = 0,
             .name = name,
-            .utility_id = lib::hash_string(folder)
+            .utility_id = lib::hash(folder)
         });
     }
 
@@ -51,7 +52,7 @@ namespace backend {
     }
 
     any_ptr ObjectManager::_get_or_load(const std::string& key) {
-        auto it = m_content.find(lib::hash_string(key));
+        auto it = m_content.find(lib::hash(key));
 
         if (it == m_content.end())
             throw std::runtime_error(lib::format("object {} doesn't exist", key));

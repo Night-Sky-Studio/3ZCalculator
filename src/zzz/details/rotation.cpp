@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 //library
-#include "library/funcs.hpp"
+#include "library/string_funcs.hpp"
 
 namespace zzz::details {
     using rotations_container = std::unordered_map<std::string, std::vector<std::string>>;

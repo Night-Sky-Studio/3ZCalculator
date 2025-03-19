@@ -4,14 +4,14 @@
 #include <stdexcept>
 
 //library
-#include "library/funcs.hpp"
+#include "library/string_funcs.hpp"
 
 namespace zzz::details {
     // Agent
 
     size_t Agent::is_skill_or_anomaly(const Agent& agent, const std::string& name) {
         size_t result;
-        auto hashed_key = lib::hash_string(name);
+        auto hashed_key = lib::hash(name);
 
         if (agent.m_skills.contains(hashed_key))
             result = 1;
@@ -29,8 +29,8 @@ namespace zzz::details {
     Element Agent::element() const { return m_element; }
     Rarity Agent::rarity() const { return m_rarity; }
     const StatsGrid& Agent::stats() const { return m_stats; }
-    const Skill& Agent::skill(const std::string& name) const { return m_skills.at(lib::hash_string(name)); }
-    const Anomaly& Agent::anomaly(const std::string& name) const { return m_anomalies.at(lib::hash_string(name)); }
+    const Skill& Agent::skill(const std::string& name) const { return m_skills.at(lib::hash(name)); }
+    const Anomaly& Agent::anomaly(const std::string& name) const { return m_anomalies.at(lib::hash(name)); }
 
     // AgentBuilder
 
@@ -68,12 +68,12 @@ namespace zzz::details {
         return *this;
     }
     AgentBuilder& AgentBuilder::add_skill(Skill skill) {
-        auto hashed_key = lib::hash_string(skill.name());
+        auto hashed_key = lib::hash(skill.name());
         m_product->m_skills.emplace(hashed_key, std::move(skill));
         return *this;
     }
     AgentBuilder& AgentBuilder::add_anomaly(Anomaly anomaly) {
-        auto hashed_key = lib::hash_string(anomaly.name());
+        auto hashed_key = lib::hash(anomaly.name());
         m_product->m_anomalies.emplace(hashed_key, std::move(anomaly));
         return *this;
     }

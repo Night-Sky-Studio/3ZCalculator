@@ -3,28 +3,14 @@
 //std
 #include <charconv>
 #include <concepts>
-#include <stdexcept>
 #include <string>
 #include <vector>
-
-//toml11
-#include "toml.hpp"
-
-//fmtlib
-#include "fmt/format.h"
 
 namespace lib::ext {
 #include "library/crc64.hpp"
 }
 
 namespace lib {
-    inline size_t hash_string(const std::string& what) {
-        return ext::crc64(0, what.data(), what.size());
-    }
-    constexpr size_t hash_cstr(const char* what, size_t length) {
-        return ext::crc64(0, what, length);
-    }
-
     inline std::vector<std::string_view> split_as_view(const std::string_view& source, char delim) {
         std::vector<std::string_view> result;
         size_t pos = 0;
@@ -64,15 +50,10 @@ namespace lib {
         return result;
     }
 
-    inline toml::value load_by_id(const std::string& folder, uint64_t id) {
-        std::fstream file(folder + '/' + std::to_string(id) + ".toml", std::ios::in | std::ios::binary);
-        if (!file.is_open())
-            throw std::runtime_error("file is not found");
-        return toml::parse(file);
+    inline size_t hash(const std::string& what) {
+        return ext::crc64(0, what.data(), what.size());
     }
-
-    template<typename... TArgs>
-    std::string format(const std::string& fmt, TArgs... args) {
-        return fmt::vformat(fmt, fmt::make_format_args(args...));
+    constexpr size_t hash(const char* what, size_t length) {
+        return ext::crc64(0, what, length);
     }
 }

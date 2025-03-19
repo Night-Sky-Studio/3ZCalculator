@@ -12,7 +12,7 @@
 #include "fmt/chrono.h"
 
 //library
-#include "library/funcs.hpp"
+#include "library/format.hpp"
 
 namespace backend::logger_details {
     static constexpr std::array<frozen::string, 5> level2cstr = {

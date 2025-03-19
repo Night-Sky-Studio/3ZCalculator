@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #ifdef DEBUG_STATUS
-#include "library/funcs.hpp"
+#include "library/format.hpp"
 #include "tabulate/table.hpp"
 #endif
 
@@ -113,8 +113,6 @@ namespace zzz {
         else
             _content.emplace(key, s);
     }
-
-    //std::list<const stat*> StatsGrid::get_stats_by_tag(Tag tag) const { return _content_by_tag.at(tag); }
 
     StatsGrid::iterator StatsGrid::begin() { return _content.begin(); }
     StatsGrid::iterator StatsGrid::end() { return _content.end(); }

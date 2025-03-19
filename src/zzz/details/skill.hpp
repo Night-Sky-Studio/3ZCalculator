@@ -14,7 +14,7 @@
 #include "zzz/stats.hpp"
 
 namespace zzz::details {
-    // level for abilities is always
+    // level for abilities is always 12
     class Skill {
         friend class SkillBuilder;
 
