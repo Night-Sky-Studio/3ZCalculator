@@ -9,13 +9,15 @@
 //crow
 #include "crow/app.h"
 
+//library
+#include "library/cached_memory.hpp"
+
 //calculator
 #include "calc/calculator.hpp"
 #include "calc/details.hpp"
 
 //backend
 #include "backend/logger.hpp"
-#include "backend/object_manager.hpp"
 
 namespace backend {
     class Backend {
@@ -25,13 +27,13 @@ namespace backend {
         static constexpr frozen::string ip = "192.168.1.2";
 
         explicit Backend(const std::string& logger_file);
-        ObjectManager& manager();
+        lib::ObjectManager& manager();
 
         void init();
         void run();
 
     protected:
-        ObjectManager m_manager;
+        lib::ObjectManager m_manager;
         crow::SimpleApp m_app;
         Logger m_logger;
 

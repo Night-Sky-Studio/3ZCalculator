@@ -81,8 +81,8 @@ add_executable(3ZCalculator
 
     "src/backend/backend.cpp"
     "src/backend/logger.cpp"
-    "src/backend/object_manager.cpp"
-)
+    
+ "src/library/cached_memory.cpp")
 
 target_include_directories(3ZCalculator PRIVATE src)
 

@@ -110,9 +110,9 @@ static constexpr std::array<uint64_t, 256> crc64_table = {
     0xa6df411fbfb21ca3, 0xdc0731d78f8795da, 0x536fa08fdfd90e51, 0x29b7d047efec8728,
 };
 
-constexpr uint64_t crc64(uint64_t crc, const char* s, uint64_t l) {
-    for (uint64_t j = 0; j < l; j++) {
-        const uint8_t byte = s[j];
+constexpr uint64_t crc64(uint64_t crc, const char* cstr, uint64_t length) {
+    for (uint64_t j = 0; j < length; j++) {
+        const uint8_t byte = cstr[j];
         crc = crc64_table[(uint8_t) crc ^ byte] ^ (crc >> 8);
     }
     return crc;
