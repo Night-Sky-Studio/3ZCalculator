@@ -15,7 +15,7 @@ namespace lib {
     using any_future = std::future<any_ptr>;
 
     using MObjectPtr = std::shared_ptr<class MObject>;
-    // helper object for ObjectManager
+    // helper for ObjectManager
     class MObject {
         friend class ObjectManager;
 
@@ -28,14 +28,15 @@ namespace lib {
             auto result = std::static_pointer_cast<T>(m_ptr);
             return result;
         }
+        any_ptr raw();
+
+        bool is_allocated() const;
 
     protected:
         any_ptr m_ptr = nullptr;
         // TODO: make atomic
         size_t m_unused_period = 0;
         const std::string m_fullname;
-
-        explicit operator bool() const;
 
         void set(any_ptr ptr);
         void set(nullptr_t);
@@ -46,7 +47,10 @@ namespace lib {
         const any_ptr& get() const;
         any_ptr& get();
 
-        virtual bool load_from_stream(std::istream& is, size_t mode) = 0;
+        // preferably make some private functions
+        // which this overriden function will call in switch-case statement
+        virtual bool load_from_string(const std::string& input, size_t mode) = 0;
+        bool load_from_stream(std::istream& is, size_t mode);
         bool load_from_file(size_t mode);
     };
 

@@ -31,16 +31,12 @@ namespace lib {
         m_fullname(std::move(fullname)) {
     }
 
-    MObject::operator bool() const {
-        return (bool) m_ptr;
-    }
+    any_ptr MObject::raw() { return m_ptr; }
 
-    void MObject::set(any_ptr ptr) {
-        m_ptr = std::move(ptr);
-    }
-    void MObject::set(nullptr_t) {
-        m_ptr.reset();
-    }
+    bool MObject::is_allocated() const { return (bool) m_ptr; }
+
+    void MObject::set(any_ptr ptr) { m_ptr = std::move(ptr); }
+    void MObject::set(nullptr_t) { m_ptr.reset(); }
 
     const any_ptr& MObject::operator*() const { return m_ptr; }
     any_ptr& MObject::operator*() { return m_ptr; }
@@ -48,6 +44,9 @@ namespace lib {
     any_ptr& MObject::get() { return m_ptr; }
     const any_ptr& MObject::get() const { return m_ptr; }
 
+    bool MObject::load_from_stream(std::istream& is, size_t mode) {
+        return load_from_string({ std::istreambuf_iterator(is), {} }, mode);
+    }
     bool MObject::load_from_file(size_t mode) {
         auto path = lib::format("{}.{}", m_fullname, ObjectManager::file_extensions.at(mode));
         std::fstream file(path, std::ios::in | std::ios::binary);
@@ -102,7 +101,7 @@ namespace lib {
         auto& object = it->second;
         object->m_unused_period = 0;
 
-        if ((bool) object)
+        if (object->is_allocated())
             return object;
 
         object->load_from_file(m_file_extension_id);
@@ -118,7 +117,7 @@ namespace lib {
         while (m_is_active) {
             // resets object from memory when passed enough time
             for (auto& obj : m_content | std::views::values) {
-                if (!(bool) obj)
+                if (!obj->is_allocated())
                     continue;
 
                 if (obj.use_count() == 1 && obj->get().use_count() == 1)

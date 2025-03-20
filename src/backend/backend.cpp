@@ -98,7 +98,7 @@ namespace backend {
     }
 
     // remake with unordered_map or list
-    void prepare_request_composed(calc::request_t& what, ObjectManager& source) {
+    void prepare_request_composed(calc::request_t& what, lib::ObjectManager& source) {
         auto agent_future = source.get(lib::format("agents/{}", what.agent.id));
         auto wengine_future = source.get(lib::format("wengines/{}", what.wengine.id));
 
