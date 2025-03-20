@@ -5,3 +5,4 @@ cmake-build-debug/*
 out/*
 res/*.log
 vcpkg_installed/*
+/Folder.DotSettings.user
