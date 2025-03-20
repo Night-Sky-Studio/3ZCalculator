@@ -31,20 +31,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(FrozenLib)
 
-# toml11
-FetchContent_Declare(
-    toml11
-    URL https://github.com/ToruNiina/toml11/archive/refs/tags/v4.4.0.tar.gz
-)
-FetchContent_MakeAvailable(toml11)
-
-# nlohmann::json
-FetchContent_Declare(
-    json 
-    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
-
 # tabulate
 FetchContent_Declare(
     tabulate
@@ -65,6 +51,8 @@ find_package(Crow CONFIG REQUIRED)
 add_executable(3ZCalculator
     "main.cpp"
 
+    "src/library/cached_memory.cpp"
+
     "src/zzz/enums.cpp"
     "src/zzz/stats.cpp"
 
@@ -81,15 +69,12 @@ add_executable(3ZCalculator
 
     "src/backend/backend.cpp"
     "src/backend/logger.cpp"
-    
- "src/library/cached_memory.cpp")
+)
 
 target_include_directories(3ZCalculator PRIVATE src)
 
 target_link_libraries(3ZCalculator PRIVATE 
     frozen-headers
-    toml11::toml11
-    nlohmann_json::nlohmann_json
     tabulate::tabulate
     fmt::fmt
     Crow::Crow

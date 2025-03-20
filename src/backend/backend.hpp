@@ -3,8 +3,8 @@
 //frozen
 #include "frozen/string.h"
 
-//nlohmann::json
-#include "nlohmann/json.hpp"
+//utl
+#include "utl/json.hpp"
 
 //crow
 #include "crow/app.h"
@@ -36,12 +36,6 @@ namespace backend {
         lib::ObjectManager m_manager;
         crow::SimpleApp m_app;
         Logger m_logger;
-
-        calc::request_t json_to_request(const nlohmann::json& json);
-
-        static nlohmann::json calcs_to_json(const calc::Calculator::result_t& calcs);
-
-        static calc::Calculator::result_t request_calcs(const calc::request_t& request);
 
     private:
         size_t _init_object_manager();
