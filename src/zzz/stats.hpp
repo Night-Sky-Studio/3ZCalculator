@@ -4,11 +4,8 @@
 #include <list>
 #include <unordered_map>
 
-//toml11
-#include "toml.hpp"
-
-//library
-#include "library/converter.hpp"
+//utl
+#include "utl/json.hpp"
 
 //zzz
 #include "zzz/enums.hpp"
@@ -24,12 +21,6 @@ namespace zzz {
         Tag tag = Tag::Universal;
 
         operator double() const { return value; }
-    };
-
-    class ToStatConverter : public lib::IConverter<stat, toml::array>, public lib::IConverter<stat, toml::table> {
-    public:
-        stat from(const toml::array& data) const override;
-        stat from(const toml::table& data) const override;
     };
 
     class StatsGrid {
@@ -69,13 +60,10 @@ namespace zzz {
         static size_t _gen_key(StatType type, Tag tag);
     };
 
-    class ToStatsGridConverter : public lib::IConverter<StatsGrid, toml::value> {
+    class StatsConverter {
     public:
-        StatsGrid from(const toml::value& data) const override;
-    };
-}
+        static stat to_stat_from(const utl::json::Node& source);
 
-namespace global {
-    static const zzz::ToStatConverter to_stat;
-    static const zzz::ToStatsGridConverter to_stats_grid;
+        static StatsGrid to_stats_grid_from(const utl::json::Node& source);
+    };
 }

@@ -14,32 +14,27 @@
 //crow
 #include "crow/logging.h"
 
-namespace lib::mobject_details {
-    void set_default_file_extensions() {
-        ObjectManager::file_extensions = {
-            { 0, "" }, // none
-            { 1, "json" },
-            { 2, "toml" },
-            { 3, "txt" }, // plane text
-        };
-    }
-}
-
 namespace lib {
     // MObject
 
-    MObject::MObject(std::string fullname, size_t utility_id) :
+    MObject::MObject(std::string fullname) :
         _fullname(std::move(fullname)) {
     }
 
-    any_ptr MObject::raw() { return _ptr; }
+    const std::any& MObject::raw() { return _content; }
 
-    bool MObject::is_allocated() const { return (bool) _ptr; }
+    bool MObject::is_allocated() const { return _content.has_value(); }
 
     bool MObject::load_from_stream(std::istream& is, size_t mode) {
         return load_from_string({ std::istreambuf_iterator(is), {} }, mode);
     }
     bool MObject::load_from_file(size_t mode) {
+        if (_fullname.empty()) {
+#ifdef DEBUG_STATUS
+            CROW_LOG_INFO << "fullname isn't set";
+#endif
+        }
+
         auto path = lib::format("{}.{}", _fullname, ObjectManager::file_extensions.at(mode));
         std::fstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open()) {
@@ -54,10 +49,12 @@ namespace lib {
 
     // ObjectManager
 
+    std::unordered_map<size_t, std::string> ObjectManager::file_extensions = {};
+
     ObjectManager::ObjectManager(size_t file_extension_id) :
         m_file_extension_id(file_extension_id) {
         if (file_extensions.empty())
-            mobject_details::set_default_file_extensions();
+            init_default_file_extensions();
     }
 
     ObjectManager::~ObjectManager() {
@@ -69,9 +66,9 @@ namespace lib {
         return _get_logic(key);
     }
     std::future<MObjectPtr> ObjectManager::get_async(std::string key) {
-        return std::async(std::launch::async,
-            std::bind(_get_logic, this, std::placeholders::_1),
-            std::move(key));
+        return std::async(std::launch::async, [this, key = std::move(key)] {
+            return _get_logic(key);
+        });
     }
 
     void ObjectManager::add_object(const MObjectPtr& value) {
@@ -112,11 +109,11 @@ namespace lib {
                 if (!obj->is_allocated())
                     continue;
 
-                if (obj.use_count() == 1 && obj->_ptr.use_count() == 1)
+                if (obj.use_count() == 1)
                     obj->_unused_period++;
 
                 if (obj->_unused_period == max_unused_period) {
-                    obj->_ptr = nullptr;
+                    obj->_content.reset();
 #ifdef DEBUG_STATUS
                     CROW_LOG_INFO << lib::format("{} is deleted", obj->_fullname);
 #endif

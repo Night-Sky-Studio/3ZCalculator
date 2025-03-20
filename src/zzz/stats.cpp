@@ -10,26 +10,6 @@
 #endif
 
 namespace zzz {
-    // StatAdaptor
-
-    stat ToStatConverter::from(const toml::array& data) const {
-        return stat {
-            .value = data[1].as_floating(),
-            .type = convert::string_to_stat_type(data[0].as_string()),
-            .tag = data.size() == 3 ? convert::string_to_tag(data[2].as_string()) : Tag::Universal
-        };
-    }
-    stat ToStatConverter::from(const toml::table& data) const {
-        auto tag_it = data.find("tag");
-        return stat {
-            .value = data.at("value").as_floating(),
-            .type = convert::string_to_stat_type(data.at("type").as_string()),
-            .tag = tag_it != data.end() ? convert::string_to_tag(tag_it->second.as_string()) : Tag::Universal
-        };
-    }
-
-    // StatsTable
-
     stat StatsGrid::no_value = { .value = 0.0, .type = StatType::None, .tag = Tag::Universal };
 
 #ifdef DEBUG_STATUS
@@ -124,24 +104,14 @@ namespace zzz {
         return (size_t) type | (size_t) tag << 8;
     }
 
-    // StatsTableLoader
+    // ToStatsConverter
 
-    StatsGrid ToStatsGridConverter::from(const toml::value& data) const {
-        StatsGrid result;
+    inline stat to_stat_from_object(const utl::json::Node& source) {
+    }
 
-        for (const auto& it : data.as_array()) {
-            switch (it.type()) {
-            case toml::value_t::array:
-                result.emplace(global::to_stat.from(it.as_array()));
-                break;
-            case toml::value_t::table:
-                result.emplace(global::to_stat.from(it.as_table()));
-                break;
-            default:
-                throw std::runtime_error("wrong stat format");
-            }
-        }
-
-        return result;
+    stat StatsConverter::to_stat_from(const utl::json::Node& source) {
+        
+    }
+    StatsGrid StatsConverter::to_stats_grid_from(const utl::json::Node& source) {
     }
 }

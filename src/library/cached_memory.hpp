@@ -1,6 +1,7 @@
 #pragma once
 
 //std
+#include <any>
 #include <atomic>
 #include <future>
 #include <memory>
@@ -17,15 +18,15 @@ namespace lib {
         friend class ObjectManager;
 
     public:
-        MObject(std::string fullname, size_t utility_id);
+        explicit MObject(std::string fullname);
         virtual ~MObject() = default;
 
         template<typename T>
-        std::shared_ptr<T> as() {
-            auto result = std::static_pointer_cast<T>(_ptr);
+        const T& as() {
+            auto result = std::any_cast<T>(_content);
             return result;
         }
-        any_ptr raw();
+        const std::any& raw();
 
         bool is_allocated() const;
 
@@ -36,8 +37,13 @@ namespace lib {
         bool load_from_stream(std::istream& is, size_t mode);
         bool load_from_file(size_t mode);
 
+        template<typename T>
+        void set(T value) {
+            _content.emplace<T>(std::move(value));
+        }
+
     private:
-        any_ptr _ptr = nullptr;
+        std::any _content = nullptr;
         // TODO: make atomic
         size_t _unused_period = 0;
         const std::string _fullname;
@@ -46,6 +52,15 @@ namespace lib {
     class ObjectManager {
     public:
         static std::unordered_map<size_t, std::string> file_extensions;
+        static void init_default_file_extensions() {
+            file_extensions = {
+                { 0, "" }, // none
+                { 1, "json" },
+                { 2, "toml" },
+                { 3, "txt" }, // plane text
+            };
+        }
+
         // TODO: remake using lifetime in real time, not in cycles
         static constexpr size_t max_unused_period = 20ul;
         // TODO: make sleep time at most (while using multithreading)

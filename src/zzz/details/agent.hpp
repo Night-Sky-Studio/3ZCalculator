@@ -2,18 +2,19 @@
 
 //std
 #include <cstdint>
-#include <memory>
 #include <string>
 #include <unordered_map>
 
 //library
 #include "library/builder.hpp"
+#include "library/cached_memory.hpp"
 
 //zzz
-#include "zzz/enums.hpp"
-#include "zzz/stats.hpp"
+#include "utl/json.hpp"
 #include "zzz/details/anomaly.hpp"
 #include "zzz/details/skill.hpp"
+#include "zzz/enums.hpp"
+#include "zzz/stats.hpp"
 
 namespace zzz::details {
     // TODO: make skill and anomaly one unordered_map
@@ -22,7 +23,7 @@ namespace zzz::details {
 
     public:
         // 0 - none, 1 - skill, 2 - anomaly
-        static size_t is_skill_or_anomaly(const Agent& agent, const std::string& name);
+        size_t is_skill_or_anomaly(const std::string& name);
 
         uint64_t id() const;
         const std::string& name() const;
@@ -48,11 +49,18 @@ namespace zzz::details {
     public:
         AgentBuilder& set_id(uint64_t id);
         AgentBuilder& set_name(std::string name);
+
         AgentBuilder& set_speciality(Speciality speciality);
+        AgentBuilder& set_speciality(const std::string& speciality_str);
+
         AgentBuilder& set_element(Element element);
+        AgentBuilder& set_element(const std::string& element_str);
+
         AgentBuilder& set_rarity(Rarity rarity);
+
         AgentBuilder& add_stat(stat value);
         AgentBuilder& set_stats(StatsGrid stats);
+
         AgentBuilder& add_skill(Skill skill);
         AgentBuilder& add_anomaly(Anomaly anomaly);
 
@@ -72,5 +80,12 @@ namespace zzz::details {
 
 namespace zzz {
     using AgentDetails = details::Agent;
-    using AgentDetailsPtr = std::shared_ptr<details::Agent>;
+
+    class AgentPtr : public lib::MObject {
+    public:
+        explicit AgentPtr(const std::string& name);
+
+    protected:
+        bool load_from_string(const std::string& input, size_t mode) override;
+    };
 }

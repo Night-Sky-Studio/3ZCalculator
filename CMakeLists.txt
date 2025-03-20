@@ -65,9 +65,9 @@ add_executable(3ZCalculator
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"
 
-    "src/calc/calculator.cpp"
+    #"src/calc/calculator.cpp"
 
-    "src/backend/backend.cpp"
+    #"src/backend/backend.cpp"
     "src/backend/logger.cpp"
 )
 

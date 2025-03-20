@@ -16,7 +16,7 @@ namespace calc {
     };
 
     // TODO: properly organize
-    struct request_t {
+    /*struct request_t {
         struct {
             uint64_t id = 0;
             zzz::AgentDetailsPtr ptr = nullptr;
@@ -35,5 +35,5 @@ namespace calc {
             std::multimap<size_t, zzz::DdsDetailsPtr*> by_count;
             std::list<std::tuple<uint64_t, zzz::DdsDetailsPtr>> uniques;
         } dds;
-    };
+    };*/
 }
