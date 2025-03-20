@@ -6,11 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-//toml11
-#include "toml.hpp"
-
 //library
-#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -23,7 +19,6 @@ namespace zzz::details {
     // TODO: make skill and anomaly one unordered_map
     class Agent {
         friend class AgentBuilder;
-        friend class ToAgentConverter;
 
     public:
         // 0 - none, 1 - skill, 2 - anomaly
@@ -73,18 +68,9 @@ namespace zzz::details {
             bool rarity     : 1 = false;
         } _is_set;
     };
-
-    class ToAgentConverter : public lib::IConverter<Agent, toml::value> {
-    public:
-        Agent from(const toml::value& data) const override;
-    };
 }
 
 namespace zzz {
     using AgentDetails = details::Agent;
     using AgentDetailsPtr = std::shared_ptr<details::Agent>;
-}
-
-namespace global {
-    static const zzz::details::ToAgentConverter to_agent;
 }

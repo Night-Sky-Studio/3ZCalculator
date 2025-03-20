@@ -82,22 +82,4 @@ namespace zzz::details {
 
         return IBuilder::get_product();
     }
-
-    // WengineAdaptor
-
-    Wengine ToWengineConverter::from(const toml::value& data) const {
-        WengineBuilder builder;
-
-        builder.set_id(data.at("id").as_integer());
-        builder.set_name(data.at("name").as_string());
-        builder.set_rarity((Rarity)data.at("rarity").as_integer());
-        builder.set_speciality(convert::string_to_speciality(data.at("speciality").as_string()));
-
-        const auto& stats = data.at("stats").as_table();
-        builder.set_main_stat(global::to_stat.from(stats.at("main").as_array()));
-        builder.set_sub_stat(global::to_stat.from(stats.at("sub").as_array()));
-        builder.set_passive_stats(global::to_stats_grid.from(stats.at("passive")));
-
-        return builder.get_product();
-    }
 }

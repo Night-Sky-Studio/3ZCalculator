@@ -6,11 +6,7 @@
 #include <memory>
 #include <string>
 
-//toml11
-#include "toml.hpp"
-
 //library
-#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -19,7 +15,6 @@
 namespace zzz::details {
     class DriveDiscSet {
         friend class DdsBuilder;
-        friend class ToDdsConverter;
 
     public:
         uint64_t id() const;
@@ -52,18 +47,9 @@ namespace zzz::details {
             bool p4   : 1 = false;
         } _is_set;
     };
-
-    class ToDdsConverter : protected lib::IConverter<DriveDiscSet, toml::value> {
-    public:
-        DriveDiscSet from(const toml::value& data) const override;
-    };
 }
 
 namespace zzz {
     using DdsDetails = details::DriveDiscSet;
     using DdsDetailsPtr = std::shared_ptr<details::DriveDiscSet>;
-}
-
-namespace global {
-    static const zzz::details::ToDdsConverter to_dds;
 }

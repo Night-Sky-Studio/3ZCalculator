@@ -46,19 +46,4 @@ namespace zzz::details {
             throw std::runtime_error("you have to specify id, name, 2- and 4-piece bonuses");
         return IBuilder::get_product();
     }
-
-    // DriveDiscSetAdaptor
-
-    DriveDiscSet ToDdsConverter::from(const toml::value& data) const {
-        DdsBuilder builder;
-
-        builder.set_id(data.at("id").as_integer());
-        builder.set_name(data.at("name").as_string());
-
-        const auto& set_bonuses = data.at("set_bonus").as_table();
-        builder.set_p2(global::to_stats_grid.from(set_bonuses.at("p2")));
-        builder.set_p4(global::to_stats_grid.from(set_bonuses.at("p4")));
-
-        return builder.get_product();
-    }
 }

@@ -5,7 +5,6 @@
 #include <string>
 
 //library
-#include "library/converter.hpp"
 #include "library/builder.hpp"
 
 //zzz
@@ -15,7 +14,6 @@
 namespace zzz::details {
     class Wengine {
         friend class WengineBuilder;
-        friend class ToWengineConverter;
 
     public:
         uint64_t id() const;
@@ -59,18 +57,9 @@ namespace zzz::details {
             bool passive_stats : 1 = false;
         } _is_set;
     };
-
-    class ToWengineConverter : public lib::IConverter<Wengine, toml::value> {
-    public:
-        Wengine from(const toml::value& data) const override;
-    };
 }
 
 namespace zzz {
     using WengineDetails = details::Wengine;
     using WengineDetailsPtr = std::shared_ptr<details::Wengine>;
-}
-
-namespace global {
-    static const zzz::details::ToWengineConverter to_wengine;
 }
