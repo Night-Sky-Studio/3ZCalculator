@@ -1,14 +1,15 @@
 #include "library/cached_memory.hpp"
 
 //std
+#include <fstream>
 #include <ranges>
 
 //frozen
 #include "frozen/string.h"
 
 //lib
-#include "library/string_funcs.hpp"
 #include "library/format.hpp"
+#include "library/string_funcs.hpp"
 
 //crow
 #include "crow/logging.h"
@@ -28,27 +29,18 @@ namespace lib {
     // MObject
 
     MObject::MObject(std::string fullname, size_t utility_id) :
-        m_fullname(std::move(fullname)) {
+        _fullname(std::move(fullname)) {
     }
 
-    any_ptr MObject::raw() { return m_ptr; }
+    any_ptr MObject::raw() { return _ptr; }
 
-    bool MObject::is_allocated() const { return (bool) m_ptr; }
-
-    void MObject::set(any_ptr ptr) { m_ptr = std::move(ptr); }
-    void MObject::set(nullptr_t) { m_ptr.reset(); }
-
-    const any_ptr& MObject::operator*() const { return m_ptr; }
-    any_ptr& MObject::operator*() { return m_ptr; }
-
-    any_ptr& MObject::get() { return m_ptr; }
-    const any_ptr& MObject::get() const { return m_ptr; }
+    bool MObject::is_allocated() const { return (bool) _ptr; }
 
     bool MObject::load_from_stream(std::istream& is, size_t mode) {
         return load_from_string({ std::istreambuf_iterator(is), {} }, mode);
     }
     bool MObject::load_from_file(size_t mode) {
-        auto path = lib::format("{}.{}", m_fullname, ObjectManager::file_extensions.at(mode));
+        auto path = lib::format("{}.{}", _fullname, ObjectManager::file_extensions.at(mode));
         std::fstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open()) {
 #ifdef DEBUG_STATUS
@@ -83,7 +75,7 @@ namespace lib {
     }
 
     void ObjectManager::add_object(const MObjectPtr& value) {
-        m_content.emplace(hash(value->m_fullname), value);
+        m_content.emplace(hash(value->_fullname), value);
     }
 
     void ObjectManager::launch() {
@@ -99,7 +91,7 @@ namespace lib {
             throw std::runtime_error(lib::format("{} doesn't exist", key));
 
         auto& object = it->second;
-        object->m_unused_period = 0;
+        object->_unused_period = 0;
 
         if (object->is_allocated())
             return object;
@@ -107,7 +99,7 @@ namespace lib {
         object->load_from_file(m_file_extension_id);
 
 #ifdef DEBUG_STATUS
-        CROW_LOG_INFO << lib::format("{} is loaded", object->m_fullname);
+        CROW_LOG_INFO << lib::format("{} is loaded", object->_fullname);
 #endif
 
         return object;
@@ -120,13 +112,13 @@ namespace lib {
                 if (!obj->is_allocated())
                     continue;
 
-                if (obj.use_count() == 1 && obj->get().use_count() == 1)
-                    obj->m_unused_period++;
+                if (obj.use_count() == 1 && obj->_ptr.use_count() == 1)
+                    obj->_unused_period++;
 
-                if (obj->m_unused_period == max_unused_period) {
-                    obj->set(nullptr);
+                if (obj->_unused_period == max_unused_period) {
+                    obj->_ptr = nullptr;
 #ifdef DEBUG_STATUS
-                    CROW_LOG_INFO << lib::format("{} is deleted", obj->m_fullname);
+                    CROW_LOG_INFO << lib::format("{} is deleted", obj->_fullname);
 #endif
                 }
             }

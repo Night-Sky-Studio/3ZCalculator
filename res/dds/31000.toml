@@ -1,6 +1,0 @@
-id = 31000
-name = "Woodpecker Electro"
-
-[set_bonus]
-p2 = [["crit_rate", 0.08]]
-p4 = [["atk_ratio", 0.27]]

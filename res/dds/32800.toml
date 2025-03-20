@@ -1,6 +1,0 @@
-id = 32800
-name = "Astral Voice"
-
-[set_bonus]
-p2 = [["atk_ratio", 0.1]]
-p4 = [["dmg_ratio", 0.24, "quick_assist"]]

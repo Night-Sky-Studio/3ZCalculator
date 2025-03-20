@@ -7,9 +7,6 @@
 #include <string>
 #include <unordered_map>
 
-//toml
-#include "toml.hpp"
-
 namespace lib {
     using any_ptr = std::shared_ptr<void>;
     using any_future = std::future<any_ptr>;
@@ -25,7 +22,7 @@ namespace lib {
 
         template<typename T>
         std::shared_ptr<T> as() {
-            auto result = std::static_pointer_cast<T>(m_ptr);
+            auto result = std::static_pointer_cast<T>(_ptr);
             return result;
         }
         any_ptr raw();
@@ -33,25 +30,17 @@ namespace lib {
         bool is_allocated() const;
 
     protected:
-        any_ptr m_ptr = nullptr;
-        // TODO: make atomic
-        size_t m_unused_period = 0;
-        const std::string m_fullname;
-
-        void set(any_ptr ptr);
-        void set(nullptr_t);
-
-        const any_ptr& operator*() const;
-        any_ptr& operator*();
-
-        const any_ptr& get() const;
-        any_ptr& get();
-
         // preferably make some private functions
         // which this overriden function will call in switch-case statement
         virtual bool load_from_string(const std::string& input, size_t mode) = 0;
         bool load_from_stream(std::istream& is, size_t mode);
         bool load_from_file(size_t mode);
+
+    private:
+        any_ptr _ptr = nullptr;
+        // TODO: make atomic
+        size_t _unused_period = 0;
+        const std::string _fullname;
     };
 
     class ObjectManager {

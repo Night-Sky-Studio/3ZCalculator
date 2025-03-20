@@ -1,0 +1,12 @@
+{
+    "id": 14109,
+    "name": "Hailstorm Shrine",
+    "speciality": "anomaly",
+    "rarity": 4,
+
+    "stats": {
+        "main": { "atk_base": 743.0 },
+        "sub": { "crit_rate": 0.24 },
+        "passive": { "crit_rate": 0.5, "ice_ratio": 0.4 }
+    }
+}
