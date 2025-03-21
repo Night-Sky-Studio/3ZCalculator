@@ -1,7 +1,9 @@
 #pragma once
 
 //std
-#include <list>
+#include <functional>
+#include <memory>
+#include <string>
 #include <unordered_map>
 
 //utl
@@ -10,60 +12,76 @@
 //zzz
 #include "zzz/enums.hpp"
 
-#ifdef DEBUG_STATUS
-#include "tabulate/table.hpp"
-#endif
-
 namespace zzz {
-    struct stat {
-        double value = 0;
-        StatType type = StatType::None;
-        Tag tag = Tag::Universal;
+    class StatsGrid;
+    class IStat;
 
-        operator double() const { return value; }
-    };
+    using StatPtr = std::shared_ptr<IStat>;
 
-    class StatsGrid {
-        friend class ToStatsGridConverter;
+    class IStat {
+        friend class StatsGrid;
 
     public:
-        using iterator = std::unordered_map<size_t, stat>::iterator;
-        using const_iterator = std::unordered_map<size_t, stat>::const_iterator;
+        explicit IStat(size_t type);
+        virtual ~IStat() = default;
 
-        static stat no_value;
+        virtual StatPtr copy_as_ptr() const = 0;
 
-#ifdef DEBUG_STATUS
-        tabulate::Table get_debug_table() const;
-#endif
+        virtual double value() const = 0;
 
-        stat get(StatType type) const;
-        stat get_all(StatType type, Tag tag) const;
-        stat get_only(StatType type, Tag tag) const;
+        double base() const;
+        StatId id() const;
+        Tag tag() const;
 
-        stat& at(StatType type, Tag tag = Tag::Universal);
-        stat at(StatType type, Tag tag = Tag::Universal) const;
-
-        bool emplace(stat what);
-
-        void add(const StatsGrid& another);
-        void add(stat s);
-
-        iterator begin();
-        iterator end();
-
-        const_iterator begin() const;
-        const_iterator end() const;
+    protected:
+        double m_base = 0;
+        StatId m_id = StatId::None;
+        Tag m_tag = Tag::Universal;
 
     private:
-        std::unordered_map<size_t, stat> _content;
-
-        static size_t _gen_key(StatType type, Tag tag);
+        size_t _type;
     };
 
-    class StatsConverter {
+    class RegularStat : public IStat {
     public:
-        static stat to_stat_from(const utl::json::Node& source);
+        static StatPtr make(double base, StatId id, Tag tag);
 
-        static StatsGrid to_stats_grid_from(const utl::json::Node& source);
+        static StatPtr make_from_floating(const utl::Json& json);
+        static StatPtr make_from_object(const utl::Json& json);
+
+        explicit RegularStat();
+
+        StatPtr copy_as_ptr() const override;
+
+        double value() const override;
+    };
+
+    class RelativeStat : public IStat {
+    public:
+        static StatPtr make_from_string(const utl::Json& json);
+        static StatPtr make_from_object(const utl::Json& json);
+
+        explicit RelativeStat();
+
+        //double value() const override;
+
+    protected:
+        double m_mult = 0;
+        StatId m_dependency = StatId::None;
+    };
+
+    class StatFactory {
+    public:
+        using StatMaker = std::function<StatPtr(const utl::Json&)>;
+
+        static std::string default_type_name;
+
+        static void init_default();
+
+        static bool add_maker(std::string key, StatMaker value);
+        static StatPtr make(const utl::Json& json);
+
+    protected:
+        static std::unordered_map<std::string, StatMaker> m_makers;
     };
 }

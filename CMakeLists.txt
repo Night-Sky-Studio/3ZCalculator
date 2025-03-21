@@ -55,6 +55,7 @@ add_executable(3ZCalculator
 
     "src/zzz/enums.cpp"
     "src/zzz/stats.cpp"
+    "src/zzz/stats_grid.cpp"
 
     "src/zzz/combat/drive_disc_piece.cpp"
 
@@ -82,3 +83,4 @@ target_link_libraries(3ZCalculator PRIVATE
 )
 
 add_compile_definitions(DEBUG_STATUS)
+add_compile_definitions(ADDITIONAL_CHECK_MODE)

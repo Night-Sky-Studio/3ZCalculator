@@ -36,8 +36,8 @@ namespace zzz::combat {
         DdpBuilder& set_disc_id(uint64_t disc_id);
         DdpBuilder& set_slot(uint8_t slot);
         DdpBuilder& set_rarity(Rarity rarity);
-        DdpBuilder& set_main_stat(StatType type, uint8_t level);
-        DdpBuilder& add_sub_stat(StatType type, uint8_t level);
+        DdpBuilder& set_main_stat(StatId type, uint8_t level);
+        DdpBuilder& add_sub_stat(StatId type, uint8_t level);
 
         bool is_built() const override;
         DriveDiscPiece&& get_product() override;

@@ -125,11 +125,11 @@ namespace zzz {
     AgentDetails load_from_json(const utl::json::Node& json) {
         details::AgentBuilder agent_builder;
 
-        agent_builder.set_id(json["id"].get_integral());
-        agent_builder.set_name(json["name"].get_string());
-        agent_builder.set_speciality(json["speciality"].get_string());
-        agent_builder.set_element(json["element"].get_string());
-        agent_builder.set_rarity((Rarity) json["rarity"].get_integral());
+        agent_builder.set_id(json["id"].as_integral());
+        agent_builder.set_name(json["name"].as_string());
+        agent_builder.set_speciality(json["speciality"].as_string());
+        agent_builder.set_element(json["element"].as_string());
+        agent_builder.set_rarity((Rarity) json["rarity"].as_integral());
 
         return agent_builder.get_product();
     }

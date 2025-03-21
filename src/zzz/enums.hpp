@@ -9,7 +9,7 @@
 #include "frozen/string.h"
 
 namespace zzz {
-    enum class StatType : uint8_t {
+    enum class StatId : uint8_t {
         None,
         HpTotal, HpBase, HpRatio, HpFlat,
         AtkTotal, AtkBase, AtkRatio, AtkFlat,
@@ -68,29 +68,35 @@ namespace zzz {
 }
 
 namespace zzz::convert {
-    constexpr frozen::string stat_type_to_cstr(StatType source);
-    std::string stat_type_to_string(StatType source);
-    constexpr StatType cstr_to_stat_type(const frozen::string& source);
-    StatType string_to_stat_type(const std::string& source);
+    constexpr frozen::string stat_id_to_cstr(StatId source);
+    std::string_view stat_id_to_string(StatId source);
+
+    constexpr StatId cstr_to_stat_id(const frozen::string& source);
+    StatId string_to_stat_id(std::string_view source);
 
     constexpr frozen::string tag_to_cstr(Tag source);
-    std::string tag_to_string(Tag source);
+    std::string_view tag_to_string(Tag source);
+
     constexpr Tag cstr_to_tag(const frozen::string& source);
-    Tag string_to_tag(const std::string& source);
+    Tag string_to_tag(std::string_view source);
 
     constexpr frozen::string speciality_to_cstr(Speciality source);
-    std::string speciality_to_string(Speciality source);
+    std::string_view speciality_to_string(Speciality source);
+
     constexpr Speciality cstr_to_speciality(const frozen::string& source);
-    Speciality string_to_speciality(const std::string& source);
+    Speciality string_to_speciality(std::string_view source);
 
     constexpr frozen::string element_to_cstr(Element source);
-    std::string element_to_string(Element source);
+    std::string_view element_to_string(Element source);
+
     constexpr Element cstr_to_element(const frozen::string& source);
-    Element string_to_element(const std::string& source);
+    Element string_to_element(std::string_view source);
 }
 
-inline zzz::StatType operator+(zzz::StatType lhs, zzz::Element rhs) {
-    if (lhs != zzz::StatType::DmgRatio && lhs != zzz::StatType::ResPen)
+inline zzz::StatId operator+(zzz::StatId lhs, zzz::Element rhs) {
+#ifdef ADDITIONAL_CHECK_MODE
+    if (lhs != zzz::StatId::DmgRatio && lhs != zzz::StatId::ResPen)
         throw std::runtime_error("you only can sum DmgRatio or ResPen with Element");
-    return zzz::StatType((uint8_t) lhs + (uint8_t) rhs);
+#endif
+    return zzz::StatId((uint8_t) lhs + (uint8_t) rhs);
 }

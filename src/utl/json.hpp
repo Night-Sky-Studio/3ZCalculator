@@ -405,6 +405,10 @@ namespace utl::json {
 
     enum class Format : uint8_t { PRETTY, MINIMIZED };
 
+    enum class NodeType : uint8_t {
+        NONE = 0, OBJECT = 1, ARRAY = 2, STRING = 3, INTEGRAL = 4, FLOATING = 5, BOOL = 6
+    };
+
     class Node;
     inline void _serialize_json_to_buffer(std::string& chars, const Node& node, Format format);
 
@@ -419,6 +423,7 @@ namespace utl::json {
         using null_type = _null_type_impl;
 
     private:
+        // 'null_type' should go first to ensure default-initialization creates 'null' nodes
         using variant_type = std::variant<
             null_type,
             object_type,
@@ -427,43 +432,43 @@ namespace utl::json {
             integral_type,
             floating_type,
             bool_type>;
-        // 'null_type' should go first to ensure default-initialization creates 'null' nodes
 
-        variant_type data {};
+        std::string_view _key;
+        variant_type _data {};
 
     public:
         // -- Getters --
         // -------------
 
         template<class T>
-        [[nodiscard]] T& get() {
-            return std::get<T>(this->data);
+        [[nodiscard]] T& as() {
+            return std::get<T>(this->_data);
         }
 
         template<class T>
-        [[nodiscard]] const T& get() const {
-            return std::get<T>(this->data);
+        [[nodiscard]] const T& as() const {
+            return std::get<T>(this->_data);
         }
 
-        [[nodiscard]] object_type& get_object() { return this->get<object_type>(); }
-        [[nodiscard]] array_type& get_array() { return this->get<array_type>(); }
-        [[nodiscard]] string_type& get_string() { return this->get<string_type>(); }
-        [[nodiscard]] integral_type& get_integral() { return this->get<integral_type>(); }
-        [[nodiscard]] floating_type& get_floating() { return this->get<floating_type>(); }
-        [[nodiscard]] bool_type& get_bool() { return this->get<bool_type>(); }
-        [[nodiscard]] null_type& get_null() { return this->get<null_type>(); }
+        [[nodiscard]] object_type& as_object() { return this->as<object_type>(); }
+        [[nodiscard]] array_type& as_array() { return this->as<array_type>(); }
+        [[nodiscard]] string_type& as_string() { return this->as<string_type>(); }
+        [[nodiscard]] integral_type& as_integral() { return this->as<integral_type>(); }
+        [[nodiscard]] floating_type& as_floating() { return this->as<floating_type>(); }
+        [[nodiscard]] bool_type& as_bool() { return this->as<bool_type>(); }
+        [[nodiscard]] null_type& as_null() { return this->as<null_type>(); }
 
-        [[nodiscard]] const object_type& get_object() const { return this->get<object_type>(); }
-        [[nodiscard]] const array_type& get_array() const { return this->get<array_type>(); }
-        [[nodiscard]] const string_type& get_string() const { return this->get<string_type>(); }
-        [[nodiscard]] const integral_type& get_integral() const { return this->get<integral_type>(); }
-        [[nodiscard]] const floating_type& get_floating() const { return this->get<floating_type>(); }
-        [[nodiscard]] const bool_type& get_bool() const { return this->get<bool_type>(); }
-        [[nodiscard]] const null_type& get_null() const { return this->get<null_type>(); }
+        [[nodiscard]] const object_type& as_object() const { return this->as<object_type>(); }
+        [[nodiscard]] const array_type& as_array() const { return this->as<array_type>(); }
+        [[nodiscard]] const string_type& as_string() const { return this->as<string_type>(); }
+        [[nodiscard]] const integral_type& as_integral() const { return this->as<integral_type>(); }
+        [[nodiscard]] const floating_type& as_floating() const { return this->as<floating_type>(); }
+        [[nodiscard]] const bool_type& as_bool() const { return this->as<bool_type>(); }
+        [[nodiscard]] const null_type& as_null() const { return this->as<null_type>(); }
 
         template<class T>
         [[nodiscard]] bool is() const noexcept {
-            return std::holds_alternative<T>(this->data);
+            return std::holds_alternative<T>(this->_data);
         }
 
         [[nodiscard]] bool is_object() const noexcept { return this->is<object_type>(); }
@@ -476,40 +481,48 @@ namespace utl::json {
 
         template<class T>
         [[nodiscard]] T* get_if() noexcept {
-            return std::get_if<T>(&this->data);
+            return std::get_if<T>(&this->_data);
         }
 
         template<class T>
         [[nodiscard]] const T* get_if() const noexcept {
-            return std::get_if<T>(&this->data);
+            return std::get_if<T>(&this->_data);
         }
+
+        [[nodiscard]] std::string_view key() const { return this->_key; }
 
         // -- Object methods ---
         // ---------------------
 
-        Node& operator[](std::string_view key) {
-            // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
+        // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
             // support heterogeneous lookup, we have to reimplement them manually
-            if (this->is_null()) this->data = object_type {}; // 'null' converts to objects automatically
-            auto& object = this->get_object();
+        Node& operator[](std::string_view key) {
+            // 'null' converts to objects automatically
+            if (this->is_null()) {
+                this->_data = object_type {};
+            }
+            auto& object = this->as_object();
             auto it = object.find(key);
-            if (it == object.end()) it = object.emplace(key, Node {}).first;
+            if (it == object.end()) {
+                it = object.emplace(key, Node {}).first;
+                it->second._key = it->first;
+            }
             return it->second;
         }
 
+        // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
+        // support heterogeneous lookup, we have to reimplement them manually
         [[nodiscard]] const Node& operator[](std::string_view key) const {
-            // 'std::map<K, V>::operator[]()' and 'std::map<K, V>::at()' don't support
-            // support heterogeneous lookup, we have to reimplement them manually
-            const auto& object = this->get_object();
+            const auto& object = this->as_object();
             const auto it = object.find(key);
             if (it == object.end())
                 throw std::runtime_error("Accessing non-existent key {" + std::string(key) + "} in JSON object.");
             return it->second;
         }
 
+        // Non-const 'operator[]' inserts non-existent keys, '.at()' should throw instead
         [[nodiscard]] Node& at(std::string_view key) {
-            // Non-const 'operator[]' inserts non-existent keys, '.at()' should throw instead
-            auto& object = this->get_object();
+            auto& object = this->as_object();
             const auto it = object.find(key);
             if (it == object.end())
                 throw std::runtime_error("Accessing non-existent key {" + std::string(key) + "} in JSON object.");
@@ -519,39 +532,39 @@ namespace utl::json {
         [[nodiscard]] const Node& at(std::string_view key) const { return this->operator[](key); }
 
         [[nodiscard]] bool contains(std::string_view key) const {
-            const auto& object = this->get_object();
+            const auto& object = this->as_object();
             const auto it = object.find(std::string(key));
             return it != object.end();
         }
 
+        // same thing as 'this->contains(key) ? json.at(key).get<T>() : else_value' but without a second map lookup
         template<class T>
-        [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) {
-            const auto& object = this->get_object();
+        [[nodiscard]] const T& value_or(std::string_view key, const T& else_value) const {
+            const auto& object = this->as_object();
             const auto it = object.find(std::string(key));
-            if (it != object.end()) return it->second.get<T>();
+            if (it != object.end()) return it->second.as<T>();
             return else_value;
-            // same thing as 'this->contains(key) ? json.at(key).get<T>() : else_value' but without a second map lookup
         }
 
         // -- Array methods ---
         // --------------------
 
-        [[nodiscard]] Node& operator[](std::size_t pos) { return this->get_array()[pos]; }
+        [[nodiscard]] Node& operator[](std::size_t pos) { return this->as_array()[pos]; }
 
-        [[nodiscard]] const Node& operator[](std::size_t pos) const { return this->get_array()[pos]; }
+        [[nodiscard]] const Node& operator[](std::size_t pos) const { return this->as_array()[pos]; }
 
-        [[nodiscard]] Node& at(std::size_t pos) { return this->get_array().at(pos); }
+        [[nodiscard]] Node& at(std::size_t pos) { return this->as_array().at(pos); }
 
-        [[nodiscard]] const Node& at(std::size_t pos) const { return this->get_array().at(pos); }
+        [[nodiscard]] const Node& at(std::size_t pos) const { return this->as_array().at(pos); }
 
         void push_back(const Node& node) {
-            if (this->is_null()) this->data = array_type {}; // 'null' converts to arrays automatically
-            this->get_array().push_back(node);
+            if (this->is_null()) this->_data = array_type {}; // 'null' converts to arrays automatically
+            this->as_array().push_back(node);
         }
 
         void push_back(Node&& node) {
-            if (this->is_null()) this->data = array_type {}; // 'null' converts to arrays automatically
-            this->get_array().push_back(std::move(node));
+            if (this->is_null()) this->_data = array_type {}; // 'null' converts to arrays automatically
+            this->as_array().push_back(std::move(node));
         }
 
         // -- Assignment --
@@ -561,9 +574,9 @@ namespace utl::json {
         template<class T>
         Node& operator=(const T& value)
             requires (!std::is_same_v<std::decay_t<T>, Node> &&
-            !std::is_same_v<std::decay_t<T>, object_type> &&
-            !std::is_same_v<std::decay_t<T>, array_type> &&
-            !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>) {
+                !std::is_same_v<std::decay_t<T>, object_type> &&
+                !std::is_same_v<std::decay_t<T>, array_type> &&
+                !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>) {
             // Don't take types that decay to Node/object/array/string to prevent
             // shadowing native copy/move assignment for those types
 
@@ -572,23 +585,23 @@ namespace utl::json {
             // string > object > array > bool > null > floating > integral
 
             if constexpr (is_string_like_v<T>) {
-                this->data.emplace<string_type>(value);
+                this->_data.emplace<string_type>(value);
             } else if constexpr (is_object_like_v<T>) {
-                this->data.emplace<object_type>();
-                auto& object = this->get_object();
+                this->_data.emplace<object_type>();
+                auto& object = this->as_object();
                 for (const auto& [key, val] : value) object[key] = val;
             } else if constexpr (is_array_like_v<T>) {
-                this->data.emplace<array_type>();
-                auto& array = this->get_array();
+                this->_data.emplace<array_type>();
+                auto& array = this->as_array();
                 for (const auto& elem : value) array.emplace_back(elem);
             } else if constexpr (is_bool_like_v<T>) {
-                this->data.emplace<bool_type>(value);
+                this->_data.emplace<bool_type>(value);
             } else if constexpr (is_null_like_v<T>) {
-                this->data.emplace<null_type>(value);
+                this->_data.emplace<null_type>(value);
             } else if constexpr (std::is_floating_point_v<T>) {
-                this->data.emplace<floating_type>(value);
+                this->_data.emplace<floating_type>(value);
             } else if constexpr (std::is_integral_v<T>) {
-                this->data.emplace<integral_type>(value);
+                this->_data.emplace<integral_type>(value);
             } else {
                 static_assert(_always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
             }
@@ -598,29 +611,29 @@ namespace utl::json {
 
         // "native" copy/move semantics for types that support it
         Node& operator=(const object_type& value) {
-            this->data = value;
+            this->_data = value;
             return *this;
         }
         Node& operator=(object_type&& value) {
-            this->data = std::move(value);
+            this->_data = std::move(value);
             return *this;
         }
 
         Node& operator=(const array_type& value) {
-            this->data = value;
+            this->_data = value;
             return *this;
         }
         Node& operator=(array_type&& value) {
-            this->data = std::move(value);
+            this->_data = std::move(value);
             return *this;
         }
 
         Node& operator=(const string_type& value) {
-            this->data = value;
+            this->_data = value;
             return *this;
         }
         Node& operator=(string_type&& value) {
-            this->data = std::move(value);
+            this->_data = std::move(value);
             return *this;
         }
 
@@ -634,7 +647,7 @@ namespace utl::json {
             array_type array_value;
             array_value.reserve(ilist.size());
             for (const auto& e : ilist) array_value.emplace_back(e);
-            this->data = std::move(array_value);
+            this->_data = std::move(array_value);
             return *this;
         }
 
@@ -648,7 +661,7 @@ namespace utl::json {
                 array_value.back() = e;
             }
             // uses 1D 'operator=(std::initializer_list<T>)' to fill each node of the array
-            this->data = std::move(array_value);
+            this->_data = std::move(array_value);
             return *this;
         }
 
@@ -663,7 +676,7 @@ namespace utl::json {
                 array_value.back() = e;
             }
             // uses 2D 'operator=(std::initializer_list<std::initializer_list<T>>)' to fill each node of the array
-            this->data = std::move(array_value);
+            this->_data = std::move(array_value);
             return *this;
         }
 
@@ -690,23 +703,23 @@ namespace utl::json {
         template<class T>
         Node(const T& value)
             requires (!std::is_same_v<std::decay_t<T>, Node> &&
-            !std::is_same_v<std::decay_t<T>, object_type> &&
-            !std::is_same_v<std::decay_t<T>, array_type> &&
-            !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>) {
+                !std::is_same_v<std::decay_t<T>, object_type> &&
+                !std::is_same_v<std::decay_t<T>, array_type> &&
+                !std::is_same_v<std::decay_t<T>, string_type> && is_json_convertible_v<T>) {
             *this = value;
         }
 
-        Node(const object_type& value) { this->data = value; }
-        Node(object_type&& value) { this->data = std::move(value); }
-        Node(const array_type& value) { this->data = value; }
-        Node(array_type&& value) { this->data = std::move(value); }
-        Node(std::string_view value) { this->data = string_type(value); }
-        Node(const string_type& value) { this->data = value; }
-        Node(string_type&& value) { this->data = std::move(value); }
-        Node(integral_type value) { this->data = value; }
-        Node(floating_type value) { this->data = value; }
-        Node(bool_type value) { this->data = value; }
-        Node(null_type value) { this->data = value; }
+        Node(const object_type& value) { this->_data = value; }
+        Node(object_type&& value) { this->_data = std::move(value); }
+        Node(const array_type& value) { this->_data = value; }
+        Node(array_type&& value) { this->_data = std::move(value); }
+        Node(std::string_view value) { this->_data = string_type(value); }
+        Node(const string_type& value) { this->_data = value; }
+        Node(string_type&& value) { this->_data = std::move(value); }
+        Node(integral_type value) { this->_data = value; }
+        Node(floating_type value) { this->_data = value; }
+        Node(bool_type value) { this->_data = value; }
+        Node(null_type value) { this->_data = value; }
 
         // --- JSON Serializing public API ---
         // -----------------------------------
@@ -751,6 +764,13 @@ namespace utl::json {
             // specializations of this template that will actually perform the conversion will be defined by
             // macros outside the class body, this is a perfectly legal thing to do, even if unintuitive compared
             // to non-template members, see https://en.cppreference.com/w/cpp/language/member_template
+        }
+
+        // --- Type Information ---
+        // ------------------------
+
+        [[nodiscard]] NodeType type() const {
+            return (NodeType) this->_data.index();
         }
     };
 
@@ -1651,14 +1671,14 @@ namespace utl::json {
             for (const auto& [key, val] : value) {
                 Node single_node;
                 _assign_value_to_node(single_node, val);
-                node.get_object().emplace(key, std::move(single_node));
+                node.as_object().emplace(key, std::move(single_node));
             }
         } else if constexpr (is_array_like_v<T>) {
             node = Array {};
             for (const auto& elem : value) {
                 Node single_node;
                 _assign_value_to_node(single_node, elem);
-                node.get_array().emplace_back(std::move(single_node));
+                node.as_array().emplace_back(std::move(single_node));
             }
         } else static_assert(_always_false_v<T>, "Could not resolve recursive conversion from 'T' to 'json::Node'.");
     }
@@ -1674,18 +1694,18 @@ namespace utl::json {
     // we can't directly assign 'std::vector<Node>' to 'std::vector<double>' like we would with simpler types.
     template<class T>
     void _assign_node_to_value_recursively(T& value, const Node& node) {
-        if constexpr (is_string_like_v<T>) value = node.get_string();
+        if constexpr (is_string_like_v<T>) value = node.as_string();
         else if constexpr (is_object_like_v<T>) {
-            const auto object = node.get_object();
+            const auto object = node.as_object();
             for (const auto& [key, val] : object) _assign_node_to_value_recursively(value[key], val);
         } else if constexpr (is_array_like_v<T>) {
-            const auto array = node.get_array();
+            const auto array = node.as_array();
             value.resize(array.size());
             for (std::size_t i = 0; i < array.size(); ++i) _assign_node_to_value_recursively(value[i], array[i]);
-        } else if constexpr (is_bool_like_v<T>) value = node.get_bool();
-        else if constexpr (is_null_like_v<T>) value = node.get_null();
-        else if constexpr (std::is_integral_v<T>) value = node.get_integral();
-        else if constexpr (std::is_floating_point_v<T>) value = node.get_floating();
+        } else if constexpr (is_bool_like_v<T>) value = node.as_bool();
+        else if constexpr (is_null_like_v<T>) value = node.as_null();
+        else if constexpr (std::is_integral_v<T>) value = node.as_integral();
+        else if constexpr (std::is_floating_point_v<T>) value = node.as_floating();
         else if constexpr (_is_reflected_struct<T>) value = node.to_struct<T>();
         else static_assert(_always_false_v<T>, "Method is a non-exhaustive visitor of std::variant<>.");
     }
@@ -1696,7 +1716,7 @@ namespace utl::json {
     void _assign_node_to_value_recursively(std::array<T, N>& value, const Node& node) {
         using namespace std::string_literals;
 
-        const auto array = node.get_array();
+        const auto array = node.as_array();
 
         if (array.size() != value.size())
             throw std::runtime_error("JSON to structure serializer encountered non-mathing std::array size of "s +
@@ -1738,6 +1758,11 @@ namespace utl::json {
     static_assert(true)
 
 } // namespace utl::json
+
+namespace utl {
+    using JsonType = json::NodeType;
+    using Json = json::Node;
+}
 
 #endif
 #endif // module utl::json

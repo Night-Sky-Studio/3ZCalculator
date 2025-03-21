@@ -10,76 +10,76 @@
 namespace zzz::combat::drive_disc_info {
     // mss4 - main stat slot 4
     constexpr frozen::unordered_set mss4_limits = {
-        StatType::AtkRatio,
-        StatType::HpRatio,
-        StatType::DefRatio,
-        StatType::Ap,
-        StatType::CritRate,
-        StatType::CritDmg
+        StatId::AtkRatio,
+        StatId::HpRatio,
+        StatId::DefRatio,
+        StatId::Ap,
+        StatId::CritRate,
+        StatId::CritDmg
     };
     // mss5 - main stat slot 5
     constexpr frozen::unordered_set mss5_limits = {
-        StatType::AtkRatio,
-        StatType::HpRatio,
-        StatType::DefRatio,
-        StatType::DefPenRatio,
-        StatType::PhysRatio,
-        StatType::FireRatio,
-        StatType::IceRatio,
-        StatType::ElectricRatio,
-        StatType::EtherRatio
+        StatId::AtkRatio,
+        StatId::HpRatio,
+        StatId::DefRatio,
+        StatId::DefPenRatio,
+        StatId::PhysRatio,
+        StatId::FireRatio,
+        StatId::IceRatio,
+        StatId::ElectricRatio,
+        StatId::EtherRatio
     };
     // mss6 - main stat slot 6
     constexpr frozen::unordered_set mss6_limits = {
-        StatType::AtkRatio,
-        StatType::HpRatio,
-        StatType::DefRatio,
-        StatType::AmRatio,
-        StatType::ErRatio,
-        StatType::ImpactRatio
+        StatId::AtkRatio,
+        StatId::HpRatio,
+        StatId::DefRatio,
+        StatId::AmRatio,
+        StatId::ErRatio,
+        StatId::ImpactRatio
     };
 
-    constexpr frozen::unordered_map<StatType, std::array<double, 3>, 18> main_stat_conversion_table = {
-        { StatType::HpFlat, { 734, 1468, 2200 } },
-        { StatType::AtkFlat, { 104, 212, 316 } },
-        { StatType::DefFlat, { 60, 124, 184 } },
-        { StatType::AtkRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::HpRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::DefRatio, { 0.16, 0.32, 0.48 } },
-        { StatType::Ap, { 32, 60, 92 } },
-        { StatType::CritRate, { 0.8, 0.16, 0.24 } },
-        { StatType::CritDmg, { 0.16, 0.32, 0.48 } },
-        { StatType::DefPenRatio, { 0.08, 0.16, 0.24 } },
-        { StatType::PhysRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::FireRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::IceRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::ElectricRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::EtherRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::AmRatio, { 0.1, 0.2, 0.3 } },
-        { StatType::ErRatio, { 0.2, 0.4, 0.6 } },
-        { StatType::ImpactRatio, { 0.06, 0.12, 0.18 } },
+    constexpr frozen::unordered_map<StatId, std::array<double, 3>, 18> main_stat_conversion_table = {
+        { StatId::HpFlat, { 734, 1468, 2200 } },
+        { StatId::AtkFlat, { 104, 212, 316 } },
+        { StatId::DefFlat, { 60, 124, 184 } },
+        { StatId::AtkRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::HpRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::DefRatio, { 0.16, 0.32, 0.48 } },
+        { StatId::Ap, { 32, 60, 92 } },
+        { StatId::CritRate, { 0.8, 0.16, 0.24 } },
+        { StatId::CritDmg, { 0.16, 0.32, 0.48 } },
+        { StatId::DefPenRatio, { 0.08, 0.16, 0.24 } },
+        { StatId::PhysRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::FireRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::IceRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::ElectricRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::EtherRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::AmRatio, { 0.1, 0.2, 0.3 } },
+        { StatId::ErRatio, { 0.2, 0.4, 0.6 } },
+        { StatId::ImpactRatio, { 0.06, 0.12, 0.18 } },
     };
-    constexpr frozen::unordered_map<StatType, std::array<double, 3>, 10> sub_stat_convertion_table = {
-        { StatType::AtkFlat, { 7, 15, 19 } },
-        { StatType::AtkRatio, { 0.01, 0.02, 0.03 } },
-        { StatType::HpFlat, { 39, 79, 112 } },
-        { StatType::HpRatio, { 0.01, 0.02, 0.03 } },
-        { StatType::DefFlat, { 5, 10, 15 } },
-        { StatType::DefRatio, { 0.016, 0.032, 0.048 } },
-        { StatType::CritRate, { 0.008, 0.016, 0.024 } },
-        { StatType::CritDmg, { 0.016, 0.032, 0.048 } },
-        { StatType::DefPenFlat, { 3, 6, 9 } },
-        { StatType::Ap, { 3, 6, 9 } }
+    constexpr frozen::unordered_map<StatId, std::array<double, 3>, 10> sub_stat_convertion_table = {
+        { StatId::AtkFlat, { 7, 15, 19 } },
+        { StatId::AtkRatio, { 0.01, 0.02, 0.03 } },
+        { StatId::HpFlat, { 39, 79, 112 } },
+        { StatId::HpRatio, { 0.01, 0.02, 0.03 } },
+        { StatId::DefFlat, { 5, 10, 15 } },
+        { StatId::DefRatio, { 0.016, 0.032, 0.048 } },
+        { StatId::CritRate, { 0.008, 0.016, 0.024 } },
+        { StatId::CritDmg, { 0.016, 0.032, 0.048 } },
+        { StatId::DefPenFlat, { 3, 6, 9 } },
+        { StatId::Ap, { 3, 6, 9 } }
     };
 
-    constexpr bool check_ms_limits(uint8_t slot, StatType type) {
+    constexpr bool check_ms_limits(uint8_t slot, StatId type) {
         switch (slot) {
         case 1:
-            return type == StatType::HpFlat;
+            return type == StatId::HpFlat;
         case 2:
-            return type == StatType::AtkFlat;
+            return type == StatId::AtkFlat;
         case 3:
-            return type == StatType::DefFlat;
+            return type == StatId::DefFlat;
         case 4:
             return mss4_limits.contains(type);
         case 5:
@@ -118,7 +118,7 @@ namespace zzz::combat {
         _is_set.rarity = true;
         return *this;
     }
-    DdpBuilder& DdpBuilder::set_main_stat(StatType type, uint8_t level) {
+    DdpBuilder& DdpBuilder::set_main_stat(StatId type, uint8_t level) {
         if (m_product->m_slot == 0 || m_product->m_rarity == Rarity::NotSet)
             throw std::runtime_error("you have to specify slot and rarity first");
         if (!drive_disc_info::check_ms_limits(m_product->m_slot, type))
@@ -132,7 +132,7 @@ namespace zzz::combat {
         _is_set.main_stat = true;
         return *this;
     }
-    DdpBuilder& DdpBuilder::add_sub_stat(StatType type, uint8_t level) {
+    DdpBuilder& DdpBuilder::add_sub_stat(StatId type, uint8_t level) {
         if (m_product->m_slot == 0 || m_product->m_rarity == Rarity::NotSet)
             throw std::runtime_error("you have to specify slot and main stat first");
         if (m_product->m_main_stat.type == type)
