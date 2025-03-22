@@ -14,6 +14,10 @@
 //crow
 #include "crow/logging.h"
 
+namespace global {
+    extern std::string PATH;
+}
+
 namespace lib {
     // MObject
 
@@ -35,7 +39,7 @@ namespace lib {
 #endif
         }
 
-        auto path = lib::format("{}.{}", _fullname, ObjectManager::file_extensions.at(mode));
+        auto path = lib::format("{}/{}.{}", global::PATH, _fullname, ObjectManager::file_extensions.at(mode));
         std::fstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open()) {
 #ifdef DEBUG_STATUS
