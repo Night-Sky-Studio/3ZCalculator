@@ -3,6 +3,12 @@
 //std
 #include <stdexcept>
 
+//crow
+#include "crow/logging.h"
+
+//lib
+#include "library/format.hpp"
+
 namespace zzz::details {
     // Dds
 
@@ -45,5 +51,40 @@ namespace zzz::details {
         if (!is_built())
             throw std::runtime_error("you have to specify id, name, 2- and 4-piece bonuses");
         return IBuilder::get_product();
+    }
+}
+
+namespace zzz {
+    DdsPtr::DdsPtr(const std::string& fullname) :
+        MObject(lib::format("dds/{}")) {
+    }
+
+    DdsDetails load_from_json(const utl::Json& json) {
+        const auto& table = json.as_object();
+        details::DdsBuilder builder;
+
+        builder.set_id(table.at("id").as_integral());
+        builder.set_name(table.at("name").as_string());
+
+        const auto& set_bonuses = table.at("set_bonus").as_array();
+        builder.set_p2(StatsGrid::make_from(set_bonuses[0]));
+        builder.set_p4(StatsGrid::make_from(set_bonuses[1]));
+
+        return builder.get_product();
+    }
+
+    bool DdsPtr::load_from_string(const std::string& input, size_t mode) {
+        if (mode == 1) {
+            auto json = utl::json::from_string(input);
+            auto details = load_from_json(json);
+            set(std::move(details));
+        } else {
+#ifdef DEBUG_STATUS
+            CROW_LOG_ERROR << lib::format("extension_id {} isn't defined", mode);
+#endif
+            return false;
+        }
+
+        return true;
     }
 }

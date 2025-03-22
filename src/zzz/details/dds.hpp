@@ -7,6 +7,7 @@
 
 //library
 #include "library/builder.hpp"
+#include "library/cached_memory.hpp"
 
 //zzz
 #include "zzz/stats.hpp"
@@ -52,7 +53,10 @@ namespace zzz::details {
 namespace zzz {
     using DdsDetails = details::Dds;
 
-    class DdsPtr {
+    class DdsPtr : public lib::MObject {
+    public:
+        explicit DdsPtr(const std::string& fullname);
 
+        bool load_from_string(const std::string& input, size_t mode) override;
     };
 }

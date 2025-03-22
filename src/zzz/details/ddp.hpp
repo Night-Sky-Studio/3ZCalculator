@@ -54,5 +54,4 @@ namespace zzz::combat {
 
 namespace zzz {
     using Ddp = combat::Ddp;
-    using DdpPtr = std::shared_ptr<combat::Ddp>;
 }
