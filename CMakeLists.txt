@@ -53,6 +53,7 @@ add_executable(3ZCalculator
     "main.cpp"
 
     "src/library/cached_memory.cpp"
+    "src/library/logger.cpp"
 
     "src/zzz/enums.cpp"
     "src/zzz/stats.cpp"
@@ -69,7 +70,6 @@ add_executable(3ZCalculator
     #"src/calc/calculator.cpp"
 
     #"src/backend/backend.cpp"
-    "src/backend/logger.cpp"
 )
 
 target_include_directories(3ZCalculator PRIVATE src)

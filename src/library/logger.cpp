@@ -1,8 +1,9 @@
-#include "backend/logger.hpp"
+#include "library/logger.hpp"
 
 //std
 #include <array>
 #include <chrono>
+#include <iostream>
 #include <stdexcept>
 
 //frozen
@@ -28,18 +29,19 @@ namespace backend::logger_convert {
 }
 
 namespace backend {
-    Logger::Logger(const std::string& path) :
-        _file(path, std::ios::out | std::ios::trunc) {
-        if (!_file.is_open())
-            throw std::runtime_error("log file is not found");
+    void Logger::add_log_stream(std::ostream& stream) {
+        _ostreams.emplace_back(&stream);
     }
 
     void Logger::log(std::string message, crow::LogLevel level) {
         std::lock_guard lock(_mutex);
-        _file << lib::format("({:%F %T})[{:<8}] {}\n",
+        auto output = lib::format("({:%F %T})[{:<8}] {}\n",
             std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()),
             logger_convert::level_to_string(level),
             std::move(message)
-        ) << std::flush;
+        );
+
+        for (const auto& os : _ostreams)
+            *os << output << std::flush;
     }
 }
