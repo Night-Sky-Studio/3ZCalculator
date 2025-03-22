@@ -15,7 +15,7 @@ namespace zzz {
     StatsGrid::StatsGrid(const StatsGrid& another) {
         _copy_from(another);
     }
-    StatsGrid& StatsGrid::operator=(const StatsGrid& another) {
+    StatsGrid& StatsGrid::operator=(const StatsGrid& another) noexcept {
         _copy_from(another);
         return *this;
     }
@@ -29,13 +29,13 @@ namespace zzz {
     }
 
     StatsGrid StatsGrid::make_from(const utl::Json& json, Tag mandatory_tag) {
-        if (!json.is_array())
-            throw std::runtime_error("stats have to be serialized from json.array");
+        if (!json.is_object())
+            throw std::runtime_error("stats have to be serialized from json.object");
 
         StatsGrid result;
 
-        for (const auto& it : json.as_array()) {
-            auto stat = StatFactory::make(it);
+        for (const auto& [k, v] : json.as_object()) {
+            auto stat = StatFactory::make(k, v);
             stat->m_tag = mandatory_tag;
             result.set(stat);
         }
@@ -133,7 +133,7 @@ namespace zzz {
         on_emplace.m_id = id;
         on_emplace.m_tag = tag;
 
-        return add(std::make_shared<IStat>(on_emplace));
+        add(std::make_shared<RegularStat>(std::move(on_emplace)));
     }
     void StatsGrid::add_relative(const std::string& formula, StatId id, Tag tag) {}
 

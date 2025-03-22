@@ -1,15 +1,16 @@
 #pragma once
 
 //std
-#include <memory>
 #include <string>
 
 //library
 #include "library/builder.hpp"
+#include "library/cached_memory.hpp"
 
 //zzz
 #include "zzz/enums.hpp"
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
     class Wengine {
@@ -19,17 +20,15 @@ namespace zzz::details {
         uint64_t id() const;
         const std::string& name() const;
         Speciality speciality() const;
-        const stat& main_stat() const;
-        const stat& sub_stat() const;
-        const StatsGrid& passive_stats() const;
+        // you can really have access to all stats at once
+        const StatsGrid& stats() const;
 
     protected:
         uint64_t m_id;
         std::string m_name;
         Rarity m_rarity;
         Speciality m_speciality;
-        stat m_main_stat, m_sub_stat;
-        StatsGrid m_passive_stats;
+        StatsGrid m_stats;
     };
 
     class WengineBuilder : public lib::IBuilder<Wengine> {
@@ -37,11 +36,13 @@ namespace zzz::details {
         WengineBuilder& set_id(uint64_t id);
         WengineBuilder& set_name(std::string name);
         WengineBuilder& set_rarity(Rarity rarity);
+
         WengineBuilder& set_speciality(Speciality speciality);
-        WengineBuilder& set_main_stat(stat main_stat);
-        WengineBuilder& set_sub_stat(stat sub_stat);
-        WengineBuilder& add_passive_stat(stat passive_stat);
-        WengineBuilder& set_passive_stats(StatsGrid passive_stats);
+        WengineBuilder& set_speciality(std::string_view speciality);
+
+        WengineBuilder& set_main_stat(const StatsGrid& main_stat);
+        WengineBuilder& set_sub_stat(const StatsGrid& sub_stat);
+        WengineBuilder& set_passive_stats(const StatsGrid& stats);
 
         bool is_built() const override;
         Wengine&& get_product() override;
@@ -61,5 +62,11 @@ namespace zzz::details {
 
 namespace zzz {
     using WengineDetails = details::Wengine;
-    using WengineDetailsPtr = std::shared_ptr<details::Wengine>;
+
+    class WenginePtr : public lib::MObject {
+    public:
+        explicit WenginePtr(const std::string& name);
+
+        bool load_from_string(const std::string& input, size_t mode) override;
+    };
 }

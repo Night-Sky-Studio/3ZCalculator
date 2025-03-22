@@ -98,8 +98,7 @@ namespace zzz::combat {
     uint64_t DriveDiscPiece::disc_id() const { return m_disc_id; }
     uint8_t DriveDiscPiece::slot() const { return m_slot; }
     Rarity DriveDiscPiece::rarity() const { return m_rarity; }
-    const stat& DriveDiscPiece::main_stat() const { return m_main_stat; }
-    const stat& DriveDiscPiece::sub_stat(size_t index) const { return m_sub_stats[index]; }
+    const StatsGrid& DriveDiscPiece::stats() const { return m_stats; }
 
     // DriveDiscPieceBuilder
 
@@ -124,26 +123,26 @@ namespace zzz::combat {
         if (!drive_disc_info::check_ms_limits(m_product->m_slot, type))
             throw std::runtime_error("for this slot main stat doesn't exist");
 
-        m_product->m_main_stat = {
-            .value = drive_disc_info::main_stat_conversion_table.at(type)[(size_t) m_product->m_rarity - 2],
-            .type = type,
-            .tag = Tag::Universal
-        };
-        _is_set.main_stat = true;
+        m_product->m_stats.add_regular(
+            drive_disc_info::main_stat_conversion_table.at(type)[(size_t) m_product->m_rarity - 2],
+            type,
+            Tag::Universal
+        );
+        _main_stat_id = type;
         return *this;
     }
     DdpBuilder& DdpBuilder::add_sub_stat(StatId type, uint8_t level) {
         if (m_product->m_slot == 0 || m_product->m_rarity == Rarity::NotSet)
             throw std::runtime_error("you have to specify slot and main stat first");
-        if (m_product->m_main_stat.type == type)
+        if (_main_stat_id == type)
             throw std::runtime_error("you can't have same main and sub stat");
 
-        auto rarity_index = (size_t) m_product->m_rarity - 2;
-        m_product->m_sub_stats[_current_sub_stat++] = {
-            .value = drive_disc_info::sub_stat_convertion_table.at(type)[rarity_index] * (level + 1),
-            .type = type,
-            .tag = Tag::Universal
-        };
+        size_t rarity_index = (size_t) m_product->m_rarity - 2;
+        m_product->m_stats.add_regular(
+            drive_disc_info::sub_stat_convertion_table.at(type)[rarity_index] * (level + 1),
+            type,
+            Tag::Universal
+        );
         return *this;
     }
 
@@ -151,7 +150,7 @@ namespace zzz::combat {
         return _is_set.disc_id
             && _is_set.slot
             && _is_set.rarity
-            && _is_set.main_stat
+            && _main_stat_id != StatId::None
             && _current_sub_stat >= (size_t) m_product->m_rarity - 1;
     }
     DriveDiscPiece&& DdpBuilder::get_product() {

@@ -53,6 +53,9 @@ namespace lib {
     inline size_t hash(const std::string& what) {
         return ext::crc64(0, what.data(), what.size());
     }
+    inline size_t hash(std::string_view what) {
+        return ext::crc64(0, what.data(), what.size());
+    }
     constexpr size_t hash(const char* what, size_t length) {
         return ext::crc64(0, what, length);
     }

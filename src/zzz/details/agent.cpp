@@ -1,17 +1,15 @@
 #include "zzz/details/agent.hpp"
 
 //std
+#include <ranges>
 #include <stdexcept>
 
 //utl
 #include "utl/json.hpp"
 
 //library
-#include <ranges>
-
 #include "library/format.hpp"
 #include "library/string_funcs.hpp"
-#include "zzz/stats_grid.hpp"
 
 #ifdef DEBUG_STATUS
 #include "crow/logging.h"
@@ -105,17 +103,24 @@ namespace zzz::details {
     }
 }
 
+#include <future>
+
 namespace zzz {
     AgentPtr::AgentPtr(const std::string& name) :
         MObject(lib::format("agents/{}", name)) {
-        load_from_file(1);
     }
 
-    AnomalyDetails make_anomaly_from(const utl::json::Node& json, Element default_element) {
+    AnomalyDetails make_anomaly_from(const std::string& key, const utl::Json& json, Element default_element) {
+        if (json.is_string()) {
+            if (json.as_string() == "standard")
+                return AnomalyDetails::get_standard_anomaly(key);
+            throw std::runtime_error("anomaly as string can only be standard");
+        }
+
         const auto& table = json.as_object();
         details::AnomalyBuilder builder;
 
-        builder.set_name(json.key_as_copy());
+        builder.set_name(key);
         builder.set_scale(table.at("scale").as_floating());
 
         if (auto it = table.find("element"); it != table.end())
@@ -135,7 +140,7 @@ namespace zzz {
         return builder.get_product();
     }
 
-    SkillDetails::scale make_scale_from(const utl::json::Node& json, Element default_element) {
+    SkillDetails::scale make_scale_from(const utl::Json& json, Element default_element) {
         const auto& array = json.as_array();
         SkillDetails::scale result;
 
@@ -151,13 +156,13 @@ namespace zzz {
 
         return result;
     }
-    SkillDetails make_skill_from(const utl::json::Node& json, Element default_element) {
+    SkillDetails make_skill_from(const std::string& key, const utl::Json& json, Element default_element) {
         const auto& table = json.as_object();
         details::SkillBuilder builder;
 
         auto tag = convert::string_to_tag(table.at("tag").as_string());
 
-        builder.set_name(json.key_as_copy());
+        builder.set_name(key);
         builder.set_tag(tag);
 
         if (auto it = table.find("scale"); it != table.end()) {
@@ -175,25 +180,29 @@ namespace zzz {
         return builder.get_product();
     }
 
-    AgentDetails load_from_json(const utl::json::Node& json) {
+    // json has to be root
+    AgentDetails load_from_json(const utl::Json& json) {
+        const auto& table = json.as_object();
         details::AgentBuilder builder;
 
-        auto element = convert::string_to_element(json["element"].as_string());
+        auto element = convert::string_to_element(table.at("element").as_string());
 
-        builder.set_id(json["id"].as_integral());
-        builder.set_name(json["name"].as_string());
-        builder.set_speciality(json["speciality"].as_string());
+        builder.set_id(table.at("id").as_integral());
+        builder.set_name(table.at("name").as_string());
+        builder.set_speciality(table.at("speciality").as_string());
         builder.set_element(element);
-        builder.set_rarity((Rarity) json["rarity"].as_integral());
+        builder.set_rarity((Rarity) table.at("rarity").as_integral());
 
-        auto stats = StatsGrid::make_from(json["stats"]);
+        auto stats = StatsGrid::make_from(table.at("stats"));
         builder.set_stats(std::move(stats));
 
-        for (const auto& value : json["anomalies"].as_object() | std::views::values)
-            builder.add_anomaly(make_anomaly_from(value, element));
+        if (auto it = table.find("anomalies"); it != table.end()) {
+            for (const auto& [k, v] : it->second.as_object())
+                builder.add_anomaly(make_anomaly_from(k, v, element));
+        }
 
-        for (const auto& value : json["skills"].as_object() | std::views::values)
-            builder.add_skill(make_skill_from(value, element));
+        for (const auto& [k, v] : table.at("skills").as_object())
+            builder.add_skill(make_skill_from(k, v, element));
 
         return builder.get_product();
     }

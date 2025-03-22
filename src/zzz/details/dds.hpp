@@ -3,7 +3,6 @@
 //std
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <string>
 
 //library
@@ -11,9 +10,10 @@
 
 //zzz
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
-    class DriveDiscSet {
+    class Dds {
         friend class DdsBuilder;
 
     public:
@@ -29,7 +29,7 @@ namespace zzz::details {
         std::array<StatsGrid, 2> m_set_bonuses;
     };
 
-    class DdsBuilder : public lib::IBuilder<DriveDiscSet> {
+    class DdsBuilder : public lib::IBuilder<Dds> {
     public:
         DdsBuilder& set_id(uint64_t id);
         DdsBuilder& set_name(std::string name);
@@ -37,7 +37,7 @@ namespace zzz::details {
         DdsBuilder& set_p4(StatsGrid bonus);
 
         bool is_built() const override;
-        DriveDiscSet&& get_product() override;
+        Dds&& get_product() override;
 
     private:
         struct {
@@ -50,6 +50,9 @@ namespace zzz::details {
 }
 
 namespace zzz {
-    using DdsDetails = details::DriveDiscSet;
-    using DdsDetailsPtr = std::shared_ptr<details::DriveDiscSet>;
+    using DdsDetails = details::Dds;
+
+    class DdsPtr {
+
+    };
 }

@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 23)
 include(FetchContent)
 
 set(USE_BOOST_KARMA OFF)
+#set(DCMAKE_TOOLCHAIN_FILE "D:/lib/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 # CPM.cmake
 
@@ -61,7 +62,7 @@ add_executable(3ZCalculator
 
     "src/zzz/details/agent.cpp"
     "src/zzz/details/anomaly.cpp"
-    "src/zzz/details/drive_disc_set.cpp"
+    "src/zzz/details/dds.cpp"
     "src/zzz/details/rotation.cpp"
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"

@@ -433,7 +433,6 @@ namespace utl::json {
             floating_type,
             bool_type>;
 
-        std::string_view _key;
         variant_type _data {};
 
     public:
@@ -489,9 +488,6 @@ namespace utl::json {
             return std::get_if<T>(&this->_data);
         }
 
-        [[nodiscard]] std::string_view key() const { return this->_key; }
-        [[nodiscard]] std::string key_as_copy() const { return std::string(this->_key); }
-
         // -- Object methods ---
         // ---------------------
 
@@ -506,7 +502,6 @@ namespace utl::json {
             auto it = object.find(key);
             if (it == object.end()) {
                 it = object.emplace(key, Node {}).first;
-                it->second._key = it->first;
             }
             return it->second;
         }

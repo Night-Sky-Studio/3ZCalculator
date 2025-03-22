@@ -29,25 +29,25 @@ namespace zzz {
         result.m_id = id;
         result.m_tag = tag;
 
-        return std::make_shared<IStat>(std::move(result));
+        return std::make_shared<RegularStat>(std::move(result));
     }
 
-    StatPtr RegularStat::make_from_floating(const utl::Json& json) {
+    StatPtr RegularStat::make_from_floating(const std::string& key, const utl::Json& json) {
         RegularStat result;
 
         result.m_base = json.as_floating();
-        result.m_id = convert::string_to_stat_id(json.key());
+        result.m_id = convert::string_to_stat_id(key);
 
-        return std::make_shared<IStat>(std::move(result));
+        return std::make_shared<RegularStat>(std::move(result));
     }
-    StatPtr RegularStat::make_from_object(const utl::Json& json) {
+    StatPtr RegularStat::make_from_object(const std::string& key, const utl::Json& json) {
         RegularStat result;
 
         result.m_base = json["val"].as_floating();
-        result.m_id = convert::string_to_stat_id(json.key());
+        result.m_id = convert::string_to_stat_id(key);
         result.m_tag = convert::string_to_tag(json.value_or<std::string>("tag", "universal"));
 
-        return std::make_shared<IStat>(std::move(result));
+        return std::make_shared<RegularStat>(std::move(result));
     }
 
     RegularStat::RegularStat() :
@@ -61,21 +61,19 @@ namespace zzz {
         result.m_id = m_id;
         result.m_tag = m_tag;
 
-        return std::make_shared<IStat>(std::move(result));
+        return std::make_shared<RegularStat>(std::move(result));
     }
 
     double RegularStat::value() const {
         return m_base;
     }
 
-    // RelativeStat
+    // TODO: RelativeStat
 
-    // TODO
-    StatPtr RelativeStat::make_from_string(const utl::Json& json) {
+    StatPtr RelativeStat::make_from_string(const std::string& key, const utl::Json& json) {
         return nullptr;
     }
-    // TODO
-    StatPtr RelativeStat::make_from_object(const utl::Json& json) {
+    StatPtr RelativeStat::make_from_object(const std::string& key, const utl::Json& json) {
         return nullptr;
     }
 
@@ -83,10 +81,21 @@ namespace zzz {
         IStat(2) {
     }
 
+    StatPtr RelativeStat::copy_as_ptr() const {
+        return nullptr;
+    }
+
+    double RelativeStat::value() const {
+        return 0;
+    }
+
     // StatFactory
 
+    std::string StatFactory::default_type_name;
+    std::unordered_map<std::string, StatFactory::StatMaker> StatFactory::m_makers;
+
     void StatFactory::init_default() {
-        default_type_name = "regular";
+        default_type_name = "regular 5";
         m_makers = {
             { "regular 1", RegularStat::make_from_object },
             { "regular 5", RegularStat::make_from_floating },
@@ -100,11 +109,11 @@ namespace zzz {
         return flag;
     }
 
-    StatPtr StatFactory::make(const utl::Json& json) {
-        const auto& key = json.is_object()
+    StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
+        const auto& maker_key = json.is_object()
             ? json.value_or<std::string>("type", default_type_name) + ' ' + std::to_string((size_t) json.type())
             : default_type_name;
-        auto it = m_makers.find(key);
-        return it != m_makers.end() ? it->second(json) : nullptr;
+        auto it = m_makers.find(maker_key);
+        return it != m_makers.end() ? it->second(key, json) : nullptr;
     }
 }

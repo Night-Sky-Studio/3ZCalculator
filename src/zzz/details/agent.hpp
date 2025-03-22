@@ -6,16 +6,19 @@
 #include <unordered_map>
 #include <variant>
 
+//utl
+#include "utl/json.hpp"
+
 //library
 #include "library/builder.hpp"
 #include "library/cached_memory.hpp"
 
 //zzz
-#include "utl/json.hpp"
 #include "zzz/details/anomaly.hpp"
 #include "zzz/details/skill.hpp"
 #include "zzz/enums.hpp"
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
     using Ability = std::variant<Skill, Anomaly>;

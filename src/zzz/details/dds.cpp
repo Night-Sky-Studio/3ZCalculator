@@ -1,18 +1,18 @@
-#include "zzz/details/drive_disc_set.hpp"
+#include "zzz/details/dds.hpp"
 
 //std
 #include <stdexcept>
 
 namespace zzz::details {
-    // DriveDiscSet
+    // Dds
 
-    uint64_t DriveDiscSet::id() const { return m_id; }
-    const std::string& DriveDiscSet::name() const { return m_name; }
+    uint64_t Dds::id() const { return m_id; }
+    const std::string& Dds::name() const { return m_name; }
 
-    const StatsGrid& DriveDiscSet::p2() const { return m_set_bonuses[0]; }
-    const StatsGrid& DriveDiscSet::p4() const { return m_set_bonuses[1]; }
+    const StatsGrid& Dds::p2() const { return m_set_bonuses[0]; }
+    const StatsGrid& Dds::p4() const { return m_set_bonuses[1]; }
 
-    // DriveDiscSetBuilder
+    // DdsBuilder
 
     DdsBuilder& DdsBuilder::set_id(uint64_t id) {
         m_product->m_id = id;
@@ -41,7 +41,7 @@ namespace zzz::details {
             && _is_set.p2
             && _is_set.p4;
     }
-    DriveDiscSet&& DdsBuilder::get_product() {
+    Dds&& DdsBuilder::get_product() {
         if (!is_built())
             throw std::runtime_error("you have to specify id, name, 2- and 4-piece bonuses");
         return IBuilder::get_product();

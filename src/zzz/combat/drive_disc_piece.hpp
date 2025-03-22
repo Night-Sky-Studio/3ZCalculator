@@ -9,7 +9,7 @@
 
 //zzz
 #include "zzz/enums.hpp"
-#include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::combat {
     class DriveDiscPiece {
@@ -19,15 +19,13 @@ namespace zzz::combat {
         uint64_t disc_id() const;
         uint8_t slot() const;
         Rarity rarity() const;
-        const stat& main_stat() const;
-        const stat& sub_stat(size_t index) const;
+        const StatsGrid& stats() const;
 
     protected:
         uint64_t m_disc_id;
         uint8_t m_slot;
         Rarity m_rarity;
-        stat m_main_stat;
-        stat m_sub_stats[4];
+        StatsGrid m_stats;
     };
 
     // firstly set slot
@@ -44,13 +42,13 @@ namespace zzz::combat {
 
     private:
         struct {
-            bool disc_id   : 1 = false;
-            bool slot      : 1 = false;
-            bool rarity    : 1 = false;
-            bool main_stat : 1 = false;
+            bool disc_id : 1 = false;
+            bool slot    : 1 = false;
+            bool rarity  : 1 = false;
         } _is_set;
 
-        uint8_t _current_sub_stat : 3 = 0;
+        uint8_t _current_sub_stat = 0;
+        StatId _main_stat_id = StatId::None;
     };
 }
 

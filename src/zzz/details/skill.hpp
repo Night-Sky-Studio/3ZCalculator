@@ -11,6 +11,7 @@
 
 //zzz
 #include "zzz/enums.hpp"
+#include "zzz/stats.hpp"
 #include "zzz/stats_grid.hpp"
 
 namespace zzz::details {

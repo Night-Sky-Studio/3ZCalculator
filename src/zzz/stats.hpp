@@ -46,8 +46,8 @@ namespace zzz {
     public:
         static StatPtr make(double base, StatId id, Tag tag);
 
-        static StatPtr make_from_floating(const utl::Json& json);
-        static StatPtr make_from_object(const utl::Json& json);
+        static StatPtr make_from_floating(const std::string& key, const utl::Json& json);
+        static StatPtr make_from_object(const std::string& key, const utl::Json& json);
 
         explicit RegularStat();
 
@@ -58,12 +58,13 @@ namespace zzz {
 
     class RelativeStat : public IStat {
     public:
-        static StatPtr make_from_string(const utl::Json& json);
-        static StatPtr make_from_object(const utl::Json& json);
+        static StatPtr make_from_string(const std::string& key, const utl::Json& json);
+        static StatPtr make_from_object(const std::string& key, const utl::Json& json);
 
         explicit RelativeStat();
 
-        //double value() const override;
+        StatPtr copy_as_ptr() const override;
+        double value() const override;
 
     protected:
         double m_mult = 0;
@@ -72,14 +73,14 @@ namespace zzz {
 
     class StatFactory {
     public:
-        using StatMaker = std::function<StatPtr(const utl::Json&)>;
+        using StatMaker = std::function<StatPtr(const std::string&, const utl::Json&)>;
 
         static std::string default_type_name;
 
         static void init_default();
 
         static bool add_maker(std::string key, StatMaker value);
-        static StatPtr make(const utl::Json& json);
+        static StatPtr make(const std::string& key, const utl::Json& json);
 
     protected:
         static std::unordered_map<std::string, StatMaker> m_makers;

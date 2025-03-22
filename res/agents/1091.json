@@ -17,7 +17,6 @@
     },
 
     "anomalies": {
-        "shatter": "standard",
         "frostburn": {
             "scale": 1500.0
         }

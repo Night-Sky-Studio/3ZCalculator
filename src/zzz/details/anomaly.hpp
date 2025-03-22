@@ -10,6 +10,7 @@
 
 //zzz
 #include "zzz/enums.hpp"
+#include "zzz/stats.hpp"
 #include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
@@ -17,12 +18,12 @@ namespace zzz::details {
 		friend class AnomalyBuilder;
 
 	public:
-		static std::pair<Element, Anomaly> make_as_pair(
+		static std::pair<size_t, Anomaly> make_as_pair(
 			std::string name,
 			double scale,
 			Element element,
 			StatsGrid buffs = {});
-		static const Anomaly& get_standard_anomaly(Element element);
+		static const Anomaly& get_standard_anomaly(std::string_view name);
 
 		Anomaly() = default;
 
@@ -40,7 +41,7 @@ namespace zzz::details {
 		bool m_can_crit = false;
 
 	private:
-		static const std::unordered_map<Element, Anomaly> standard_anomalies;
+		static const std::unordered_map<size_t, Anomaly> standard_anomalies;
 
 		Anomaly(std::string name, double scale, Element element, StatsGrid buffs);
 	};
