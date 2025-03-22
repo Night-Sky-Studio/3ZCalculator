@@ -15,6 +15,7 @@
 
 int main() {
 	lib::ObjectManager::init_default_file_extensions();
+	zzz::StatFactory::init_default();
 	zzz::AgentPtr agent("1091");
 
 	return 0;

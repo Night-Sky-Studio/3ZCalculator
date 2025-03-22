@@ -490,6 +490,7 @@ namespace utl::json {
         }
 
         [[nodiscard]] std::string_view key() const { return this->_key; }
+        [[nodiscard]] std::string key_as_copy() const { return std::string(this->_key); }
 
         // -- Object methods ---
         // ---------------------

@@ -2,13 +2,45 @@
 
 //std
 #include <ranges>
+#include <stdexcept>
 
 //lib
 #include "library/format.hpp"
 
 namespace zzz {
     size_t gen_key(StatId id, Tag tag) {
-        return size_t(tag) << 8 | uint8_t(id);
+        return uint8_t(id) << 8 | size_t(tag);
+    }
+
+    StatsGrid::StatsGrid(const StatsGrid& another) {
+        _copy_from(another);
+    }
+    StatsGrid& StatsGrid::operator=(const StatsGrid& another) {
+        _copy_from(another);
+        return *this;
+    }
+
+    StatsGrid::StatsGrid(StatsGrid&& another) noexcept :
+        m_content(std::move(another.m_content)) {
+    }
+    StatsGrid& StatsGrid::operator=(StatsGrid&& another) noexcept {
+        m_content = std::move(another.m_content);
+        return *this;
+    }
+
+    StatsGrid StatsGrid::make_from(const utl::Json& json, Tag mandatory_tag) {
+        if (!json.is_array())
+            throw std::runtime_error("stats have to be serialized from json.array");
+
+        StatsGrid result;
+
+        for (const auto& it : json.as_array()) {
+            auto stat = StatFactory::make(it);
+            stat->m_tag = mandatory_tag;
+            result.set(stat);
+        }
+
+        return result;
     }
 
 #ifdef DEBUG_STATUS
@@ -73,14 +105,27 @@ namespace zzz {
         return it->second->m_base;
     }
 
-    void StatsGrid::add(const RegularStat& stat) {
-        size_t key = gen_key(stat.m_id, stat.m_tag);
+    bool StatsGrid::contains(StatId id, Tag tag) const {
+        return m_content.contains(gen_key(id, tag));
+    }
+
+    void StatsGrid::set(const StatPtr& stat) {
+        size_t key = gen_key(stat->m_id, stat->m_tag);
         auto it = m_content.find(key);
         if (it != m_content.end())
-            it->second->m_base += stat.m_base;
+            it->second = stat;
         else
-            m_content.emplace(key, std::make_shared<IStat>(stat));
+            m_content.emplace(key, stat);
     }
+    void StatsGrid::add(const StatPtr& stat) {
+        size_t key = gen_key(stat->m_id, stat->m_tag);
+        auto it = m_content.find(key);
+        if (it != m_content.end())
+            it->second->m_base += stat->m_base;
+        else
+            m_content.emplace(key, stat);
+    }
+
     void StatsGrid::add_regular(double value, StatId id, Tag tag) {
         RegularStat on_emplace;
 
@@ -88,19 +133,25 @@ namespace zzz {
         on_emplace.m_id = id;
         on_emplace.m_tag = tag;
 
-        return add(on_emplace);
+        return add(std::make_shared<IStat>(on_emplace));
     }
-
-    void StatsGrid::add(const RelativeStat& stat) {}
     void StatsGrid::add_relative(const std::string& formula, StatId id, Tag tag) {}
 
-    void StatsGrid::add(const StatsGrid& another) {
-        for (const auto& [k, v] : another.m_content) {
+    void StatsGrid::add(const StatsGrid& stat) {
+        for (const auto& [k, v] : stat.m_content) {
             auto it = m_content.find(k);
             if (it != m_content.end())
                 it->second->m_base += v->m_base;
             else
                 m_content.emplace(k, v->copy_as_ptr());
         }
+    }
+
+    //StatPtr StatsGrid::_no_value = RegularStat::make(0, StatId::None, Tag::Universal);
+
+    void StatsGrid::_copy_from(const StatsGrid& another) {
+        m_content.clear();
+        for (const auto& [k, v] : another.m_content)
+            m_content.emplace(k, v->copy_as_ptr());
     }
 }

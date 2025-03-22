@@ -9,9 +9,6 @@
 #include <unordered_map>
 
 namespace lib {
-    using any_ptr = std::shared_ptr<void>;
-    using any_future = std::future<any_ptr>;
-
     using MObjectPtr = std::shared_ptr<class MObject>;
     // helper for ObjectManager
     class MObject {
@@ -30,13 +27,13 @@ namespace lib {
 
         bool is_allocated() const;
 
-    protected:
         // preferably make some private functions
         // which this overriden function will call in switch-case statement
         virtual bool load_from_string(const std::string& input, size_t mode) = 0;
         bool load_from_stream(std::istream& is, size_t mode);
         bool load_from_file(size_t mode);
 
+    protected:
         template<typename T>
         void set(T value) {
             _content.emplace<T>(std::move(value));

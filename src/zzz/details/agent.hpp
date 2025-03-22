@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 //library
 #include "library/builder.hpp"
@@ -17,22 +18,20 @@
 #include "zzz/stats.hpp"
 
 namespace zzz::details {
-    // TODO: make skill and anomaly one unordered_map
+    using Ability = std::variant<Skill, Anomaly>;
+
     class Agent {
         friend class AgentBuilder;
 
     public:
-        // 0 - none, 1 - skill, 2 - anomaly
-        size_t is_skill_or_anomaly(const std::string& name);
-
         uint64_t id() const;
         const std::string& name() const;
         Speciality speciality() const;
         Element element() const;
         Rarity rarity() const;
         const StatsGrid& stats() const;
-        const Skill& skill(const std::string& name) const;
-        const Anomaly& anomaly(const std::string& name) const;
+
+        const Ability& ability(const std::string& name) const;
 
     protected:
         uint64_t m_id;
@@ -41,8 +40,7 @@ namespace zzz::details {
         Element m_element;
         Rarity m_rarity;
         StatsGrid m_stats;
-        std::unordered_map<size_t, Skill> m_skills;
-        std::unordered_map<size_t, Anomaly> m_anomalies;
+        std::unordered_map<size_t, Ability> m_abilities;
     };
 
     class AgentBuilder : public lib::IBuilder<Agent> {
@@ -51,14 +49,14 @@ namespace zzz::details {
         AgentBuilder& set_name(std::string name);
 
         AgentBuilder& set_speciality(Speciality speciality);
-        AgentBuilder& set_speciality(const std::string& speciality_str);
+        AgentBuilder& set_speciality(std::string_view speciality_str);
 
         AgentBuilder& set_element(Element element);
-        AgentBuilder& set_element(const std::string& element_str);
+        AgentBuilder& set_element(std::string_view element_str);
 
         AgentBuilder& set_rarity(Rarity rarity);
 
-        AgentBuilder& add_stat(stat value);
+        AgentBuilder& add_stat(const StatPtr& value);
         AgentBuilder& set_stats(StatsGrid stats);
 
         AgentBuilder& add_skill(Skill skill);
@@ -85,7 +83,6 @@ namespace zzz {
     public:
         explicit AgentPtr(const std::string& name);
 
-    protected:
         bool load_from_string(const std::string& input, size_t mode) override;
     };
 }
