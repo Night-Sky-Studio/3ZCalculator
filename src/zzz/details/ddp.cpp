@@ -1,4 +1,4 @@
-#include "zzz/combat/drive_disc_piece.hpp"
+#include "zzz/details/ddp.hpp"
 
 //std
 #include <stdexcept>
@@ -93,14 +93,14 @@ namespace zzz::combat::drive_disc_info {
 }
 
 namespace zzz::combat {
-    // DriveDiscPiece
+    // Ddp
 
-    uint64_t DriveDiscPiece::disc_id() const { return m_disc_id; }
-    uint8_t DriveDiscPiece::slot() const { return m_slot; }
-    Rarity DriveDiscPiece::rarity() const { return m_rarity; }
-    const StatsGrid& DriveDiscPiece::stats() const { return m_stats; }
+    uint64_t Ddp::disc_id() const { return m_disc_id; }
+    uint8_t Ddp::slot() const { return m_slot; }
+    Rarity Ddp::rarity() const { return m_rarity; }
+    const StatsGrid& Ddp::stats() const { return m_stats; }
 
-    // DriveDiscPieceBuilder
+    // DdpBuilder
 
     DdpBuilder& DdpBuilder::set_disc_id(uint64_t disc_id) {
         m_product->m_disc_id = disc_id;
@@ -153,7 +153,7 @@ namespace zzz::combat {
             && _main_stat_id != StatId::None
             && _current_sub_stat >= (size_t) m_product->m_rarity - 1;
     }
-    DriveDiscPiece&& DdpBuilder::get_product() {
+    Ddp&& DdpBuilder::get_product() {
         if (!is_built())
             throw std::runtime_error("you have to specify slot, main stat and at least 3 sub stats");
         return IBuilder::get_product();

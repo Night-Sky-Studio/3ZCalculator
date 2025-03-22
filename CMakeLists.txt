@@ -58,10 +58,9 @@ add_executable(3ZCalculator
     "src/zzz/stats.cpp"
     "src/zzz/stats_grid.cpp"
 
-    "src/zzz/combat/drive_disc_piece.cpp"
-
     "src/zzz/details/agent.cpp"
     "src/zzz/details/anomaly.cpp"
+    "src/zzz/details/ddp.cpp"
     "src/zzz/details/dds.cpp"
     "src/zzz/details/rotation.cpp"
     "src/zzz/details/skill.cpp"

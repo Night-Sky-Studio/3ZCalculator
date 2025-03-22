@@ -12,7 +12,7 @@
 #include "zzz/stats_grid.hpp"
 
 namespace zzz::combat {
-    class DriveDiscPiece {
+    class Ddp {
         friend class DdpBuilder;
 
     public:
@@ -29,7 +29,7 @@ namespace zzz::combat {
     };
 
     // firstly set slot
-    class DdpBuilder : public lib::IBuilder<DriveDiscPiece> {
+    class DdpBuilder : public lib::IBuilder<Ddp> {
     public:
         DdpBuilder& set_disc_id(uint64_t disc_id);
         DdpBuilder& set_slot(uint8_t slot);
@@ -38,7 +38,7 @@ namespace zzz::combat {
         DdpBuilder& add_sub_stat(StatId type, uint8_t level);
 
         bool is_built() const override;
-        DriveDiscPiece&& get_product() override;
+        Ddp&& get_product() override;
 
     private:
         struct {
@@ -53,6 +53,6 @@ namespace zzz::combat {
 }
 
 namespace zzz {
-    using Ddp = combat::DriveDiscPiece;
-    using DdpPtr = std::shared_ptr<combat::DriveDiscPiece>;
+    using Ddp = combat::Ddp;
+    using DdpPtr = std::shared_ptr<combat::Ddp>;
 }
