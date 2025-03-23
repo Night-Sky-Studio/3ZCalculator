@@ -234,9 +234,40 @@ namespace backend {
 
         return result;
     }
+    utl::Json calcs_to_detailed_json(const calc::Calculator::result_t& calcs) {
+        utl::Json result;
+        const auto& [total, per_ability] = calcs; // [double, std::vector<double>]
 
-    calc::Calculator::result_t request_calcs(const calc::request_t& request) {
-        return calc::Calculator::eval(request);
+        result["total"] = total;
+
+        return result;
+    }
+
+    utl::Json post_damage(const calc::request_t& request) {
+        utl::Json json;
+
+        auto [total_dmg, per_ability] = calc::Calculator::eval(request);
+        json["total"] = total_dmg;
+        json["per_ability"] = per_ability;
+
+        return json;
+    }
+    utl::Json post_damage_detailed(const calc::request_t& request) {
+        utl::Json json;
+
+        auto [total_dmg, per_ability] = calc::Calculator::eval_detailed(request);
+        json["total"] = total_dmg;
+        utl::json::Array on_emplace;
+        for (auto& [dmg, tag, name] : per_ability) {
+            utl::json::Array line(3);
+            line[0] = dmg;
+            line[1] = (size_t) tag;
+            line[2] = std::move(name);
+            on_emplace.emplace_back(std::move(line));
+        }
+        json["per_ability"] = std::move(on_emplace);
+
+        return json;
     }
 }
 
@@ -315,18 +346,13 @@ namespace backend {
         CROW_ROUTE(m_app, "/")([] {
             return "3Z Calculator Backend";
         });
-        CROW_ROUTE(m_app, "/stop").methods("GET"_method)([this](const crow::request& req) {
-            m_app.stop();
-            return crow::response(503, "server.stop() was called");
-        });
-        CROW_ROUTE(m_app, "/get_dmg").methods("POST"_method)([this](const crow::request& req) {
+        CROW_ROUTE(m_app, "/damage").methods("POST"_method)([this](const crow::request& req) {
             crow::response response;
 
             try {
                 auto json = utl::json::from_string(req.body);
                 auto unpacked_request = json_to_request(json, m_manager);
-                auto calcs = request_calcs(unpacked_request);
-                auto output = calcs_to_json(calcs).to_string();
+                auto output = post_damage(unpacked_request).to_string(utl::json::Format::MINIMIZED);
 
                 response = { 200, std::move(output) };
             } catch (const std::exception& e) {
@@ -335,6 +361,25 @@ namespace backend {
 
             response.add_header("Access-Control-Allow-Origin", "*");
             return response;
+        });
+        CROW_ROUTE(m_app, "/damage_detailed").methods("POST"_method)([this](const crow::request& req) {
+            crow::response response;
+
+            try {
+                auto json = utl::json::from_string(req.body);
+                auto unpacked_request = json_to_request(json, m_manager);
+                auto output = post_damage_detailed(unpacked_request).to_string(utl::json::Format::MINIMIZED);
+
+                response = { 200, std::move(output) };
+            } catch (const std::exception& e) {
+                response = { 400, e.what() };
+            }
+
+            response.add_header("Access-Control-Allow-Origin", "*");
+            return response;
+        });
+        CROW_ROUTE(m_app, "/refresh").methods("GET"_method)([this] {
+            return "";
         });
     }
 }

@@ -81,6 +81,7 @@ namespace zzz::details {
 
 namespace zzz {
     using AgentDetails = details::Agent;
+    using AbilityDetails = details::Ability;
 
     class Agent : public lib::MObject {
     public:

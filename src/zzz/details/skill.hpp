@@ -31,6 +31,8 @@ namespace zzz::details {
         std::span<const scale> scales() const;
         const StatsGrid& buffs() const;
 
+        size_t max_index() const;
+
     protected:
         std::string m_name;
         Tag m_tag;
