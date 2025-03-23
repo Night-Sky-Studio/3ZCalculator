@@ -4,6 +4,6 @@
 
     "set_bonus": [
         { "atk_ratio": 0.1 },
-        { "dmg_ratio": { "val": "0.24", "tag": "quick_assist" } }
+        { "dmg_ratio": { "val": 0.24, "tag": "quick_assist" } }
     ]
 }

@@ -93,8 +93,7 @@ namespace zzz {
     double& StatsGrid::at(StatId id, Tag tag) {
         auto it = m_content.find(gen_key(id, tag));
         if (it == m_content.end())
-            throw std::runtime_error(lib::format("key with id {} and tag {} is not found",
-                convert::stat_id_to_string(id), convert::tag_to_string(tag)));
+            it = m_content.emplace(gen_key(id, tag), RegularStat::make(0, id, tag)).first;
         return it->second->m_base;
     }
     const double& StatsGrid::at(StatId id, Tag tag) const {

@@ -32,7 +32,7 @@ namespace calc {
         cell_t<zzz::Wengine> wengine;
         cell_t<zzz::Rotation> rotation;
 
-        std::multimap<size_t, zzz::DdsPtr> dds_by_count;
+        std::multimap<size_t, zzz::DdsPtr&> dds_by_count;
         std::list<cell_t<zzz::Dds>> dds_list;
 
         std::array<zzz::Ddp, 6> ddps = {};

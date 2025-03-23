@@ -111,7 +111,7 @@ namespace zzz {
 
     StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
         const auto& maker_key = json.is_object()
-            ? json.value_or<std::string>("type", default_type_name) + ' ' + std::to_string((size_t) json.type())
+            ? json.value_or<std::string>("type", "regular") + ' ' + std::to_string((size_t) json.type())
             : default_type_name;
         auto it = m_makers.find(maker_key);
         return it != m_makers.end() ? it->second(key, json) : nullptr;

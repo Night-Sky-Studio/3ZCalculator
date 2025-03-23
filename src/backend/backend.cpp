@@ -146,7 +146,8 @@ namespace backend {
         std::map<size_t, size_t> dds_count;
         size_t current_disk = 0;
 
-        for (const auto& v : table.at("discs").as_object() | std::views::values) {
+        for (const auto& it : table.at("discs").as_array()) {
+            const auto& v = it.as_object();
             zzz::combat::DdpBuilder builder;
 
             uint64_t disc_id = v.at("id").as_integral();
@@ -197,7 +198,7 @@ namespace backend {
         if (what.rotation.ptr == nullptr)
             rotation_future = source.get_async(lib::format("rotations/{}/{}", what.agent.id, what.rotation.id));
 
-        std::list<std::tuple<zzz::DdsPtr, std::future<lib::MObjectPtr>>> dds_futures;
+        std::list<std::tuple<zzz::DdsPtr&, std::future<lib::MObjectPtr>>> dds_futures;
         for (auto& [id, ptr] : what.dds_list)
             dds_futures.emplace_back(ptr, source.get_async(lib::format("dds/{}", id)));
 

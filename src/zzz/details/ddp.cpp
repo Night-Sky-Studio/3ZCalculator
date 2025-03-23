@@ -143,6 +143,7 @@ namespace zzz::combat {
             type,
             Tag::Universal
         );
+        _current_sub_stat++;
         return *this;
     }
 
