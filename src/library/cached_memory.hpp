@@ -30,16 +30,16 @@ namespace lib {
         // which this overriden function will call in switch-case statement
         virtual bool load_from_string(const std::string& input, size_t mode) = 0;
         bool load_from_stream(std::istream& is, size_t mode);
-        bool load_from_file(size_t mode);
+        bool load(size_t mode);
 
     protected:
         template<typename T>
         void set(T value) {
-            _content.reset(std::move(value));
+            _content.reset(new T(std::move(value)));
         }
 
     private:
-        std::unique_ptr<void> _content = nullptr;
+        std::shared_ptr<void> _content = nullptr;
         // TODO: make atomic
         size_t _unused_period = 0;
         const std::string _fullname;

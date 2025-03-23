@@ -30,7 +30,7 @@ namespace lib {
     bool MObject::load_from_stream(std::istream& is, size_t mode) {
         return load_from_string({ std::istreambuf_iterator(is), {} }, mode);
     }
-    bool MObject::load_from_file(size_t mode) {
+    bool MObject::load(size_t mode) {
         if (_fullname.empty()) {
 #ifdef DEBUG_STATUS
             CROW_LOG_INFO << "fullname isn't set";
@@ -95,7 +95,7 @@ namespace lib {
         if (object->is_allocated())
             return object;
 
-        object->load_from_file(m_file_extension_id);
+        object->load(m_file_extension_id);
 
 #ifdef DEBUG_STATUS
         CROW_LOG_INFO << lib::format("{} is loaded", object->_fullname);

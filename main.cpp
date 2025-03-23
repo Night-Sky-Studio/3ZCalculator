@@ -16,6 +16,7 @@
 
 //zzz
 #include "zzz/details/agent.hpp"
+#include "zzz/details/rotation.hpp"
 
 namespace global {
 	std::string PATH = "./data";
@@ -28,8 +29,7 @@ int main(int argc, char** argv) {
 	lib::ObjectManager::init_default_file_extensions();
 	zzz::StatFactory::init_default();
 
-	lib::ObjectManager manager;
-	manager.add_object();
+	auto rotation = std::make_shared<zzz::Rotation>("1091/1");
 
 	return 0;
 }
