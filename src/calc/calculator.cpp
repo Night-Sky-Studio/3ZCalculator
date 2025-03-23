@@ -4,6 +4,9 @@
 #include <map>
 #include <ranges>
 
+//lib
+#include "library/format.hpp"
+
 //zzz
 #include "zzz/stats.hpp"
 #include "zzz/stats_grid.hpp"
@@ -139,7 +142,7 @@ namespace calc {
                 const auto& anomaly = std::get<AnomalyDetails>(ability);
                 dmg = calc_anomaly_dmg(anomaly, agent.element(), stats, Calculator::enemy);
             } else
-                throw std::runtime_error("ability is neither skill nor anomaly");
+                throw RUNTIME_ERROR("ability is neither skill nor anomaly");
 
             total_dmg += dmg;
             dmg_per_ability.emplace_back(dmg);

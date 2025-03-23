@@ -1,8 +1,5 @@
 #include "zzz/details/wengine.hpp"
 
-//std
-#include <stdexcept>
-
 //frozen
 #include "frozen/unordered_set.h"
 
@@ -55,7 +52,7 @@ namespace zzz::details {
     // TODO: make proper check on main stat
     WengineBuilder& WengineBuilder::set_main_stat(const StatsGrid& main_stat) {
         /*if (!wengine_info::ms_limits.contains(main_stat))
-            throw std::runtime_error("this main stat doesn't exist");*/
+            throw std::RUNTIME_ERROR("this main stat doesn't exist");*/
 
         m_product->m_stats.add(main_stat);
         _is_set.main_stat = true;
@@ -83,7 +80,7 @@ namespace zzz::details {
     }
     Wengine&& WengineBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify id, name, speciality and stats [main and sub at least]");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality and stats [main and sub at least]");
 
         return IBuilder::get_product();
     }

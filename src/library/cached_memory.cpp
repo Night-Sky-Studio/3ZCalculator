@@ -87,7 +87,7 @@ namespace lib {
         auto it = m_content.find(hash(key));
 
         if (it == m_content.end())
-            throw std::runtime_error(lib::format("{} doesn't exist", key));
+            throw RUNTIME_ERROR(lib::format("{} doesn't exist", key));
 
         auto& object = it->second;
         object->_unused_period = 0;

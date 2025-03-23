@@ -1,7 +1,7 @@
 #include "zzz/details/skill.hpp"
 
-//std
-#include <stdexcept>
+//lib
+#include "library/format.hpp"
 
 namespace zzz::details {
     // Skill
@@ -62,7 +62,7 @@ namespace zzz::details {
     }
     Skill&& SkillBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify name and tag");
+            throw RUNTIME_ERROR("you have to specify name and tag");
 
         return IBuilder::get_product();
     }

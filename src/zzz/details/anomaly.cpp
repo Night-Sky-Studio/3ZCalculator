@@ -1,9 +1,7 @@
 #include "zzz/details/anomaly.hpp"
 
-//std
-#include <stdexcept>
-
 //library
+#include "library/format.hpp"
 #include "library/string_funcs.hpp"
 
 namespace zzz::details {
@@ -87,7 +85,7 @@ namespace zzz::details {
     }
     Anomaly&& AnomalyBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify name, scale and element");
+            throw RUNTIME_ERROR("you have to specify name, scale and element");
 
         return IBuilder::get_product();
     }

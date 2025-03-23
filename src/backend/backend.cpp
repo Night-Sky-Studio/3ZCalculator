@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include <stdexcept>
+#include <ranges>
 #include <string>
 #include <thread>
 
@@ -22,8 +22,6 @@
 #include "zzz/details.hpp"
 
 //calc
-#include <ranges>
-
 #include "calc/calculator.hpp"
 
 #ifdef DEBUG_STATUS
@@ -291,8 +289,7 @@ namespace backend {
         size_t allocated_objects = 0;
         fs::path res_path = lib::format("{}/data/", global::PATH);
         if (!exists(res_path) || !is_directory(res_path))
-            throw std::runtime_error(lib::format("resource folder doesn't exist at path \"{}\"",
-                fs::absolute(res_path).string()));
+            throw FMT_RUNTIME_ERROR("resource folder doesn't exist at path \"{}\"", fs::absolute(res_path).string());
 
         for (const auto& entry : fs::directory_iterator(res_path)) {
             // ignores non directories
@@ -332,12 +329,11 @@ namespace backend {
                 auto output = calcs_to_json(calcs).to_string();
 
                 response = { 200, std::move(output) };
-                response.add_header("Access-Control-Allow-Origin", "*");
             } catch (const std::exception& e) {
                 response = { 400, e.what() };
-                response.add_header("Access-Control-Allow-Origin", "*");
             }
 
+            response.add_header("Access-Control-Allow-Origin", "*");
             return response;
         });
     }

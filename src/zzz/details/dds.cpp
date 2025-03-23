@@ -1,8 +1,5 @@
 #include "zzz/details/dds.hpp"
 
-//std
-#include <stdexcept>
-
 //crow
 #include "crow/logging.h"
 
@@ -49,7 +46,8 @@ namespace zzz::details {
     }
     Dds&& DdsBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify id, name, 2- and 4-piece bonuses");
+            throw RUNTIME_ERROR("you have to specify id, name, 2- and 4-piece bonuses");
+
         return IBuilder::get_product();
     }
 }

@@ -30,7 +30,7 @@ namespace zzz {
 
     StatsGrid StatsGrid::make_from(const utl::Json& json, Tag mandatory_tag) {
         if (!json.is_object())
-            throw std::runtime_error("stats have to be serialized from json.object");
+            throw RUNTIME_ERROR("stats have to be serialized from json.object");
 
         StatsGrid result;
 
@@ -99,8 +99,8 @@ namespace zzz {
     const double& StatsGrid::at(StatId id, Tag tag) const {
         auto it = m_content.find(gen_key(id, tag));
         if (it == m_content.end())
-            throw std::runtime_error(lib::format("key with id {} and tag {} is not found",
-                convert::stat_id_to_string(id), convert::tag_to_string(tag)));
+            throw FMT_RUNTIME_ERROR("key with id {} and tag {} is not found",
+                convert::stat_id_to_string(id), convert::tag_to_string(tag));
         return it->second->m_base;
     }
 
@@ -145,8 +145,6 @@ namespace zzz {
                 m_content.emplace(k, v->copy_as_ptr());
         }
     }
-
-    //StatPtr StatsGrid::_no_value = RegularStat::make(0, StatId::None, Tag::Universal);
 
     void StatsGrid::_copy_from(const StatsGrid& another) {
         m_content.clear();

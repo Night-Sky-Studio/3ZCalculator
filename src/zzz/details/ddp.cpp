@@ -1,11 +1,9 @@
 #include "zzz/details/ddp.hpp"
 
-//std
-#include <stdexcept>
-
 //frozen
 #include "frozen/unordered_map.h"
 #include "frozen/unordered_set.h"
+#include "library/format.hpp"
 
 namespace zzz::combat::drive_disc_info {
     // mss4 - main stat slot 4
@@ -119,9 +117,9 @@ namespace zzz::combat {
     }
     DdpBuilder& DdpBuilder::set_main_stat(StatId type, uint8_t level) {
         if (m_product->m_slot == 0 || m_product->m_rarity == Rarity::NotSet)
-            throw std::runtime_error("you have to specify slot and rarity first");
+            throw RUNTIME_ERROR("you have to specify slot and rarity first");
         if (!drive_disc_info::check_ms_limits(m_product->m_slot, type))
-            throw std::runtime_error("for this slot main stat doesn't exist");
+            throw RUNTIME_ERROR("for this slot main stat doesn't exist");
 
         m_product->m_stats.add_regular(
             drive_disc_info::main_stat_conversion_table.at(type)[(size_t) m_product->m_rarity - 2],
@@ -133,9 +131,9 @@ namespace zzz::combat {
     }
     DdpBuilder& DdpBuilder::add_sub_stat(StatId type, uint8_t level) {
         if (m_product->m_slot == 0 || m_product->m_rarity == Rarity::NotSet)
-            throw std::runtime_error("you have to specify slot and main stat first");
+            throw RUNTIME_ERROR("you have to specify slot and main stat first");
         if (_main_stat_id == type)
-            throw std::runtime_error("you can't have same main and sub stat");
+            throw RUNTIME_ERROR("you can't have same main and sub stat");
 
         size_t rarity_index = (size_t) m_product->m_rarity - 2;
         m_product->m_stats.add_regular(
@@ -156,7 +154,7 @@ namespace zzz::combat {
     }
     Ddp&& DdpBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify slot, main stat and at least 3 sub stats");
+            throw RUNTIME_ERROR("you have to specify slot, main stat and at least 3 sub stats");
         return IBuilder::get_product();
     }
 }

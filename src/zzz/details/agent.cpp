@@ -97,7 +97,7 @@ namespace zzz::details {
     }
     Agent&& AgentBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify id, name, speciality, element, rarity and stats");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity and stats");
 
         return IBuilder::get_product();
     }
@@ -112,7 +112,7 @@ namespace zzz {
         if (json.is_string()) {
             if (json.as_string() == "standard")
                 return AnomalyDetails::get_standard_anomaly(key);
-            throw std::runtime_error("anomaly as string can only be standard");
+            throw RUNTIME_ERROR("anomaly as string can only be standard");
         }
 
         const auto& table = json.as_object();
