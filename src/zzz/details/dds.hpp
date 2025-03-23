@@ -57,6 +57,8 @@ namespace zzz {
     public:
         explicit Dds(const std::string& fullname);
 
+        const DdsDetails& details() const;
+
         bool load_from_string(const std::string& input, size_t mode) override;
     };
     using DdsPtr = std::shared_ptr<Dds>;

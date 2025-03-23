@@ -106,9 +106,7 @@ namespace zzz::details {
 #include <future>
 
 namespace zzz {
-    Agent::Agent(const std::string& name) :
-        MObject(lib::format("agents/{}", name)) {
-    }
+    // Service
 
     AnomalyDetails make_anomaly_from(const std::string& key, const utl::Json& json, Element default_element) {
         if (json.is_string()) {
@@ -206,6 +204,14 @@ namespace zzz {
 
         return builder.get_product();
     }
+
+    // Agent
+
+    Agent::Agent(const std::string& name) :
+        MObject(lib::format("agents/{}", name)) {
+    }
+
+    const AgentDetails& Agent::details() const { return as<AgentDetails>(); }
 
     bool Agent::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {

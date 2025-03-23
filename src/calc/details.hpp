@@ -27,6 +27,12 @@ namespace calc {
         T& value() { return *m_ptr; }
         const T& value() const { return *m_ptr; }
 
+        T* operator->() { return m_ptr.get(); }
+        const T* operator->() const { return m_ptr.get(); }
+
+        T& operator*() { return *m_ptr; }
+        const T& operator*() const { return *m_ptr; }
+
     protected:
         uint64_t m_id;
         std::shared_ptr<T> m_ptr;

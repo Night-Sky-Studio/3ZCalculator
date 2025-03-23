@@ -23,6 +23,8 @@ namespace zzz {
     public:
         explicit Rotation(const std::string& name);
 
+        const RotationDetails& details() const;
+
         bool load_from_string(const std::string& input, size_t mode) override;
     };
     using RotationPtr = std::shared_ptr<Rotation>;

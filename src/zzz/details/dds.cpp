@@ -55,9 +55,7 @@ namespace zzz::details {
 }
 
 namespace zzz {
-    Dds::Dds(const std::string& fullname) :
-        MObject(lib::format("dds/{}")) {
-    }
+    // Service
 
     DdsDetails load_from_json(const utl::Json& json) {
         const auto& table = json.as_object();
@@ -72,6 +70,14 @@ namespace zzz {
 
         return builder.get_product();
     }
+
+    // Dds
+
+    Dds::Dds(const std::string& fullname) :
+        MObject(lib::format("dds/{}")) {
+    }
+
+    const DdsDetails& Dds::details() const { return as<DdsDetails>(); }
 
     bool Dds::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {

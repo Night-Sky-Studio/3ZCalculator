@@ -98,61 +98,47 @@ namespace calc {
 }
 
 namespace calc {
-    StatsGrid calc_stats(const request_t& request) {
+    StatsGrid calc_stats(const Request& request) {
         StatsGrid result;
 
-        result.add(request.agent.ptr->stats());
+        result.add(request.agent()->details().stats());
+        result.add(request.wengine()->details().stats());
 
-        result.add(request.wengine.ptr->main_stat());
-        result.add(request.wengine.ptr->sub_stat());
-        result.add(request.wengine.ptr->passive_stats());
+        for (size_t i = 0; i < 6; i++)
+            result.add(request.ddp(i).stats());
 
-        for (const auto& it : request.ddps) {
-            result.add(it.main_stat());
-            for (size_t i = 0; i < 4; i++)
-                result.add(it.sub_stat(i));
-        }
+        for (const auto& [count, value] : request.dds_by_count()) {
+            const auto& dds = value->details();
 
-        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                result.add((*set)->p2());
+                result.add(dds.p2());
             else if (count == 4)
-                result.add((*set)->p4());
+                result.add(dds.p4());
         }
 
         return result;
     }
 
-    std::tuple<double, std::vector<double>> request_dmg(const request_t& request) {
+    std::tuple<double, std::vector<double>> request_dmg(const Request& request) {
+        const auto& agent = request.agent()->details();
+        const auto& rotation = request.rotation()->details();
         double total_dmg = 0.0;
         std::vector<double> dmg_per_ability;
         auto stats = calc_stats(request);
 
-        dmg_per_ability.reserve(request.rotation.ptr->size());
-        for (const auto& [ability_name, index] : *request.rotation.ptr) {
-            size_t id = AgentDetails::is_skill_or_anomaly(*request.agent.ptr, ability_name);
+        dmg_per_ability.reserve(rotation.size());
+        for (const auto& [ability_name, index] : rotation) {
+            const auto& ability = agent.ability(ability_name);
             double dmg;
 
-            switch (id) {
-            case 1:
-                dmg = calc_regular_dmg(
-                    request.agent.ptr->skill(ability_name),
-                    index - 1,
-                    stats,
-                    Calculator::enemy
-                );
-                break;
-            case 2:
-                dmg = calc_anomaly_dmg(
-                    request.agent.ptr->anomaly(ability_name),
-                    request.agent.ptr->element(),
-                    stats,
-                    Calculator::enemy
-                );
-                break;
-            default:
+            if (std::holds_alternative<SkillDetails>(ability)) {
+                const auto& skill = std::get<SkillDetails>(ability);
+                dmg = calc_regular_dmg(skill, index - 1, stats, Calculator::enemy);
+            } else if (std::holds_alternative<AnomalyDetails>(ability)) {
+                const auto& anomaly = std::get<AnomalyDetails>(ability);
+                dmg = calc_anomaly_dmg(anomaly, agent.element(), stats, Calculator::enemy);
+            } else
                 throw std::runtime_error("ability is neither skill nor anomaly");
-            }
 
             total_dmg += dmg;
             dmg_per_ability.emplace_back(dmg);
@@ -171,26 +157,22 @@ namespace calc {
 #include "library/format.hpp"
 
 namespace calc {
-    tabulate::Table Calculator::debug_stats(const request_t& request) {
+    tabulate::Table Calculator::debug_stats(const Request& request) {
         StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
 
-        agent_stats.add(request.agent.ptr->stats());
+        agent_stats.add(request.agent()->details().stats());
+        wengine_stats.add(request.wengine()->details().stats());
 
-        wengine_stats.add(request.wengine.ptr->main_stat());
-        wengine_stats.add(request.wengine.ptr->sub_stat());
-        wengine_stats.add(request.wengine.ptr->passive_stats());
+        for (size_t i = 0; i < 6; i++)
+            ddp_stats.add(request.ddp(i).stats());
 
-        for (const auto& it : request.ddps) {
-            ddp_stats.add(it.main_stat());
-            for (size_t i = 0; i < 4; i++)
-                ddp_stats.add(it.sub_stat(i));
-        }
+        for (const auto& [count, value] : request.dds_by_count()) {
+            const auto& dds = value->details();
 
-        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                dds_stats.add((*set)->p2());
-            if (count == 4)
-                dds_stats.add((*set)->p4());
+                dds_stats.add(dds.p2());
+            else if (count == 4)
+                dds_stats.add(dds.p4());
         }
 
         summed_stats.add(agent_stats);
@@ -214,7 +196,7 @@ namespace calc {
 
         return stats_log;
     }
-    tabulate::Table Calculator::debug_damage(const request_t& request, const result_t& damage) {
+    tabulate::Table Calculator::debug_damage(const Request& request, const result_t& damage) {
         const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
@@ -224,7 +206,7 @@ namespace calc {
         dmg_log.add_row({ "total", std::to_string(rounded_total_dmg) });
 
         size_t i = 0;
-        for (const auto& cell : *request.rotation.ptr) {
+        for (const auto& cell : request.rotation()->details()) {
             size_t rounded_dmg = dmg_per_ability[i++];
             dmg_log.add_row({
                 cell.command + ' ' + std::to_string(cell.index),
@@ -249,7 +231,7 @@ namespace calc {
         .is_stunned = false
     };
 
-    Calculator::result_t Calculator::eval(const request_t& request) {
+    Calculator::result_t Calculator::eval(const Request& request) {
         auto result = request_dmg(request);
         return result;
     }

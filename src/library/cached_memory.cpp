@@ -111,7 +111,7 @@ namespace lib {
                 if (!obj->is_allocated())
                     continue;
 
-                if (obj.use_count() == 1)
+                if (obj.use_count() == 1 && obj->_content.use_count() == 1)
                     obj->_unused_period++;
 
                 if (obj->_unused_period == max_unused_period) {

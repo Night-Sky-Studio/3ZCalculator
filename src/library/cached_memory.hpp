@@ -19,9 +19,8 @@ namespace lib {
         virtual ~MObject() = default;
 
         template<typename T>
-        const T& as() {
-            auto result = std::any_cast<T>(_content);
-            return result;
+        const T& as() const {
+            return *static_cast<T*>(_content.get());
         }
 
         bool is_allocated() const;

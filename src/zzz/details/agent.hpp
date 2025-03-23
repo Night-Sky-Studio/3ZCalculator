@@ -86,6 +86,8 @@ namespace zzz {
     public:
         explicit Agent(const std::string& name);
 
+        const AgentDetails& details() const;
+
         bool load_from_string(const std::string& input, size_t mode) override;
     };
     using AgentPtr = std::shared_ptr<Agent>;

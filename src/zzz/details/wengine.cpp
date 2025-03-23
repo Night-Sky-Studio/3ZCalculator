@@ -90,9 +90,7 @@ namespace zzz::details {
 }
 
 namespace zzz {
-    Wengine::Wengine(const std::string& name) :
-        MObject(lib::format("wengines/{}", name)) {
-    }
+    // Service
 
     // json has to be root
     WengineDetails load_from_json(const utl::Json& json) {
@@ -111,6 +109,14 @@ namespace zzz {
 
         return builder.get_product();
     }
+
+    // Wengine
+
+    Wengine::Wengine(const std::string& name) :
+        MObject(lib::format("wengines/{}", name)) {
+    }
+
+    const WengineDetails& Wengine::details() const { return as<WengineDetails>(); }
 
     bool Wengine::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {

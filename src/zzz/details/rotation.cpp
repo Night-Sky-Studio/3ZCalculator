@@ -15,12 +15,14 @@
 #include "library/format.hpp"
 #include "library/string_funcs.hpp"
 
-namespace zzz::details {
-    rotation_cell to_rotation_cell(const std::vector<std::string_view>& splitted) {
+namespace zzz {
+    // Service
+
+    details::rotation_cell to_rotation_cell(const std::vector<std::string_view>& splitted) {
         size_t index = splitted.size() == 1 ? 0 : lib::sv_to<size_t>(splitted[1]);
         return { .command = std::string(splitted[0]), .index = index };
     }
-    rotation_cell to_rotation_cell(const std::string_view& text) {
+    details::rotation_cell to_rotation_cell(const std::string_view& text) {
         return to_rotation_cell(lib::split_as_view(text, ' '));
     }
 
@@ -28,13 +30,6 @@ namespace zzz::details {
         return splitted.size() != 1
             ? lib::sv_to<size_t>(splitted[1].starts_with('x') ? splitted[1].substr(1) : splitted[1])
             : 1;
-    }
-}
-
-namespace zzz {
-    Rotation::Rotation(const std::string& name) :
-        MObject(lib::format("rotations/{}", name)) {
-        load(1);
     }
 
     RotationDetails load_from_json(const utl::Json& json) {
@@ -70,11 +65,11 @@ namespace zzz {
                 auto splitted = lib::split_as_view(it, ' ');
 
                 if (auto jt = rotations.find(std::string(splitted[0])); jt != rotations.end()) {
-                    for (size_t i = 0; i < details::calc_loops(splitted); i++)
+                    for (size_t i = 0; i < calc_loops(splitted); i++)
                         for (const auto& cell : jt->second)
                             on_emplace.emplace_back(cell);
                 } else
-                    on_emplace.emplace_back(details::to_rotation_cell(splitted));
+                    on_emplace.emplace_back(to_rotation_cell(splitted));
             }
 
             rotations.emplace(v->first, std::move(on_emplace));
@@ -82,6 +77,14 @@ namespace zzz {
 
         return std::move(rotations.at("final"));
     }
+
+    // Rotation
+
+    Rotation::Rotation(const std::string& name) :
+        MObject(lib::format("rotations/{}", name)) {
+    }
+
+    const RotationDetails& Rotation::details() const { return as<RotationDetails>(); }
 
     bool Rotation::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {

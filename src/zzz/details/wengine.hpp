@@ -67,6 +67,8 @@ namespace zzz {
     public:
         explicit Wengine(const std::string& name);
 
+        const WengineDetails& details() const;
+
         bool load_from_string(const std::string& input, size_t mode) override;
     };
     using WenginePtr = std::shared_ptr<Wengine>;
