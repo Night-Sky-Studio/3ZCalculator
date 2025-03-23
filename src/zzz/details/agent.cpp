@@ -211,6 +211,7 @@ namespace zzz {
         MObject(lib::format("agents/{}", name)) {
     }
 
+    AgentDetails& Agent::details() { return as<AgentDetails>(); }
     const AgentDetails& Agent::details() const { return as<AgentDetails>(); }
 
     bool Agent::load_from_string(const std::string& input, size_t mode) {

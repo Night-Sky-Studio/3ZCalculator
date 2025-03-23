@@ -1,35 +1,21 @@
-﻿////backend
-//#include "backend/backend.hpp"
-//
-//int main() {
-//    backend::Backend server("server.log");
-//
-//    server.init();
-//    server.run();
-//
-//    return 0;
-//}
-
-//std
-#include <filesystem>
+﻿//std
 #include <string>
 
-//zzz
-#include "zzz/details/agent.hpp"
-#include "zzz/details/rotation.hpp"
+//backend
+#include "backend/backend.hpp"
 
 namespace global {
-	std::string PATH = "./data";
+	std::string PATH = "./";
 }
 
 int main(int argc, char** argv) {
 	if (argc > 1)
 		global::PATH = argv[1];
 
-	lib::ObjectManager::init_default_file_extensions();
-	zzz::StatFactory::init_default();
+	backend::Backend server;
 
-	auto rotation = std::make_shared<zzz::Rotation>("1091/1");
+	server.init();
+	server.run();
 
 	return 0;
 }

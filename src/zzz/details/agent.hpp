@@ -86,6 +86,7 @@ namespace zzz {
     public:
         explicit Agent(const std::string& name);
 
+        AgentDetails& details();
         const AgentDetails& details() const;
 
         bool load_from_string(const std::string& input, size_t mode) override;

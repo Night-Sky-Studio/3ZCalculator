@@ -98,16 +98,16 @@ namespace calc {
 }
 
 namespace calc {
-    StatsGrid calc_stats(const Request& request) {
+    StatsGrid calc_stats(const request_t& request) {
         StatsGrid result;
 
-        result.add(request.agent()->details().stats());
-        result.add(request.wengine()->details().stats());
+        result.add(request.agent->details().stats());
+        result.add(request.wengine->details().stats());
 
         for (size_t i = 0; i < 6; i++)
-            result.add(request.ddp(i).stats());
+            result.add(request.ddps[i].stats());
 
-        for (const auto& [count, value] : request.dds_by_count()) {
+        for (const auto& [count, value] : request.dds_by_count) {
             const auto& dds = value->details();
 
             if (count == 2)
@@ -119,9 +119,10 @@ namespace calc {
         return result;
     }
 
-    std::tuple<double, std::vector<double>> request_dmg(const Request& request) {
-        const auto& agent = request.agent()->details();
-        const auto& rotation = request.rotation()->details();
+    std::tuple<double, std::vector<double>> request_dmg(const request_t& request) {
+        const auto& agent = request.agent->details();
+        const auto& rotation = request.rotation->details();
+
         double total_dmg = 0.0;
         std::vector<double> dmg_per_ability;
         auto stats = calc_stats(request);
@@ -157,16 +158,16 @@ namespace calc {
 #include "library/format.hpp"
 
 namespace calc {
-    tabulate::Table Calculator::debug_stats(const Request& request) {
+    tabulate::Table Calculator::debug_stats(const request_t& request) {
         StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
 
-        agent_stats.add(request.agent()->details().stats());
-        wengine_stats.add(request.wengine()->details().stats());
+        agent_stats.add(request.agent->details().stats());
+        wengine_stats.add(request.wengine->details().stats());
 
         for (size_t i = 0; i < 6; i++)
-            ddp_stats.add(request.ddp(i).stats());
+            ddp_stats.add(request.ddps[i].stats());
 
-        for (const auto& [count, value] : request.dds_by_count()) {
+        for (const auto& [count, value] : request.dds_by_count) {
             const auto& dds = value->details();
 
             if (count == 2)
@@ -196,7 +197,7 @@ namespace calc {
 
         return stats_log;
     }
-    tabulate::Table Calculator::debug_damage(const Request& request, const result_t& damage) {
+    tabulate::Table Calculator::debug_damage(const request_t& request, const result_t& damage) {
         const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
@@ -206,7 +207,7 @@ namespace calc {
         dmg_log.add_row({ "total", std::to_string(rounded_total_dmg) });
 
         size_t i = 0;
-        for (const auto& cell : request.rotation()->details()) {
+        for (const auto& cell : request.rotation.ptr->details()) {
             size_t rounded_dmg = dmg_per_ability[i++];
             dmg_log.add_row({
                 cell.command + ' ' + std::to_string(cell.index),
@@ -231,7 +232,7 @@ namespace calc {
         .is_stunned = false
     };
 
-    Calculator::result_t Calculator::eval(const Request& request) {
+    Calculator::result_t Calculator::eval(const request_t& request) {
         auto result = request_dmg(request);
         return result;
     }

@@ -1,5 +1,8 @@
 #pragma once
 
+//std
+#include <fstream>
+
 //frozen
 #include "frozen/string.h"
 
@@ -13,8 +16,8 @@
 #include "library/cached_memory.hpp"
 
 //calculator
-#include "calc/calculator.hpp"
-#include "calc/details.hpp"
+//#include "calc/calculator.hpp"
+//#include "calc/details.hpp"
 
 //backend
 #include "library/logger.hpp"
@@ -26,7 +29,9 @@ namespace backend {
         static constexpr auto port = 5101;
         static constexpr frozen::string ip = "192.168.1.2";
 
-        explicit Backend(const std::string& logger_file);
+        Backend() = default;
+        ~Backend();
+
         lib::ObjectManager& manager();
 
         void init();
@@ -36,8 +41,10 @@ namespace backend {
         lib::ObjectManager m_manager;
         crow::SimpleApp m_app;
         Logger m_logger;
+        std::optional<std::fstream> m_log_file;
 
     private:
+        void _init_logger(bool use_file);
         size_t _init_object_manager();
         void _init_crow_app();
     };

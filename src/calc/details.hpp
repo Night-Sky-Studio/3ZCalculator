@@ -3,7 +3,7 @@
 //std
 #include <array>
 #include <map>
-#include <vector>
+#include <list>
 
 //zzz
 #include "zzz/details.hpp"
@@ -16,67 +16,25 @@ namespace calc {
     };
 
     template<typename T>
-    class RequestCell {
-    public:
-        explicit RequestCell(uint64_t id) :
-            m_id(id) {
-        }
+    struct cell_t {
+        uint64_t id;
+        std::shared_ptr<T> ptr;
 
-        uint64_t id() const { return m_id; }
+        T* operator->() { return ptr.get(); }
+        const T* operator->() const { return ptr.get(); }
 
-        T& value() { return *m_ptr; }
-        const T& value() const { return *m_ptr; }
-
-        T* operator->() { return m_ptr.get(); }
-        const T* operator->() const { return m_ptr.get(); }
-
-        T& operator*() { return *m_ptr; }
-        const T& operator*() const { return *m_ptr; }
-
-    protected:
-        uint64_t m_id;
-        std::shared_ptr<T> m_ptr;
+        T& operator*() { return *ptr; }
+        const T& operator*() const { return *ptr; }
     };
 
-    // TODO: properly organize
-    class Request {
-    public:
-        Request(uint64_t agent_id, uint64_t wengine_id, uint64_t rotation_id,
-            const std::vector<uint64_t>& dds_ids, std::array<zzz::Ddp, 6> ddps) :
-            m_agent(agent_id),
-            m_wengine(wengine_id),
-            m_rotation(rotation_id),
-            m_ddps(std::move(ddps)) {
-            m_dds_list.reserve(dds_ids.size());
-            for (auto id : dds_ids)
-                m_dds_list.emplace_back(id);
-        }
+    struct request_t {
+        cell_t<zzz::Agent> agent;
+        cell_t<zzz::Wengine> wengine;
+        cell_t<zzz::Rotation> rotation;
 
-        RequestCell<zzz::Agent>& agent() { return m_agent; }
-        const RequestCell<zzz::Agent>& agent() const { return m_agent; }
+        std::multimap<size_t, zzz::DdsPtr> dds_by_count;
+        std::list<cell_t<zzz::Dds>> dds_list;
 
-        RequestCell<zzz::Wengine>& wengine() { return m_wengine; }
-        const RequestCell<zzz::Wengine>& wengine() const { return m_wengine; }
-
-        RequestCell<zzz::Rotation>& rotation() { return m_rotation; }
-        const RequestCell<zzz::Rotation>& rotation() const { return m_rotation; }
-
-        std::multimap<size_t, zzz::DdsPtr>& dds_by_count() { return m_dds_by_count; }
-        const std::multimap<size_t, zzz::DdsPtr>& dds_by_count() const { return m_dds_by_count; }
-
-        std::vector<RequestCell<zzz::Dds>>& dds_list() { return m_dds_list; }
-        const std::vector<RequestCell<zzz::Dds>>& dds_list() const { return m_dds_list; }
-
-        const zzz::Ddp& ddp(size_t index) const { return m_ddps[index]; }
-
-    protected:
-        RequestCell<zzz::Agent> m_agent;
-        RequestCell<zzz::Wengine> m_wengine;
-        RequestCell<zzz::Rotation> m_rotation;
-
-        std::multimap<size_t, zzz::DdsPtr> m_dds_by_count;
-        std::vector<RequestCell<zzz::Dds>> m_dds_list;
-
-        std::array<zzz::Ddp, 6> m_ddps;
+        std::array<zzz::Ddp, 6> ddps = {};
     };
 }

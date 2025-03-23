@@ -42,6 +42,23 @@ namespace lib {
         return result;
     }
 
+    inline std::string replace(
+        std::string src,
+        const std::string& from,
+        const std::string& to,
+        size_t count = std::string::npos) {
+        if (from.empty())
+            return src;
+
+        size_t n = 0, pos = 0;
+        while (n < count && (pos = src.find(from, pos)) != std::string::npos) {
+            src.replace(pos, from.size(), to);
+            pos += to.size();
+        }
+
+        return src;
+    }
+
     // TODO: error handling
     template<std::integral TResult>
     TResult sv_to(const std::string_view& str) {

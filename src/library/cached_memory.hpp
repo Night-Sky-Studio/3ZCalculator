@@ -19,8 +19,13 @@ namespace lib {
         virtual ~MObject() = default;
 
         template<typename T>
-        const T& as() const {
-            return *static_cast<T*>(_content.get());
+        T& as() { return *static_cast<T*>(_content.get()); }
+        template<typename T>
+        const T& as() const { return *static_cast<T*>(_content.get()); }
+
+        template<typename T>
+        void set(T value) {
+            _content.reset(new T(std::move(value)));
         }
 
         bool is_allocated() const;
@@ -30,12 +35,6 @@ namespace lib {
         virtual bool load_from_string(const std::string& input, size_t mode) = 0;
         bool load_from_stream(std::istream& is, size_t mode);
         bool load(size_t mode);
-
-    protected:
-        template<typename T>
-        void set(T value) {
-            _content.reset(new T(std::move(value)));
-        }
 
     private:
         std::shared_ptr<void> _content = nullptr;

@@ -84,6 +84,7 @@ namespace zzz {
         MObject(lib::format("rotations/{}", name)) {
     }
 
+    RotationDetails& Rotation::details() { return as<RotationDetails>(); }
     const RotationDetails& Rotation::details() const { return as<RotationDetails>(); }
 
     bool Rotation::load_from_string(const std::string& input, size_t mode) {

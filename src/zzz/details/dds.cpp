@@ -74,9 +74,10 @@ namespace zzz {
     // Dds
 
     Dds::Dds(const std::string& fullname) :
-        MObject(lib::format("dds/{}")) {
+        MObject(lib::format("dds/{}", fullname)) {
     }
 
+    DdsDetails& Dds::details() { return as<DdsDetails>(); }
     const DdsDetails& Dds::details() const { return as<DdsDetails>(); }
 
     bool Dds::load_from_string(const std::string& input, size_t mode) {

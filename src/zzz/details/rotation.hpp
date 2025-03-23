@@ -23,6 +23,7 @@ namespace zzz {
     public:
         explicit Rotation(const std::string& name);
 
+        RotationDetails& details();
         const RotationDetails& details() const;
 
         bool load_from_string(const std::string& input, size_t mode) override;

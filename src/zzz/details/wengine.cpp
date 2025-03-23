@@ -116,6 +116,7 @@ namespace zzz {
         MObject(lib::format("wengines/{}", name)) {
     }
 
+    WengineDetails& Wengine::details() { return as<WengineDetails>(); }
     const WengineDetails& Wengine::details() const { return as<WengineDetails>(); }
 
     bool Wengine::load_from_string(const std::string& input, size_t mode) {

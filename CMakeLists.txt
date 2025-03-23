@@ -69,7 +69,7 @@ add_executable(3ZCalculator
 
     "src/calc/calculator.cpp"
 
-    #"src/backend/backend.cpp"
+    "src/backend/backend.cpp"
 )
 
 target_include_directories(3ZCalculator PRIVATE src)
