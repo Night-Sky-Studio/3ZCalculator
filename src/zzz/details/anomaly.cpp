@@ -15,9 +15,14 @@ namespace zzz::details {
         size_t key = lib::hash(name);
         return { key, Anomaly { std::move(name), scale, element, std::move(buffs) } };
     }
+
     const Anomaly& Anomaly::get_standard_anomaly(std::string_view name) {
         size_t key = lib::hash(name);
         return standard_anomalies.at(key);
+    }
+    std::string_view Anomaly::get_anomaly_by_element(Element element) {
+        const auto& cstr = anomalies_name[(size_t) element];
+        return { cstr.data(), cstr.size() };
     }
 
     const std::string& Anomaly::name() const { return m_name; }

@@ -1,9 +1,13 @@
 #pragma once
 
 //std
+#include <array>
 #include <memory>
 #include <string>
 #include <unordered_map>
+
+//frozen
+#include "frozen/string.h"
 
 //library
 #include "library/builder.hpp"
@@ -23,7 +27,9 @@ namespace zzz::details {
 			double scale,
 			Element element,
 			StatsGrid buffs = {});
+
 		static const Anomaly& get_standard_anomaly(std::string_view name);
+		static std::string_view get_anomaly_by_element(Element element);
 
 		Anomaly() = default;
 
@@ -42,6 +48,9 @@ namespace zzz::details {
 
 	private:
 		static const std::unordered_map<size_t, Anomaly> standard_anomalies;
+		static constexpr std::array<frozen::string, 5> anomalies_name = {
+			"assault", "burn", "shatter", "shock", "corruption"
+		};
 
 		Anomaly(std::string name, double scale, Element element, StatsGrid buffs);
 	};

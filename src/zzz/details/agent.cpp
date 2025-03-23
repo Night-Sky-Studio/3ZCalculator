@@ -109,12 +109,6 @@ namespace zzz {
     // Service
 
     AnomalyDetails make_anomaly_from(const std::string& key, const utl::Json& json, Element default_element) {
-        if (json.is_string()) {
-            if (json.as_string() == "standard")
-                return AnomalyDetails::get_standard_anomaly(key);
-            throw RUNTIME_ERROR("anomaly as string can only be standard");
-        }
-
         const auto& table = json.as_object();
         details::AnomalyBuilder builder;
 
@@ -183,6 +177,8 @@ namespace zzz {
         const auto& table = json.as_object();
         details::AgentBuilder builder;
 
+        // basic information
+
         auto element = convert::string_to_element(table.at("element").as_string());
 
         builder.set_id(table.at("id").as_integral());
@@ -191,13 +187,30 @@ namespace zzz {
         builder.set_element(element);
         builder.set_rarity((Rarity) table.at("rarity").as_integral());
 
+        // stats
+
         auto stats = StatsGrid::make_from(table.at("stats"));
         builder.set_stats(std::move(stats));
 
+        // anomalies
+
+        bool has_anomaly_redefinition = false;
+        auto own_anomaly_name = AnomalyDetails::get_anomaly_by_element(element);
+
         if (auto it = table.find("anomalies"); it != table.end()) {
-            for (const auto& [k, v] : it->second.as_object())
-                builder.add_anomaly(make_anomaly_from(k, v, element));
+            for (const auto& [k, v] : it->second.as_object()) {
+                auto anomaly = make_anomaly_from(k, v, element);
+
+                if (own_anomaly_name == anomaly.name())
+                    has_anomaly_redefinition = true;
+
+                builder.add_anomaly(std::move(anomaly));
+            }
         }
+        if (!has_anomaly_redefinition)
+            builder.add_anomaly(AnomalyDetails::get_standard_anomaly(own_anomaly_name));
+
+        // skills
 
         for (const auto& [k, v] : table.at("skills").as_object())
             builder.add_skill(make_skill_from(k, v, element));
