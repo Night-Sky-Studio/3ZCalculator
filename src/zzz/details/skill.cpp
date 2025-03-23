@@ -11,6 +11,8 @@ namespace zzz::details {
     std::span<const Skill::scale> Skill::scales() const { return { m_scales.data(), m_scales.size() }; }
     const StatsGrid& Skill::buffs() const { return m_buffs; }
 
+    size_t Skill::max_index() const { return m_scales.size(); }
+
     // SkillBuilder
 
     SkillBuilder& SkillBuilder::set_name(std::string name) {

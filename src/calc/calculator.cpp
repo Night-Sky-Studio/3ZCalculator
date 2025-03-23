@@ -13,7 +13,7 @@
 
 using namespace zzz;
 
-namespace calc {
+namespace calc::details {
     constexpr size_t level = 60;
     constexpr double buff_level_mult = 1.0 + (level - 1.0) / 59.0;
     constexpr double level_coefficient = 794.0;
@@ -98,9 +98,7 @@ namespace calc {
         return base_dmg * crit_mult * dmg_ratio_mult * anomaly_ratio_mult * ap_bonus_mult * buff_level_mult *
             dmg_taken_mult * def_mult * res_mult * stun_mult;
     }
-}
 
-namespace calc {
     StatsGrid calc_stats(const request_t& request) {
         StatsGrid result;
 
@@ -120,35 +118,6 @@ namespace calc {
         }
 
         return result;
-    }
-
-    std::tuple<double, std::vector<double>> request_dmg(const request_t& request) {
-        const auto& agent = request.agent->details();
-        const auto& rotation = request.rotation->details();
-
-        double total_dmg = 0.0;
-        std::vector<double> dmg_per_ability;
-        auto stats = calc_stats(request);
-
-        dmg_per_ability.reserve(rotation.size());
-        for (const auto& [ability_name, index] : rotation) {
-            const auto& ability = agent.ability(ability_name);
-            double dmg;
-
-            if (std::holds_alternative<SkillDetails>(ability)) {
-                const auto& skill = std::get<SkillDetails>(ability);
-                dmg = calc_regular_dmg(skill, index - 1, stats, Calculator::enemy);
-            } else if (std::holds_alternative<AnomalyDetails>(ability)) {
-                const auto& anomaly = std::get<AnomalyDetails>(ability);
-                dmg = calc_anomaly_dmg(anomaly, agent.element(), stats, Calculator::enemy);
-            } else
-                throw RUNTIME_ERROR("ability is neither skill nor anomaly");
-
-            total_dmg += dmg;
-            dmg_per_ability.emplace_back(dmg);
-        }
-
-        return { total_dmg, dmg_per_ability };
     }
 }
 
@@ -236,7 +205,65 @@ namespace calc {
     };
 
     Calculator::result_t Calculator::eval(const request_t& request) {
-        auto result = request_dmg(request);
-        return result;
+        const auto& agent = request.agent->details();
+        const auto& rotation = request.rotation->details();
+
+        double total_dmg = 0.0;
+        std::vector<double> dmg_per_ability;
+        auto stats = details::calc_stats(request);
+
+        dmg_per_ability.reserve(rotation.size());
+        for (const auto& [ability_name, index] : rotation) {
+            const auto& ability = agent.ability(ability_name);
+            double dmg;
+
+            if (std::holds_alternative<SkillDetails>(ability)) {
+                const auto& skill = std::get<SkillDetails>(ability);
+                dmg = details::calc_regular_dmg(skill, index - 1, stats, enemy);
+            } else if (std::holds_alternative<AnomalyDetails>(ability)) {
+                const auto& anomaly = std::get<AnomalyDetails>(ability);
+                dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);
+            } else
+                throw RUNTIME_ERROR("ability is neither skill nor anomaly");
+
+            total_dmg += dmg;
+            dmg_per_ability.emplace_back(dmg);
+        }
+
+        return { total_dmg, dmg_per_ability };
+    }
+    Calculator::detailed_result_t Calculator::eval_detailed(const request_t& request) {
+        const auto& agent = request.agent->details();
+        const auto& rotation = request.rotation->details();
+
+        double total_dmg = 0.0;
+        std::vector<std::tuple<double, Tag, std::string>> info_per_ability;
+        auto stats = details::calc_stats(request);
+
+        info_per_ability.reserve(rotation.size());
+        for (const auto& [ability_name, index] : rotation) {
+            const auto& ability = agent.ability(ability_name);
+            double dmg;
+            Tag tag;
+            std::string name = ability_name;
+
+            if (std::holds_alternative<SkillDetails>(ability)) {
+                const auto& skill = std::get<SkillDetails>(ability);
+                dmg = details::calc_regular_dmg(skill, index - 1, stats, enemy);
+                tag = skill.tag();
+                if (skill.max_index() > 1)
+                    name += lib::format(" {}", index);
+            } else if (std::holds_alternative<AnomalyDetails>(ability)) {
+                const auto& anomaly = std::get<AnomalyDetails>(ability);
+                dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);
+                tag = Tag::Anomaly;
+            } else
+                throw RUNTIME_ERROR("ability is neither skill nor anomaly");
+
+            total_dmg += dmg;
+            info_per_ability.emplace_back(dmg, tag, std::move(name));
+        }
+
+        return { total_dmg, info_per_ability };
     }
 }
