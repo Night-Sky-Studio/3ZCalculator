@@ -1,14 +1,18 @@
 #include "backend/backend.hpp"
 
 //std
-#include <fstream>
+#include <filesystem>
+#include <iostream>
 #include <memory>
-#include <stdexcept>
+#include <ranges>
 #include <string>
 #include <thread>
 
-//toml
-#include "toml.hpp"
+//frozen
+#include "frozen/string.h"
+
+//utl
+#include "utl/json.hpp"
 
 //library
 #include "library/format.hpp"
@@ -17,38 +21,122 @@
 //zzz
 #include "zzz/details.hpp"
 
+//calc
+#include "calc/calculator.hpp"
+
 #ifdef DEBUG_STATUS
 //crow
 #include "crow/logging.h"
 #endif
 
+namespace fs = std::filesystem;
+
+namespace global {
+    extern std::string PATH;
+}
+
+namespace backend::details {
+    using maker_func = std::function<lib::MObjectPtr(const std::string&)>;
+    struct object_maker {
+        maker_func func;
+        bool is_recursive = false;
+    };
+
+    // TODO: make part of global scope
+    static const std::unordered_map<std::string, object_maker> associated_folders = {
+        {
+            "agents", {
+                .func = [](const std::string& name) { return std::make_shared<zzz::Agent>(name); }
+            }
+        },
+        {
+            "wengines", {
+                .func = [](const std::string& name) { return std::make_shared<zzz::Wengine>(name); }
+            }
+        },
+        {
+            "dds", {
+                .func = [](const std::string& name) { return std::make_shared<zzz::Dds>(name); }
+            }
+        },
+        {
+            "rotations", {
+                .func = [](const std::string& name) { return std::make_shared<zzz::Rotation>(name); },
+                .is_recursive = true
+            }
+        }
+    };
+    using maker_iterator = const std::unordered_map<std::string, object_maker>::const_iterator;
+
+    std::list<lib::MObjectPtr> regular_folder_iteration(
+        const fs::directory_entry& entry,
+        const maker_func& func) {
+        std::list<lib::MObjectPtr> result;
+
+        for (const auto& it : fs::directory_iterator(entry)) {
+            // ignores other folders and non json files
+            if (!it.is_regular_file() || it.path().extension() != ".json")
+                continue;
+
+            auto stem = it.path().stem().string();
+
+            result.emplace_back(func(stem));
+        }
+
+        return result;
+    }
+    std::list<lib::MObjectPtr> recursive_folder_iteration(
+        const fs::directory_entry& entry,
+        const maker_func& func) {
+        std::list<lib::MObjectPtr> result;
+
+        auto source_dir = lib::format("{}/data/{}/", global::PATH, entry.path().filename().string());
+
+        for (const auto& it : fs::recursive_directory_iterator(entry)) {
+            if (!it.is_regular_file())
+                continue;
+
+            auto relative = it.path().lexically_relative(source_dir).relative_path().string();
+
+            relative = relative.substr(0, relative.size() - relative.find_last_of('.') + 1);
+            relative = lib::replace(relative, std::string(1, fs::path::preferred_separator), "/");
+
+            result.emplace_back(func(relative));
+        }
+
+        return result;
+    }
+}
+
 namespace backend {
-    void prepare_request_details(calc::request_t& what, const nlohmann::json& source) {
+    // preparers
+
+    void prepare_request_details(calc::request_t& what, const utl::Json& source) {
+        const auto& table = source.as_object();
+
         // agent
 
-        what.agent.id = source["aid"];
+        what.agent.id = table.at("aid").as_integral();
 
         // wengine
 
-        what.wengine.id = source["wid"];
+        what.wengine.id = table.at("wid").as_integral();
 
-        // rotation
+        // TODO: add rotation to the object manager and save it on disk
 
         if (!source["rotation"].is_array())
-            what.rotation.id = source["rotation"];
+            what.rotation.id = table.at("rotation").as_integral();
         else {
-            what.rotation.ptr = std::make_shared<zzz::rotation_details>();
+            const auto& array = table.at("rotation").as_array();
+            zzz::RotationDetails rotation;
 
-            const auto& rotations = source["rotation"].get<std::vector<std::string>>();
-            for (const auto& it : rotations) {
-                auto splitted = lib::split_as_copy(it, ' ');
-                auto index = splitted.size() > 1
-                    ? std::stoul(splitted[1])
-                    : 0;
-                what.rotation.ptr->emplace_back(splitted[0], index);
+            for (const auto& it : array) {
+                auto splitted = lib::split_as_copy(it.as_string(), ' ');
+                auto index = splitted.size() > 1 ? std::stoul(splitted[1]) : 0;
+                rotation.emplace_back(splitted[0], index);
             }
 
-            // TODO: add rotation to the object manager and save it on disk
+            what.rotation->set(std::move(rotation));
         }
 
         // ddps and dds_count
@@ -56,20 +144,22 @@ namespace backend {
         std::map<size_t, size_t> dds_count;
         size_t current_disk = 0;
 
-        for (const auto& it : source["discs"]) {
+        for (const auto& it : table.at("discs").as_array()) {
+            const auto& v = it.as_object();
             zzz::combat::DdpBuilder builder;
 
-            uint64_t disc_id = it["id"];
-            const std::vector<uint32_t>& stats = it["stats"];
-            const std::vector<uint32_t>& levels = it["levels"];
+            uint64_t disc_id = v.at("id").as_integral();
+
+            const auto& stats = v.at("stats").as_array();
+            const auto& levels = v.at("levels").as_array();
 
             builder.set_disc_id(disc_id);
             builder.set_slot(current_disk + 1);
-            builder.set_rarity(it["rarity"]);
+            builder.set_rarity((zzz::Rarity) v.at("rarity").as_integral());
 
-            builder.set_main_stat((zzz::StatType) stats[0], levels[0]);
+            builder.set_main_stat((zzz::StatId) stats[0].as_integral(), levels[0].as_integral());
             for (size_t i = 1; i < 5; i++)
-                builder.add_sub_stat((zzz::StatType) stats[i], levels[i]);
+                builder.add_sub_stat((zzz::StatId) stats[i].as_integral(), levels[i].as_integral());
 
             what.ddps[current_disk++] = builder.get_product();
 
@@ -87,52 +177,78 @@ namespace backend {
             if (count < 2)
                 continue;
 
-            auto& [_, ptr] = what.dds.uniques.emplace_back(id, nullptr);
-            what.dds.by_count.emplace(2, &ptr);
+            auto& val = what.dds_list.emplace_back(id);
+            what.dds_by_count.emplace(2, val.ptr);
 
             if (count < 4)
                 continue;
 
-            what.dds.by_count.emplace(4, &ptr);
+            what.dds_by_count.emplace(4, val.ptr);
         }
     }
 
-    // remake with unordered_map or list
-    void prepare_request_composed(calc::request_t& what, ObjectManager& source) {
-        auto agent_future = source.get(lib::format("agents/{}", what.agent.id));
-        auto wengine_future = source.get(lib::format("wengines/{}", what.wengine.id));
+    // TODO: remake with unordered_map or list
+    void prepare_request_composed(calc::request_t& what, lib::ObjectManager& source) {
+        auto agent_future = source.get_async(lib::format("agents/{}", what.agent.id));
+        auto wengine_future = source.get_async(lib::format("wengines/{}", what.wengine.id));
 
-        std::future<any_ptr> rotation_future;
+        std::future<lib::MObjectPtr> rotation_future;
         if (what.rotation.ptr == nullptr)
-            rotation_future = source.get(lib::format("rotations/{}/{}", what.agent.id, what.rotation.id));
+            rotation_future = source.get_async(lib::format("rotations/{}/{}", what.agent.id, what.rotation.id));
 
-        std::list<std::tuple<zzz::DdsDetailsPtr*, std::future<any_ptr>>> dds_futures;
-        for (auto& [id, ptr] : what.dds.uniques)
-            dds_futures.emplace_back(&ptr, source.get(lib::format("dds/{}", id)));
+        std::list<std::tuple<zzz::DdsPtr&, std::future<lib::MObjectPtr>>> dds_futures;
+        for (auto& [id, ptr] : what.dds_list)
+            dds_futures.emplace_back(ptr, source.get_async(lib::format("dds/{}", id)));
 
         try {
-            what.agent.ptr = std::static_pointer_cast<zzz::AgentDetails>(agent_future.get());
-            what.wengine.ptr = std::static_pointer_cast<zzz::WengineDetails>(wengine_future.get());
+            what.agent.ptr = std::static_pointer_cast<zzz::Agent>(agent_future.get());
+            what.wengine.ptr = std::static_pointer_cast<zzz::Wengine>(wengine_future.get());
 
             if (what.rotation.ptr == nullptr)
-                what.rotation.ptr = std::static_pointer_cast<zzz::rotation_details>(rotation_future.get());
+                what.rotation.ptr = std::static_pointer_cast<zzz::Rotation>(rotation_future.get());
 
             for (auto& [ptr, future] : dds_futures)
-                *ptr = std::static_pointer_cast<zzz::DdsDetails>(future.get());
+                ptr = std::static_pointer_cast<zzz::Dds>(future.get());
         } catch (const std::runtime_error& e) {
             CROW_LOG_ERROR << lib::format("error: {}", e.what());
         }
     }
+
+    // requesters
+
+    calc::request_t json_to_request(const utl::Json& json, lib::ObjectManager& manager) {
+        calc::request_t result;
+
+        prepare_request_details(result, json);
+        prepare_request_composed(result, manager);
+
+        return result;
+    }
+
+    utl::Json calcs_to_json(const calc::Calculator::result_t& calcs) {
+        utl::Json result;
+        const auto& [total, per_ability] = calcs; // [double, std::vector<double>]
+
+        result["total"] = total;
+        result["per_ability"] = per_ability;
+
+        return result;
+    }
+
+    calc::Calculator::result_t request_calcs(const calc::request_t& request) {
+        return calc::Calculator::eval(request);
+    }
 }
 
 namespace backend {
-    // getters
-
-    Backend::Backend(const std::string& logger_file) :
-        m_logger(logger_file) {
+    Backend::~Backend() {
+        if (m_log_file.has_value())
+            m_log_file->close();
     }
 
-    ObjectManager& Backend::manager() {
+    // getters
+
+    lib::ObjectManager& Backend::manager() {
         return m_manager;
     }
 
@@ -147,90 +263,51 @@ namespace backend {
             .run();
     }
 
-    // requesters
-
-    calc::request_t Backend::json_to_request(const nlohmann::json& json) {
-        calc::request_t result;
-
-        prepare_request_details(result, json);
-        prepare_request_composed(result, m_manager);
-
-        return result;
-    }
-
-    nlohmann::json Backend::calcs_to_json(const calc::Calculator::result_t& calcs) {
-        nlohmann::json result;
-        const auto& [total, per_ability] = calcs; // [double, std::vector<double>]
-
-        result["total"] = total;
-        result["per_ability"] = per_ability;
-
-        return result;
-    }
-
-    calc::Calculator::result_t Backend::request_calcs(const calc::request_t& request) {
-        return calc::Calculator::eval(request);
-    }
-
     // initializers
 
     void Backend::init() {
         crow::logger::setHandler(&m_logger);
         crow::logger::setLogLevel(crow::LogLevel::INFO);
 
+        lib::ObjectManager::init_default_file_extensions();
+        zzz::StatFactory::init_default();
+
+        _init_logger(true);
         _init_object_manager();
         _init_crow_app();
     }
 
+    void Backend::_init_logger(bool use_file) {
+        m_logger.add_log_stream(std::cout);
+        if (use_file) {
+            m_log_file.emplace(std::fstream(lib::format("{}/logs/console.log", global::PATH),
+                std::ios::out | std::ios::trunc));
+            m_logger.add_log_stream(*m_log_file);
+        }
+    }
     size_t Backend::_init_object_manager() {
         size_t allocated_objects = 0;
-        std::fstream file("loadable_objects.toml", std::ios::in | std::ios::binary);
-        auto toml = toml::parse(file);
-        file.close();
+        fs::path res_path = lib::format("{}/data/", global::PATH);
+        if (!exists(res_path) || !is_directory(res_path))
+            throw FMT_RUNTIME_ERROR("resource folder doesn't exist at path \"{}\"", fs::absolute(res_path).string());
 
-        auto add_objects_and_loader = [&](const std::string& folder, const any_ptr_loader& loader) {
-            m_manager.add_utility_funcs({
-                .folder = folder,
-                .loader = loader
-            });
-            for (const auto& it : toml.at(folder).as_array()) {
-                std::string name = folder + '/';
+        for (const auto& entry : fs::directory_iterator(res_path)) {
+            // ignores non directories
+            if (!entry.is_directory())
+                continue;
 
-                switch (it.type()) {
-                case toml::value_t::integer:
-                    name += std::to_string(it.as_integer());
-                    break;
-                case toml::value_t::string:
-                    name += it.as_string();
-                    break;
-                default:
-                    throw std::runtime_error("wrong type");
-                }
+            auto maker_it = details::associated_folders.find(entry.path().filename().string());
+            // ignores directories which are not associated with object creator
+            if (maker_it == details::associated_folders.end())
+                continue;
 
-                allocated_objects++;
-                m_manager.add_object(folder, name);
-#ifdef DEBUG_STATUS
-                CROW_LOG_INFO << lib::format("added object {}", name);
-#endif
-            }
-        };
+            auto list = maker_it->second.is_recursive
+                ? details::recursive_folder_iteration(entry, maker_it->second.func)
+                : details::regular_folder_iteration(entry, maker_it->second.func);
 
-        add_objects_and_loader("agents", [](const toml::value& toml) {
-            auto result = std::make_shared<zzz::AgentDetails>(global::to_agent.from(toml));
-            return std::static_pointer_cast<void>(result);
-        });
-        add_objects_and_loader("wengines", [](const toml::value& toml) {
-            auto result = std::make_shared<zzz::WengineDetails>(global::to_wengine.from(toml));
-            return std::static_pointer_cast<void>(result);
-        });
-        add_objects_and_loader("dds", [](const toml::value& toml) {
-            auto result = std::make_shared<zzz::DdsDetails>(global::to_dds.from(toml));
-            return std::static_pointer_cast<void>(result);
-        });
-        add_objects_and_loader("rotations", [](const toml::value& toml) {
-            auto result = std::make_shared<zzz::rotation_details>(global::to_rotation.from(toml));
-            return std::static_pointer_cast<void>(result);
-        });
+            for (const auto& it : list)
+                m_manager.add_object(it);
+        }
 
         return allocated_objects;
     }
@@ -246,18 +323,17 @@ namespace backend {
             crow::response response;
 
             try {
-                auto json = nlohmann::json::parse(req.body);
-                auto unpacked_request = json_to_request(json);
+                auto json = utl::json::from_string(req.body);
+                auto unpacked_request = json_to_request(json, m_manager);
                 auto calcs = request_calcs(unpacked_request);
-                auto output = calcs_to_json(calcs).dump();
+                auto output = calcs_to_json(calcs).to_string();
 
                 response = { 200, std::move(output) };
-                response.add_header("Access-Control-Allow-Origin", "*");
             } catch (const std::exception& e) {
                 response = { 400, e.what() };
-                response.add_header("Access-Control-Allow-Origin", "*");
             }
 
+            response.add_header("Access-Control-Allow-Origin", "*");
             return response;
         });
     }

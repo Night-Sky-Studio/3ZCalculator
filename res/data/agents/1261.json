@@ -1,0 +1,10 @@
+{
+    "id": 1261,
+    "name": "Jane Doe",
+    "speciality": "anomaly",
+    "element": "phys",
+    "rarity": 4,
+    "stats": {
+        "flat_atk": "cond:ap>=120;func:(ap-120)*2;max:600"
+    }
+}

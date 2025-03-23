@@ -12,6 +12,7 @@
 //zzz
 #include "zzz/enums.hpp"
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
     // level for abilities is always 12
@@ -40,10 +41,15 @@ namespace zzz::details {
     class SkillBuilder : public lib::IBuilder<Skill> {
     public:
         SkillBuilder& set_name(std::string name);
+
         SkillBuilder& set_tag(Tag tag);
+        SkillBuilder& set_tag(std::string_view tag);
+
         SkillBuilder& add_scale(Skill::scale value);
         SkillBuilder& add_scale(double motion_value, double daze, Element element);
-        SkillBuilder& add_buff(stat buff);
+        SkillBuilder& add_scale(double motion_value, double daze, std::string_view element);
+
+        SkillBuilder& add_buff(const StatPtr& buff);
         SkillBuilder& set_buffs(StatsGrid buffs);
 
         bool is_built() const override;

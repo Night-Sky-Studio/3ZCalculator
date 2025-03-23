@@ -1,21 +1,26 @@
 #pragma once
 
+//std
+#include <fstream>
+
 //frozen
 #include "frozen/string.h"
 
-//nlohmann::json
-#include "nlohmann/json.hpp"
+//utl
+#include "utl/json.hpp"
 
 //crow
 #include "crow/app.h"
 
+//library
+#include "library/cached_memory.hpp"
+
 //calculator
-#include "calc/calculator.hpp"
-#include "calc/details.hpp"
+//#include "calc/calculator.hpp"
+//#include "calc/details.hpp"
 
 //backend
-#include "backend/logger.hpp"
-#include "backend/object_manager.hpp"
+#include "library/logger.hpp"
 
 namespace backend {
     class Backend {
@@ -24,24 +29,22 @@ namespace backend {
         static constexpr auto port = 5101;
         static constexpr frozen::string ip = "192.168.1.2";
 
-        explicit Backend(const std::string& logger_file);
-        ObjectManager& manager();
+        Backend() = default;
+        ~Backend();
+
+        lib::ObjectManager& manager();
 
         void init();
         void run();
 
     protected:
-        ObjectManager m_manager;
+        lib::ObjectManager m_manager;
         crow::SimpleApp m_app;
         Logger m_logger;
-
-        calc::request_t json_to_request(const nlohmann::json& json);
-
-        static nlohmann::json calcs_to_json(const calc::Calculator::result_t& calcs);
-
-        static calc::Calculator::result_t request_calcs(const calc::request_t& request);
+        std::optional<std::fstream> m_log_file;
 
     private:
+        void _init_logger(bool use_file);
         size_t _init_object_manager();
         void _init_crow_app();
     };

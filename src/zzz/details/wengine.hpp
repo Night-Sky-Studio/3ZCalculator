@@ -1,37 +1,34 @@
 #pragma once
 
 //std
-#include <memory>
 #include <string>
 
 //library
-#include "library/converter.hpp"
 #include "library/builder.hpp"
+#include "library/cached_memory.hpp"
 
 //zzz
 #include "zzz/enums.hpp"
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
     class Wengine {
         friend class WengineBuilder;
-        friend class ToWengineConverter;
 
     public:
         uint64_t id() const;
         const std::string& name() const;
         Speciality speciality() const;
-        const stat& main_stat() const;
-        const stat& sub_stat() const;
-        const StatsGrid& passive_stats() const;
+        // you can really have access to all stats at once
+        const StatsGrid& stats() const;
 
     protected:
         uint64_t m_id;
         std::string m_name;
         Rarity m_rarity;
         Speciality m_speciality;
-        stat m_main_stat, m_sub_stat;
-        StatsGrid m_passive_stats;
+        StatsGrid m_stats;
     };
 
     class WengineBuilder : public lib::IBuilder<Wengine> {
@@ -39,11 +36,13 @@ namespace zzz::details {
         WengineBuilder& set_id(uint64_t id);
         WengineBuilder& set_name(std::string name);
         WengineBuilder& set_rarity(Rarity rarity);
+
         WengineBuilder& set_speciality(Speciality speciality);
-        WengineBuilder& set_main_stat(stat main_stat);
-        WengineBuilder& set_sub_stat(stat sub_stat);
-        WengineBuilder& add_passive_stat(stat passive_stat);
-        WengineBuilder& set_passive_stats(StatsGrid passive_stats);
+        WengineBuilder& set_speciality(std::string_view speciality);
+
+        WengineBuilder& set_main_stat(const StatsGrid& main_stat);
+        WengineBuilder& set_sub_stat(const StatsGrid& sub_stat);
+        WengineBuilder& set_passive_stats(const StatsGrid& stats);
 
         bool is_built() const override;
         Wengine&& get_product() override;
@@ -59,18 +58,19 @@ namespace zzz::details {
             bool passive_stats : 1 = false;
         } _is_set;
     };
-
-    class ToWengineConverter : public lib::IConverter<Wengine, toml::value> {
-    public:
-        Wengine from(const toml::value& data) const override;
-    };
 }
 
 namespace zzz {
     using WengineDetails = details::Wengine;
-    using WengineDetailsPtr = std::shared_ptr<details::Wengine>;
-}
 
-namespace global {
-    static const zzz::details::ToWengineConverter to_wengine;
+    class Wengine : public lib::MObject {
+    public:
+        explicit Wengine(const std::string& name);
+
+        WengineDetails& details();
+        const WengineDetails& details() const;
+
+        bool load_from_string(const std::string& input, size_t mode) override;
+    };
+    using WenginePtr = std::shared_ptr<Wengine>;
 }

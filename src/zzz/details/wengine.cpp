@@ -1,14 +1,17 @@
 #include "zzz/details/wengine.hpp"
 
-//std
-#include <stdexcept>
-
 //frozen
 #include "frozen/unordered_set.h"
 
+//crow
+#include "crow/logging.h"
+
+//lib
+#include "library/format.hpp"
+
 namespace zzz::details::wengine_info {
     // ms - main stat
-    constexpr frozen::unordered_set ms_limits = { StatType::AtkBase };
+    constexpr frozen::unordered_set ms_limits = { StatId::AtkBase };
 }
 
 namespace zzz::details {
@@ -17,9 +20,7 @@ namespace zzz::details {
     uint64_t Wengine::id() const { return m_id; }
     const std::string& Wengine::name() const { return m_name; }
     Speciality Wengine::speciality() const { return m_speciality; }
-    const stat& Wengine::main_stat() const { return m_main_stat; }
-    const stat& Wengine::sub_stat() const { return m_sub_stat; }
-    const StatsGrid& Wengine::passive_stats() const { return m_passive_stats; }
+    const StatsGrid& Wengine::stats() const { return m_stats; }
 
     // WengineBuilder
 
@@ -38,31 +39,32 @@ namespace zzz::details {
         _is_set.rarity = true;
         return *this;
     }
+
     WengineBuilder& WengineBuilder::set_speciality(Speciality speciality) {
         m_product->m_speciality = speciality;
         _is_set.speciality = true;
         return *this;
     }
-    WengineBuilder& WengineBuilder::set_main_stat(stat main_stat) {
-        if (!wengine_info::ms_limits.contains(main_stat.type))
-            throw std::runtime_error("this main stat doesn't exist");
+    WengineBuilder& WengineBuilder::set_speciality(std::string_view speciality) {
+        return set_speciality(convert::string_to_speciality(speciality));
+    }
 
-        m_product->m_main_stat = main_stat;
+    // TODO: make proper check on main stat
+    WengineBuilder& WengineBuilder::set_main_stat(const StatsGrid& main_stat) {
+        /*if (!wengine_info::ms_limits.contains(main_stat))
+            throw std::RUNTIME_ERROR("this main stat doesn't exist");*/
+
+        m_product->m_stats.add(main_stat);
         _is_set.main_stat = true;
         return *this;
     }
-    WengineBuilder& WengineBuilder::set_sub_stat(stat sub_stat) {
-        m_product->m_sub_stat = sub_stat;
+    WengineBuilder& WengineBuilder::set_sub_stat(const StatsGrid& sub_stat) {
+        m_product->m_stats.add(sub_stat);
         _is_set.sub_stat = true;
         return *this;
     }
-    WengineBuilder& WengineBuilder::add_passive_stat(stat passive_stat) {
-        m_product->m_passive_stats.emplace(passive_stat);
-        _is_set.passive_stats = true;
-        return *this;
-    }
-    WengineBuilder& WengineBuilder::set_passive_stats(StatsGrid passive_stats) {
-        m_product->m_passive_stats = std::move(passive_stats);
+    WengineBuilder& WengineBuilder::set_passive_stats(const StatsGrid& stats) {
+        m_product->m_stats.add(stats);
         _is_set.passive_stats = true;
         return *this;
     }
@@ -78,26 +80,54 @@ namespace zzz::details {
     }
     Wengine&& WengineBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify id, name, speciality and main, sub and passive stats");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality and stats [main and sub at least]");
 
         return IBuilder::get_product();
     }
+}
 
-    // WengineAdaptor
+namespace zzz {
+    // Service
 
-    Wengine ToWengineConverter::from(const toml::value& data) const {
-        WengineBuilder builder;
+    // json has to be root
+    WengineDetails load_from_json(const utl::Json& json) {
+        const auto& table = json.as_object();
+        details::WengineBuilder builder;
 
-        builder.set_id(data.at("id").as_integer());
-        builder.set_name(data.at("name").as_string());
-        builder.set_rarity((Rarity)data.at("rarity").as_integer());
-        builder.set_speciality(convert::string_to_speciality(data.at("speciality").as_string()));
+        builder.set_id(table.at("id").as_integral());
+        builder.set_name(table.at("name").as_string());
+        builder.set_rarity((Rarity) table.at("rarity").as_integral());
+        builder.set_speciality(table.at("speciality").as_string());
 
-        const auto& stats = data.at("stats").as_table();
-        builder.set_main_stat(global::to_stat.from(stats.at("main").as_array()));
-        builder.set_sub_stat(global::to_stat.from(stats.at("sub").as_array()));
-        builder.set_passive_stats(global::to_stats_grid.from(stats.at("passive")));
+        const auto& stats = table.at("stats").as_object();
+        builder.set_main_stat(StatsGrid::make_from(stats.at("main")));
+        builder.set_sub_stat(StatsGrid::make_from(stats.at("sub")));
+        builder.set_passive_stats(StatsGrid::make_from(stats.at("passive")));
 
         return builder.get_product();
+    }
+
+    // Wengine
+
+    Wengine::Wengine(const std::string& name) :
+        MObject(lib::format("wengines/{}", name)) {
+    }
+
+    WengineDetails& Wengine::details() { return as<WengineDetails>(); }
+    const WengineDetails& Wengine::details() const { return as<WengineDetails>(); }
+
+    bool Wengine::load_from_string(const std::string& input, size_t mode) {
+        if (mode == 1) {
+            auto json = utl::json::from_string(input);
+            auto details = load_from_json(json);
+            set(std::move(details));
+        } else {
+#ifdef DEBUG_STATUS
+            CROW_LOG_ERROR << lib::format("extension_id {} isn't defined", mode);
+#endif
+            return false;
+        }
+
+        return true;
     }
 }

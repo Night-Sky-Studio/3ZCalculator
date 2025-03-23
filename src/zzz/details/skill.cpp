@@ -1,7 +1,7 @@
 #include "zzz/details/skill.hpp"
 
-//std
-#include <stdexcept>
+//lib
+#include "library/format.hpp"
 
 namespace zzz::details {
     // Skill
@@ -18,20 +18,37 @@ namespace zzz::details {
         _is_set.name = true;
         return *this;
     }
+
     SkillBuilder& SkillBuilder::set_tag(Tag tag) {
         m_product->m_tag = tag;
         _is_set.tag = true;
         return *this;
     }
+    SkillBuilder& SkillBuilder::set_tag(std::string_view tag) {
+        return set_tag(convert::string_to_tag(tag));
+    }
+
     SkillBuilder& SkillBuilder::add_scale(Skill::scale value) {
         m_product->m_scales.emplace_back(value);
         return *this;
     }
     SkillBuilder& SkillBuilder::add_scale(double motion_value, double daze, Element element) {
-        return add_scale({ motion_value, daze, element });
+        return add_scale({
+            .motion_value = motion_value,
+            .daze = daze,
+            .element = element
+        });
     }
-    SkillBuilder& SkillBuilder::add_buff(stat buff) {
-        m_product->m_buffs.emplace(buff);
+    SkillBuilder& SkillBuilder::add_scale(double motion_value, double daze, std::string_view element) {
+        return add_scale({
+            .motion_value = motion_value,
+            .daze = daze,
+            .element = convert::string_to_element(element)
+        });
+    }
+
+    SkillBuilder& SkillBuilder::add_buff(const StatPtr& buff) {
+        m_product->m_buffs.add(buff);
         return *this;
     }
     SkillBuilder& SkillBuilder::set_buffs(StatsGrid buffs) {
@@ -45,7 +62,7 @@ namespace zzz::details {
     }
     Skill&& SkillBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify name and tag");
+            throw RUNTIME_ERROR("you have to specify name and tag");
 
         return IBuilder::get_product();
     }

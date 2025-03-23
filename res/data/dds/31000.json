@@ -1,0 +1,6 @@
+{
+    "id": 31000,
+    "name": "Woodpecker Electro",
+
+    "set_bonus": [{ "crit_rate": 0.08 }, { "atk_ratio": 0.27 }]
+}

@@ -3,23 +3,19 @@
 //std
 #include <array>
 #include <cstdint>
-#include <memory>
 #include <string>
 
-//toml11
-#include "toml.hpp"
-
 //library
-#include "library/converter.hpp"
 #include "library/builder.hpp"
+#include "library/cached_memory.hpp"
 
 //zzz
 #include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 namespace zzz::details {
-    class DriveDiscSet {
+    class Dds {
         friend class DdsBuilder;
-        friend class ToDdsConverter;
 
     public:
         uint64_t id() const;
@@ -34,7 +30,7 @@ namespace zzz::details {
         std::array<StatsGrid, 2> m_set_bonuses;
     };
 
-    class DdsBuilder : public lib::IBuilder<DriveDiscSet> {
+    class DdsBuilder : public lib::IBuilder<Dds> {
     public:
         DdsBuilder& set_id(uint64_t id);
         DdsBuilder& set_name(std::string name);
@@ -42,7 +38,7 @@ namespace zzz::details {
         DdsBuilder& set_p4(StatsGrid bonus);
 
         bool is_built() const override;
-        DriveDiscSet&& get_product() override;
+        Dds&& get_product() override;
 
     private:
         struct {
@@ -52,18 +48,19 @@ namespace zzz::details {
             bool p4   : 1 = false;
         } _is_set;
     };
-
-    class ToDdsConverter : protected lib::IConverter<DriveDiscSet, toml::value> {
-    public:
-        DriveDiscSet from(const toml::value& data) const override;
-    };
 }
 
 namespace zzz {
-    using DdsDetails = details::DriveDiscSet;
-    using DdsDetailsPtr = std::shared_ptr<details::DriveDiscSet>;
-}
+    using DdsDetails = details::Dds;
 
-namespace global {
-    static const zzz::details::ToDdsConverter to_dds;
+    class Dds : public lib::MObject {
+    public:
+        explicit Dds(const std::string& fullname);
+
+        DdsDetails& details();
+        const DdsDetails& details() const;
+
+        bool load_from_string(const std::string& input, size_t mode) override;
+    };
+    using DdsPtr = std::shared_ptr<Dds>;
 }

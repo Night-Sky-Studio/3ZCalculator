@@ -3,33 +3,30 @@
 //std
 #include <cstdint>
 #include <list>
-#include <memory>
 #include <string>
 
-//toml11
-#include "toml.hpp"
-
 //library
-#include "library/converter.hpp"
+#include "library/cached_memory.hpp"
 
 namespace zzz::details {
     struct rotation_cell {
         std::string command;
         uint64_t index;
     };
-    using rotation = std::list<rotation_cell>;
-
-    class ToRotationConverter : lib::IConverter<rotation, toml::value> {
-    public:
-        rotation from(const toml::value& data) const override;
-    };
+    using Rotation = std::list<rotation_cell>;
 }
 
 namespace zzz {
-    using rotation_details = details::rotation;
-    using rotation_details_ptr = std::shared_ptr<details::rotation>;
-}
+    using RotationDetails = details::Rotation;
 
-namespace global {
-    static const zzz::details::ToRotationConverter to_rotation;
+    class Rotation : public lib::MObject {
+    public:
+        explicit Rotation(const std::string& name);
+
+        RotationDetails& details();
+        const RotationDetails& details() const;
+
+        bool load_from_string(const std::string& input, size_t mode) override;
+    };
+    using RotationPtr = std::shared_ptr<Rotation>;
 }

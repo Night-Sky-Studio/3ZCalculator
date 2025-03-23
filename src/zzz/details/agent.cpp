@@ -1,27 +1,22 @@
 #include "zzz/details/agent.hpp"
 
 //std
+#include <ranges>
 #include <stdexcept>
 
+//utl
+#include "utl/json.hpp"
+
 //library
+#include "library/format.hpp"
 #include "library/string_funcs.hpp"
+
+#ifdef DEBUG_STATUS
+#include "crow/logging.h"
+#endif
 
 namespace zzz::details {
     // Agent
-
-    size_t Agent::is_skill_or_anomaly(const Agent& agent, const std::string& name) {
-        size_t result;
-        auto hashed_key = lib::hash(name);
-
-        if (agent.m_skills.contains(hashed_key))
-            result = 1;
-        else if (agent.m_anomalies.contains(hashed_key))
-            result = 2;
-        else
-            result = 0;
-
-        return result;
-    }
 
     uint64_t Agent::id() const { return m_id; }
     const std::string& Agent::name() const { return m_name; }
@@ -29,8 +24,8 @@ namespace zzz::details {
     Element Agent::element() const { return m_element; }
     Rarity Agent::rarity() const { return m_rarity; }
     const StatsGrid& Agent::stats() const { return m_stats; }
-    const Skill& Agent::skill(const std::string& name) const { return m_skills.at(lib::hash(name)); }
-    const Anomaly& Agent::anomaly(const std::string& name) const { return m_anomalies.at(lib::hash(name)); }
+
+    const Ability& Agent::ability(const std::string& name) const { return m_abilities.at(lib::hash(name)); }
 
     // AgentBuilder
 
@@ -44,37 +39,52 @@ namespace zzz::details {
         _is_set.name = true;
         return *this;
     }
+
     AgentBuilder& AgentBuilder::set_speciality(Speciality speciality) {
         m_product->m_speciality = speciality;
         _is_set.speciality = true;
         return *this;
     }
+    AgentBuilder& AgentBuilder::set_speciality(std::string_view speciality_str) {
+        m_product->m_speciality = convert::string_to_speciality(speciality_str);
+        _is_set.speciality = true;
+        return *this;
+    }
+
     AgentBuilder& AgentBuilder::set_element(Element element) {
         m_product->m_element = element;
         _is_set.element = true;
         return *this;
     }
+    AgentBuilder& AgentBuilder::set_element(std::string_view element_str) {
+        m_product->m_element = convert::string_to_element(element_str);
+        _is_set.element = true;
+        return *this;
+    }
+
     AgentBuilder& AgentBuilder::set_rarity(Rarity rarity) {
         m_product->m_rarity = rarity;
         _is_set.rarity = true;
         return *this;
     }
-    AgentBuilder& AgentBuilder::add_stat(stat value) {
-        m_product->m_stats.emplace(value);
+
+    AgentBuilder& AgentBuilder::add_stat(const StatPtr& value) {
+        m_product->m_stats.set(value);
         return *this;
     }
     AgentBuilder& AgentBuilder::set_stats(StatsGrid stats) {
         m_product->m_stats = std::move(stats);
         return *this;
     }
+
     AgentBuilder& AgentBuilder::add_skill(Skill skill) {
         auto hashed_key = lib::hash(skill.name());
-        m_product->m_skills.emplace(hashed_key, std::move(skill));
+        m_product->m_abilities.emplace(hashed_key, std::move(skill));
         return *this;
     }
     AgentBuilder& AgentBuilder::add_anomaly(Anomaly anomaly) {
         auto hashed_key = lib::hash(anomaly.name());
-        m_product->m_anomalies.emplace(hashed_key, std::move(anomaly));
+        m_product->m_abilities.emplace(hashed_key, std::move(anomaly));
         return *this;
     }
 
@@ -87,63 +97,148 @@ namespace zzz::details {
     }
     Agent&& AgentBuilder::get_product() {
         if (!is_built())
-            throw std::runtime_error("you have to specify id, name, speciality, element, rarity and stats");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity and stats");
 
         return IBuilder::get_product();
     }
+}
 
-    // AgentAdaptor
+#include <future>
 
-    Agent ToAgentConverter::from(const toml::value& data) const {
-        AgentBuilder agent_builder;
-        const auto& table = data.as_table();
-        auto element = convert::string_to_element(table.at("element").as_string());
+namespace zzz {
+    // Service
 
-        agent_builder.set_id(table.at("id").as_integer());
-        agent_builder.set_name(table.at("name").as_string());
-        agent_builder.set_speciality(convert::string_to_speciality(table.at("speciality").as_string()));
-        agent_builder.set_element(element);
-        agent_builder.set_rarity((Rarity)table.at("rarity").as_integer());
-        agent_builder.set_stats(global::to_stats_grid.from(table.at("stats")));
+    AnomalyDetails make_anomaly_from(const std::string& key, const utl::Json& json, Element default_element) {
+        const auto& table = json.as_object();
+        details::AnomalyBuilder builder;
 
-        for (const auto& [key, value] : table.at("skills").as_table()) {
-            const auto& skill_table = value.as_table();
-            SkillBuilder skill_builder;
+        builder.set_name(key);
+        builder.set_scale(table.at("scale").as_floating());
 
-            skill_builder.set_name(key);
-            skill_builder.set_tag(convert::string_to_tag(skill_table.at("tag").as_string()));
+        if (auto it = table.find("element"); it != table.end())
+            builder.set_element(it->second.as_string());
+        else
+            builder.set_element(default_element);
 
-            for (const auto& it : skill_table.at("scales").as_array()) {
-                const toml::array& scale_data = it.as_array();
-                skill_builder.add_scale(scale_data[0].as_floating(), scale_data[1].as_floating(),
-                    scale_data.size() == 3 ? convert::string_to_element(scale_data[2].as_string()) : element);
-            }
+        if (auto it = table.find("buffs"); it != table.end()) {
+            auto buffs = StatsGrid::make_from(it->second, Tag::Anomaly);
+            bool can_crit = buffs.contains(StatId::CritRate, Tag::Anomaly)
+                && buffs.contains(StatId::CritDmg, Tag::Anomaly);
 
-            if (auto it = skill_table.find("buffs"); it != skill_table.end())
-                skill_builder.set_buffs(global::to_stats_grid.from(it->second));
-
-            agent_builder.add_skill(skill_builder.get_product());
+            builder.set_buffs(std::move(buffs));
+            builder.set_crit(can_crit);
         }
 
-        if (auto anomalies_it = table.find("anomalies"); anomalies_it != table.end()) {
-            for (const auto& [key, value] : anomalies_it->second.as_table()) {
-                const auto& anomaly_table = value.as_table();
-                AnomalyBuilder anomaly_builder;
+        return builder.get_product();
+    }
 
-                anomaly_builder.set_name(key);
-                anomaly_builder.set_scale(anomaly_table.at("scale").as_floating());
+    SkillDetails::scale make_scale_from(const utl::Json& json, Element default_element) {
+        const auto& array = json.as_array();
+        SkillDetails::scale result;
 
-                auto can_crit_it = anomaly_table.find("can_crit");
-                anomaly_builder.set_crit(can_crit_it != anomaly_table.end() ? can_crit_it->second.as_boolean() : false);
+        result.motion_value = array[0].as_floating();
+        result.daze = array[1].as_floating();
 
-                if (auto it = anomaly_table.find("buffs"); it != anomaly_table.end())
-                    anomaly_builder.set_buffs(global::to_stats_grid.from(it->second));
+        if (array.size() <= 2) {
+            result.element = default_element;
+            return result;
+        }
 
-                agent_builder.add_anomaly(anomaly_builder.get_product());
+        result.element = convert::string_to_element(array[2].as_string());
+
+        return result;
+    }
+    SkillDetails make_skill_from(const std::string& key, const utl::Json& json, Element default_element) {
+        const auto& table = json.as_object();
+        details::SkillBuilder builder;
+
+        auto tag = convert::string_to_tag(table.at("tag").as_string());
+
+        builder.set_name(key);
+        builder.set_tag(tag);
+
+        if (auto it = table.find("scale"); it != table.end()) {
+            builder.add_scale(make_scale_from(it->second, default_element));
+        } else if (it = table.find("scales"); it != table.end()) {
+            for (const auto& jt : it->second.as_array())
+                builder.add_scale(make_scale_from(jt, default_element));
+        }
+
+        if (auto it = table.find("buffs"); it != table.end()) {
+            auto buffs = StatsGrid::make_from(it->second, tag);
+            builder.set_buffs(std::move(buffs));
+        }
+
+        return builder.get_product();
+    }
+
+    // json has to be root
+    AgentDetails load_from_json(const utl::Json& json) {
+        const auto& table = json.as_object();
+        details::AgentBuilder builder;
+
+        // basic information
+
+        auto element = convert::string_to_element(table.at("element").as_string());
+
+        builder.set_id(table.at("id").as_integral());
+        builder.set_name(table.at("name").as_string());
+        builder.set_speciality(table.at("speciality").as_string());
+        builder.set_element(element);
+        builder.set_rarity((Rarity) table.at("rarity").as_integral());
+
+        // stats
+
+        auto stats = StatsGrid::make_from(table.at("stats"));
+        builder.set_stats(std::move(stats));
+
+        // anomalies
+
+        bool has_anomaly_redefinition = false;
+        auto own_anomaly_name = AnomalyDetails::get_anomaly_by_element(element);
+
+        if (auto it = table.find("anomalies"); it != table.end()) {
+            for (const auto& [k, v] : it->second.as_object()) {
+                auto anomaly = make_anomaly_from(k, v, element);
+
+                if (own_anomaly_name == anomaly.name())
+                    has_anomaly_redefinition = true;
+
+                builder.add_anomaly(std::move(anomaly));
             }
-        } else
-            agent_builder.add_anomaly(Anomaly::get_standard_anomaly(element));
+        }
+        if (!has_anomaly_redefinition)
+            builder.add_anomaly(AnomalyDetails::get_standard_anomaly(own_anomaly_name));
 
-        return agent_builder.get_product();
+        // skills
+
+        for (const auto& [k, v] : table.at("skills").as_object())
+            builder.add_skill(make_skill_from(k, v, element));
+
+        return builder.get_product();
+    }
+
+    // Agent
+
+    Agent::Agent(const std::string& name) :
+        MObject(lib::format("agents/{}", name)) {
+    }
+
+    AgentDetails& Agent::details() { return as<AgentDetails>(); }
+    const AgentDetails& Agent::details() const { return as<AgentDetails>(); }
+
+    bool Agent::load_from_string(const std::string& input, size_t mode) {
+        if (mode == 1) {
+            auto json = utl::json::from_string(input);
+            auto details = load_from_json(json);
+            set(std::move(details));
+        } else {
+#ifdef DEBUG_STATUS
+            CROW_LOG_ERROR << lib::format("extension_id {} isn't defined", mode);
+#endif
+            return false;
+        }
+
+        return true;
     }
 }

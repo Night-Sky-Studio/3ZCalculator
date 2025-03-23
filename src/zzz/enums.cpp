@@ -7,9 +7,9 @@
 #include "frozen/unordered_map.h"
 
 namespace zzz::convert_info::inline stat_type_enum {
-    using enum StatType;
+    using enum StatId;
 
-    static constexpr std::array<frozen::string, (size_t) Count> stat_type2cstr = {
+    static constexpr std::array<frozen::string, (size_t) Count> stat_id2cstr = {
         "none",
         "hp_total", "hp_base", "hp_ratio", "hp_flat",
         "atk_total", "atk_base", "atk_ratio", "atk_flat",
@@ -23,7 +23,7 @@ namespace zzz::convert_info::inline stat_type_enum {
         "dmg_ratio", "phys_ratio", "fire_ratio", "ice_ratio", "electric_ratio", "ether_ratio",
         "res_pen", "phys_res_pen", "fire_res_pen", "ice_res_pen", "electric_res_pen", "ether_res_pen"
     };
-    static constexpr frozen::unordered_map<frozen::string, StatType, (size_t) Count> cstr2stat_type = {
+    static constexpr frozen::unordered_map<frozen::string, StatId, (size_t) Count> cstr2stat_id = {
         { "none", None },
         { "hp_total", HpTotal }, { "hp_base", HpBase }, { "hp_ratio", HpRatio }, { "hp_flat", HpFlat },
         { "atk_total", AtkTotal }, { "atk_base", AtkBase }, { "atk_ratio", AtkRatio }, { "atk_flat", AtkFlat },
@@ -98,21 +98,21 @@ namespace zzz::convert_info::inline rarity_enum {
 }
 
 namespace zzz::convert {
-    // StatType
+    // StatId
 
-    constexpr frozen::string stat_type_to_cstr(StatType source) {
-        return convert_info::stat_type2cstr[(size_t) source];
+    constexpr frozen::string stat_id_to_cstr(StatId source) {
+        return convert_info::stat_id2cstr[(size_t) source];
     }
-    std::string stat_type_to_string(StatType source) {
-        const auto& cstr = convert_info::stat_type2cstr[(size_t) source];
+    std::string_view stat_id_to_string(StatId source) {
+        const auto& cstr = convert_info::stat_id2cstr[(size_t) source];
         return { cstr.begin(), cstr.end() };
     }
 
-    constexpr StatType cstr_to_stat_type(const frozen::string& source) {
-        return convert_info::cstr2stat_type.at(source);
+    constexpr StatId cstr_to_stat_id(const frozen::string& source) {
+        return convert_info::cstr2stat_id.at(source);
     }
-    StatType string_to_stat_type(const std::string& source) {
-        return convert_info::cstr2stat_type.at(frozen::string(source.data(), source.size()));
+    StatId string_to_stat_id(std::string_view source) {
+        return convert_info::cstr2stat_id.at(frozen::string(source.data(), source.size()));
     }
 
     // Tag
@@ -120,7 +120,7 @@ namespace zzz::convert {
     constexpr frozen::string tag_to_cstr(Tag source) {
         return convert_info::tag2cstr[(size_t) source];
     }
-    std::string tag_to_string(Tag source) {
+    std::string_view tag_to_string(Tag source) {
         const auto& cstr = convert_info::tag2cstr[(size_t) source];
         return { cstr.begin(), cstr.end() };
     }
@@ -128,7 +128,7 @@ namespace zzz::convert {
     constexpr Tag cstr_to_tag(const frozen::string& source) {
         return convert_info::cstr2tag.at(source);
     }
-    Tag string_to_tag(const std::string& source) {
+    Tag string_to_tag(std::string_view source) {
         return convert_info::cstr2tag.at(frozen::string(source.data(), source.size()));
     }
 
@@ -137,7 +137,7 @@ namespace zzz::convert {
     constexpr frozen::string speciality_to_cstr(Speciality source) {
         return convert_info::speciality2cstr[(size_t) source];
     }
-    std::string speciality_to_string(Speciality source) {
+    std::string_view speciality_to_string(Speciality source) {
         const auto& cstr = convert_info::speciality2cstr[(size_t) source];
         return { cstr.begin(), cstr.end() };
     }
@@ -145,7 +145,7 @@ namespace zzz::convert {
     constexpr Speciality cstr_to_speciality(const frozen::string& source) {
         return convert_info::cstr2speciality.at(source);
     }
-    Speciality string_to_speciality(const std::string& source) {
+    Speciality string_to_speciality(std::string_view source) {
         return convert_info::cstr2speciality.at(frozen::string(source.data(), source.size()));
     }
 
@@ -154,7 +154,7 @@ namespace zzz::convert {
     constexpr frozen::string element_to_cstr(Element source) {
         return convert_info::element2cstr[(size_t) source];
     }
-    std::string element_to_string(Element source) {
+    std::string_view element_to_string(Element source) {
         const auto& cstr = convert_info::element2cstr[(size_t) source];
         return { cstr.begin(), cstr.end() };
     }
@@ -162,7 +162,7 @@ namespace zzz::convert {
     constexpr Element cstr_to_element(const frozen::string& source) {
         return convert_info::cstr2element.at(source);
     }
-    Element string_to_element(const std::string& source) {
+    Element string_to_element(std::string_view source) {
         return convert_info::cstr2element.at(frozen::string(source.data(), source.size()));
     }
 }

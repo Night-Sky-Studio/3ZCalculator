@@ -1,8 +1,9 @@
 #pragma once
 
 //std
-#include <fstream>
+#include <list>
 #include <mutex>
+#include <ostream>
 #include <string>
 
 //crow
@@ -11,12 +12,12 @@
 namespace backend {
     class Logger : public crow::ILogHandler {
     public:
-        explicit Logger(const std::string& path);
+        void add_log_stream(std::ostream& stream);
 
         void log(std::string message, crow::LogLevel level) override;
 
     private:
         std::mutex _mutex;
-        std::fstream _file;
+        std::list<std::ostream*> _ostreams;
     };
 }

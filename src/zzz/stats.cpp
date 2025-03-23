@@ -1,147 +1,119 @@
 #include "zzz/stats.hpp"
 
-//std
-#include <ranges>
-#include <stdexcept>
-
-#ifdef DEBUG_STATUS
+//lib
 #include "library/format.hpp"
-#include "tabulate/table.hpp"
-#endif
 
 namespace zzz {
-    // StatAdaptor
+    // IStat
 
-    stat ToStatConverter::from(const toml::array& data) const {
-        return stat {
-            .value = data[1].as_floating(),
-            .type = convert::string_to_stat_type(data[0].as_string()),
-            .tag = data.size() == 3 ? convert::string_to_tag(data[2].as_string()) : Tag::Universal
+    IStat::IStat(size_t type) :
+        _type(type) {
+    }
+
+    double IStat::base() const {
+        return m_base;
+    }
+    StatId IStat::id() const {
+        return m_id;
+    }
+    Tag IStat::tag() const {
+        return m_tag;
+    }
+
+    // RegularStat
+
+    StatPtr RegularStat::make(double base, StatId id, Tag tag) {
+        RegularStat result;
+
+        result.m_base = base;
+        result.m_id = id;
+        result.m_tag = tag;
+
+        return std::make_shared<RegularStat>(std::move(result));
+    }
+
+    StatPtr RegularStat::make_from_floating(const std::string& key, const utl::Json& json) {
+        RegularStat result;
+
+        result.m_base = json.as_floating();
+        result.m_id = convert::string_to_stat_id(key);
+
+        return std::make_shared<RegularStat>(std::move(result));
+    }
+    StatPtr RegularStat::make_from_object(const std::string& key, const utl::Json& json) {
+        RegularStat result;
+
+        result.m_base = json["val"].as_floating();
+        result.m_id = convert::string_to_stat_id(key);
+        result.m_tag = convert::string_to_tag(json.value_or<std::string>("tag", "universal"));
+
+        return std::make_shared<RegularStat>(std::move(result));
+    }
+
+    RegularStat::RegularStat() :
+        IStat(1) {
+    }
+
+    StatPtr RegularStat::copy_as_ptr() const {
+        RegularStat result;
+
+        result.m_base = m_base;
+        result.m_id = m_id;
+        result.m_tag = m_tag;
+
+        return std::make_shared<RegularStat>(std::move(result));
+    }
+
+    double RegularStat::value() const {
+        return m_base;
+    }
+
+    // TODO: RelativeStat
+
+    StatPtr RelativeStat::make_from_string(const std::string& key, const utl::Json& json) {
+        return nullptr;
+    }
+    StatPtr RelativeStat::make_from_object(const std::string& key, const utl::Json& json) {
+        return nullptr;
+    }
+
+    RelativeStat::RelativeStat() :
+        IStat(2) {
+    }
+
+    StatPtr RelativeStat::copy_as_ptr() const {
+        return nullptr;
+    }
+
+    double RelativeStat::value() const {
+        return 0;
+    }
+
+    // StatFactory
+
+    std::string StatFactory::default_type_name;
+    std::unordered_map<std::string, StatFactory::StatMaker> StatFactory::m_makers;
+
+    void StatFactory::init_default() {
+        default_type_name = "regular 5";
+        m_makers = {
+            { "regular 1", RegularStat::make_from_object },
+            { "regular 5", RegularStat::make_from_floating },
+            { "relative 1", RegularStat::make_from_object },
+            { "relative 3", RelativeStat::make_from_string }
         };
     }
-    stat ToStatConverter::from(const toml::table& data) const {
-        auto tag_it = data.find("tag");
-        return stat {
-            .value = data.at("value").as_floating(),
-            .type = convert::string_to_stat_type(data.at("type").as_string()),
-            .tag = tag_it != data.end() ? convert::string_to_tag(tag_it->second.as_string()) : Tag::Universal
-        };
-    }
 
-    // StatsTable
-
-    stat StatsGrid::no_value = { .value = 0.0, .type = StatType::None, .tag = Tag::Universal };
-
-#ifdef DEBUG_STATUS
-    tabulate::Table StatsGrid::get_debug_table() const {
-        tabulate::Table table;
-
-        table.add_row({ "stat_type", "tag", "value" });
-
-        for (const auto& stat : _content | std::views::values) {
-            auto value = lib::format("{:.4f}", stat.value);
-            size_t end = value.find_last_not_of('0');
-            if (end != std::string::npos) {
-                value = value.substr(0, end + (value[end] == '.' ? 0 : 1));
-            }
-
-            table.add_row({
-                convert::stat_type_to_string(stat.type),
-                convert::tag_to_string(stat.tag),
-                value
-            });
-        }
-
-        return table;
-    }
-#endif
-
-    stat StatsGrid::get(StatType type) const {
-        auto it = _content.find(_gen_key(type, Tag::Universal));
-        return it != _content.end() ? it->second : no_value;
-    }
-    stat StatsGrid::get_all(StatType type, Tag tag) const {
-        auto universal_it = _content.find(_gen_key(type, Tag::Universal));
-        auto result = universal_it != _content.end() ? universal_it->second : no_value;
-
-        if (tag != Tag::Universal) {
-            const auto tagged_it = _content.find(_gen_key(type, tag));
-            result.value += tagged_it != _content.end() ? tagged_it->second.value : 0.0;
-        }
-
-        return result;
-    }
-    stat StatsGrid::get_only(StatType type, Tag tag) const {
-        auto it = _content.find(_gen_key(type, tag));
-        return it != _content.end() ? it->second : no_value;
-    }
-
-    stat& StatsGrid::at(StatType type, Tag tag) {
-        auto key = _gen_key(type, tag);
-        auto it = _content.find(key);
-
-        if (it == _content.end())
-            it = _content.emplace(key, stat { .value = 0.0, .type = type, .tag = tag }).first;
-
-        return it->second;
-    }
-    stat StatsGrid::at(StatType type, Tag tag) const {
-        auto it = _content.find(_gen_key(type, tag));
-        return it != _content.end() ? it->second : stat {};
-    }
-
-    bool StatsGrid::emplace(stat what) {
-        auto key = _gen_key(what.type, what.tag);
-        auto [it, flag] = _content.emplace(key, what);
-
+    bool StatFactory::add_maker(std::string key, StatMaker value) {
+        auto [_, flag] = m_makers.emplace(std::move(key), std::move(value));
         return flag;
     }
 
-    void StatsGrid::add(const StatsGrid& another) {
-        for (const auto& it : another | std::views::values) {
-            auto key = _gen_key(it.type, it.tag);
-            if (auto jt = _content.find(key); jt != _content.end())
-                jt->second.value += it.value;
-            else
-                _content.emplace(key, it);
-        }
-    }
-    void StatsGrid::add(stat s) {
-        auto key = _gen_key(s.type, s.tag);
-        if (auto jt = _content.find(key); jt != _content.end())
-            jt->second.value += s.value;
-        else
-            _content.emplace(key, s);
-    }
-
-    StatsGrid::iterator StatsGrid::begin() { return _content.begin(); }
-    StatsGrid::iterator StatsGrid::end() { return _content.end(); }
-
-    StatsGrid::const_iterator StatsGrid::begin() const { return _content.cbegin(); }
-    StatsGrid::const_iterator StatsGrid::end() const { return _content.cend(); }
-
-    size_t StatsGrid::_gen_key(StatType type, Tag tag) {
-        return (size_t) type | (size_t) tag << 8;
-    }
-
-    // StatsTableLoader
-
-    StatsGrid ToStatsGridConverter::from(const toml::value& data) const {
-        StatsGrid result;
-
-        for (const auto& it : data.as_array()) {
-            switch (it.type()) {
-            case toml::value_t::array:
-                result.emplace(global::to_stat.from(it.as_array()));
-                break;
-            case toml::value_t::table:
-                result.emplace(global::to_stat.from(it.as_table()));
-                break;
-            default:
-                throw std::runtime_error("wrong stat format");
-            }
-        }
-
-        return result;
+    StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
+        const auto& maker_key = json.is_object()
+            ? json.value_or<std::string>("type", "regular") + ' ' + std::to_string((size_t) json.type())
+            : default_type_name;
+        auto it = m_makers.find(maker_key);
+        return it != m_makers.end() ? it->second(key, json) : nullptr;
     }
 }

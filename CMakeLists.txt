@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 23)
 include(FetchContent)
 
 set(USE_BOOST_KARMA OFF)
+#set(DCMAKE_TOOLCHAIN_FILE "D:/lib/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 # CPM.cmake
 
@@ -30,20 +31,6 @@ FetchContent_Declare(
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(FrozenLib)
-
-# toml11
-FetchContent_Declare(
-    toml11
-    URL https://github.com/ToruNiina/toml11/archive/refs/tags/v4.4.0.tar.gz
-)
-FetchContent_MakeAvailable(toml11)
-
-# nlohmann::json
-FetchContent_Declare(
-    json 
-    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
 
 # tabulate
 FetchContent_Declare(
@@ -65,14 +52,17 @@ find_package(Crow CONFIG REQUIRED)
 add_executable(3ZCalculator
     "main.cpp"
 
+    "src/library/cached_memory.cpp"
+    "src/library/logger.cpp"
+
     "src/zzz/enums.cpp"
     "src/zzz/stats.cpp"
-
-    "src/zzz/combat/drive_disc_piece.cpp"
+    "src/zzz/stats_grid.cpp"
 
     "src/zzz/details/agent.cpp"
     "src/zzz/details/anomaly.cpp"
-    "src/zzz/details/drive_disc_set.cpp"
+    "src/zzz/details/ddp.cpp"
+    "src/zzz/details/dds.cpp"
     "src/zzz/details/rotation.cpp"
     "src/zzz/details/skill.cpp"
     "src/zzz/details/wengine.cpp"
@@ -80,16 +70,12 @@ add_executable(3ZCalculator
     "src/calc/calculator.cpp"
 
     "src/backend/backend.cpp"
-    "src/backend/logger.cpp"
-    "src/backend/object_manager.cpp"
 )
 
 target_include_directories(3ZCalculator PRIVATE src)
 
 target_link_libraries(3ZCalculator PRIVATE 
     frozen-headers
-    toml11::toml11
-    nlohmann_json::nlohmann_json
     tabulate::tabulate
     fmt::fmt
     Crow::Crow
@@ -97,3 +83,4 @@ target_link_libraries(3ZCalculator PRIVATE
 )
 
 add_compile_definitions(DEBUG_STATUS)
+add_compile_definitions(ADDITIONAL_CHECK_MODE)

@@ -1,0 +1,9 @@
+{
+    "id": 32800,
+    "name": "Astral Voice",
+
+    "set_bonus": [
+        { "atk_ratio": 0.1 },
+        { "dmg_ratio": { "val": 0.24, "tag": "quick_assist" } }
+    ]
+}

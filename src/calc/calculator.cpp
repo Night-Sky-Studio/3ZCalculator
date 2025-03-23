@@ -4,8 +4,12 @@
 #include <map>
 #include <ranges>
 
+//lib
+#include "library/format.hpp"
+
 //zzz
-#include "zzz/stats_math.hpp"
+#include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 using namespace zzz;
 
@@ -16,25 +20,27 @@ namespace calc {
 
     // TODO: make part of StatsGrid
     double calc_total_atk(const StatsGrid& stats, Tag tag) {
-        return stats.get(StatType::AtkBase) * (1 + stats.get_all(StatType::AtkRatio, tag))
-            + stats.get(StatType::AtkFlat);
+        return stats.get(StatId::AtkBase)
+            * (1 + stats.get(StatId::AtkRatio, tag))
+            + stats.get(StatId::AtkFlat);
     }
 
     double calc_def_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
-        double effective_def = enemy.defense * (1 - stats.get_all(StatType::DefPenRatio, tag))
-            - stats.get_all(StatType::DefPenFlat, tag);
+        double effective_def = enemy.defense
+            * (1 - stats.get_summed(StatId::DefPenRatio, tag))
+            - stats.get_summed(StatId::DefPenFlat, tag);
         return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);
     }
     double calc_dmg_taken_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
         return 1.0
             - enemy.dmg_reduction
-            + stats.get_all(StatType::Vulnerability, tag);
+            + stats.get_summed(StatId::Vulnerability, tag);
     }
     double calc_res_mult(const enemy_t& enemy, const StatsGrid& stats, Element element, Tag tag) {
         return 1.0
             - enemy.res[(size_t) element]
-            + stats.get_all(StatType::ResPen, tag)
-            + stats.get_all(StatType::ResPen + element, tag);
+            + stats.get_summed(StatId::ResPen, tag)
+            + stats.get_summed(StatId::ResPen + element, tag);
     }
     // TODO
     double calc_stun_mult(const enemy_t& enemy, const StatsGrid& stats) {
@@ -49,15 +55,15 @@ namespace calc {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
-        stats.at(StatType::AtkTotal).value = calc_total_atk(stats, skill.tag());
+        stats.at(StatId::AtkTotal) = calc_total_atk(stats, skill.tag());
 
-        double base_dmg = scale.motion_value / 100 * stats.at(StatType::AtkTotal);
+        double base_dmg = scale.motion_value / 100 * stats.at(StatId::AtkTotal);
         double crit_mult = 1.0
-            + stats.get_all(StatType::CritRate, skill.tag())
-            * stats.get_all(StatType::CritDmg, skill.tag());
+            + stats.get_summed(StatId::CritRate, skill.tag())
+            * stats.get_summed(StatId::CritDmg, skill.tag());
         double dmg_ratio_mult = 1.0
-            + stats.get_all(StatType::DmgRatio, skill.tag())
-            + stats.get_all(StatType::DmgRatio + scale.element, skill.tag());
+            + stats.get_summed(StatId::DmgRatio, skill.tag())
+            + stats.get_summed(StatId::DmgRatio + scale.element, skill.tag());
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, skill.tag());
         double def_mult = calc_def_mult(enemy, stats, skill.tag());
@@ -72,17 +78,17 @@ namespace calc {
         StatsGrid stats,
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
-        stats.at(StatType::AtkTotal).value = calc_total_atk(stats, Tag::Anomaly);
+        stats.at(StatId::AtkTotal) = calc_total_atk(stats, Tag::Anomaly);
 
-        double base_dmg = anomaly.scale() / 100 * stats.get(StatType::AtkTotal);
+        double base_dmg = anomaly.scale() / 100 * stats.get(StatId::AtkTotal);
         double crit_mult = 1.0 + (anomaly.can_crit()
-            ? stats.get_only(StatType::CritRate, Tag::Anomaly) * stats.get_only(StatType::CritDmg, Tag::Anomaly)
+            ? stats.get_summed(StatId::CritRate, Tag::Anomaly) * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
             : 0.0);
-        double dmg_ratio_mult = 1.0 + stats.get(StatType::DmgRatio) + stats.get(StatType::DmgRatio + element);
+        double dmg_ratio_mult = 1.0 + stats.get(StatId::DmgRatio) + stats.get(StatId::DmgRatio + element);
         double anomaly_ratio_mult = 1.0
-            + stats.get_only(StatType::DmgRatio, Tag::Anomaly)
-            + stats.get_only(StatType::DmgRatio + element, Tag::Anomaly);
-        double ap_bonus_mult = stats.get(StatType::Ap) / 100.0;
+            + stats.get_summed(StatId::DmgRatio, Tag::Anomaly)
+            + stats.get_summed(StatId::DmgRatio + element, Tag::Anomaly);
+        double ap_bonus_mult = stats.get(StatId::Ap) / 100.0;
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, Tag::Anomaly);
         double def_mult = calc_def_mult(enemy, stats, Tag::Anomaly);
@@ -98,58 +104,45 @@ namespace calc {
     StatsGrid calc_stats(const request_t& request) {
         StatsGrid result;
 
-        result.add(request.agent.ptr->stats());
+        result.add(request.agent->details().stats());
+        result.add(request.wengine->details().stats());
 
-        result.add(request.wengine.ptr->main_stat());
-        result.add(request.wengine.ptr->sub_stat());
-        result.add(request.wengine.ptr->passive_stats());
+        for (size_t i = 0; i < 6; i++)
+            result.add(request.ddps[i].stats());
 
-        for (const auto& it : request.ddps) {
-            result.add(it.main_stat());
-            for (size_t i = 0; i < 4; i++)
-                result.add(it.sub_stat(i));
-        }
+        for (const auto& [count, value] : request.dds_by_count) {
+            const auto& dds = value->details();
 
-        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                result.add((*set)->p2());
+                result.add(dds.p2());
             else if (count == 4)
-                result.add((*set)->p4());
+                result.add(dds.p4());
         }
 
         return result;
     }
 
     std::tuple<double, std::vector<double>> request_dmg(const request_t& request) {
+        const auto& agent = request.agent->details();
+        const auto& rotation = request.rotation->details();
+
         double total_dmg = 0.0;
         std::vector<double> dmg_per_ability;
         auto stats = calc_stats(request);
 
-        dmg_per_ability.reserve(request.rotation.ptr->size());
-        for (const auto& [ability_name, index] : *request.rotation.ptr) {
-            size_t id = AgentDetails::is_skill_or_anomaly(*request.agent.ptr, ability_name);
+        dmg_per_ability.reserve(rotation.size());
+        for (const auto& [ability_name, index] : rotation) {
+            const auto& ability = agent.ability(ability_name);
             double dmg;
 
-            switch (id) {
-            case 1:
-                dmg = calc_regular_dmg(
-                    request.agent.ptr->skill(ability_name),
-                    index - 1,
-                    stats,
-                    Calculator::enemy
-                );
-                break;
-            case 2:
-                dmg = calc_anomaly_dmg(
-                    request.agent.ptr->anomaly(ability_name),
-                    request.agent.ptr->element(),
-                    stats,
-                    Calculator::enemy
-                );
-                break;
-            default:
-                throw std::runtime_error("ability is neither skill nor anomaly");
-            }
+            if (std::holds_alternative<SkillDetails>(ability)) {
+                const auto& skill = std::get<SkillDetails>(ability);
+                dmg = calc_regular_dmg(skill, index - 1, stats, Calculator::enemy);
+            } else if (std::holds_alternative<AnomalyDetails>(ability)) {
+                const auto& anomaly = std::get<AnomalyDetails>(ability);
+                dmg = calc_anomaly_dmg(anomaly, agent.element(), stats, Calculator::enemy);
+            } else
+                throw RUNTIME_ERROR("ability is neither skill nor anomaly");
 
             total_dmg += dmg;
             dmg_per_ability.emplace_back(dmg);
@@ -171,23 +164,19 @@ namespace calc {
     tabulate::Table Calculator::debug_stats(const request_t& request) {
         StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
 
-        agent_stats.add(request.agent.ptr->stats());
+        agent_stats.add(request.agent->details().stats());
+        wengine_stats.add(request.wengine->details().stats());
 
-        wengine_stats.add(request.wengine.ptr->main_stat());
-        wengine_stats.add(request.wengine.ptr->sub_stat());
-        wengine_stats.add(request.wengine.ptr->passive_stats());
+        for (size_t i = 0; i < 6; i++)
+            ddp_stats.add(request.ddps[i].stats());
 
-        for (const auto& it : request.ddps) {
-            ddp_stats.add(it.main_stat());
-            for (size_t i = 0; i < 4; i++)
-                ddp_stats.add(it.sub_stat(i));
-        }
+        for (const auto& [count, value] : request.dds_by_count) {
+            const auto& dds = value->details();
 
-        for (const auto& [count, set] : request.dds.by_count) {
             if (count == 2)
-                dds_stats.add((*set)->p2());
-            if (count == 4)
-                dds_stats.add((*set)->p4());
+                dds_stats.add(dds.p2());
+            else if (count == 4)
+                dds_stats.add(dds.p4());
         }
 
         summed_stats.add(agent_stats);
@@ -221,7 +210,7 @@ namespace calc {
         dmg_log.add_row({ "total", std::to_string(rounded_total_dmg) });
 
         size_t i = 0;
-        for (const auto& cell : *request.rotation.ptr) {
+        for (const auto& cell : request.rotation.ptr->details()) {
             size_t rounded_dmg = dmg_per_ability[i++];
             dmg_log.add_row({
                 cell.command + ' ' + std::to_string(cell.index),

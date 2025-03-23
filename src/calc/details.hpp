@@ -3,9 +3,9 @@
 //std
 #include <array>
 #include <map>
+#include <list>
 
 //zzz
-#include "zzz/combat.hpp"
 #include "zzz/details.hpp"
 
 namespace calc {
@@ -15,25 +15,26 @@ namespace calc {
         bool is_stunned;
     };
 
-    // TODO: properly organize
-    struct request_t {
-        struct {
-            uint64_t id = 0;
-            zzz::AgentDetailsPtr ptr = nullptr;
-        } agent;
-        struct {
-            uint64_t id = 0;
-            zzz::WengineDetailsPtr ptr = nullptr;
-        } wengine;
-        struct {
-            uint64_t id = 0;
-            zzz::rotation_details_ptr ptr = nullptr;
-        } rotation;
-        std::array<zzz::Ddp, 6> ddps;
+    template<typename T>
+    struct cell_t {
+        uint64_t id;
+        std::shared_ptr<T> ptr;
 
-        struct {
-            std::multimap<size_t, zzz::DdsDetailsPtr*> by_count;
-            std::list<std::tuple<uint64_t, zzz::DdsDetailsPtr>> uniques;
-        } dds;
+        T* operator->() { return ptr.get(); }
+        const T* operator->() const { return ptr.get(); }
+
+        T& operator*() { return *ptr; }
+        const T& operator*() const { return *ptr; }
+    };
+
+    struct request_t {
+        cell_t<zzz::Agent> agent;
+        cell_t<zzz::Wengine> wengine;
+        cell_t<zzz::Rotation> rotation;
+
+        std::multimap<size_t, zzz::DdsPtr&> dds_by_count;
+        std::list<cell_t<zzz::Dds>> dds_list;
+
+        std::array<zzz::Ddp, 6> ddps = {};
     };
 }
