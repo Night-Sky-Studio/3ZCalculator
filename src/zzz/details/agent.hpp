@@ -82,10 +82,11 @@ namespace zzz::details {
 namespace zzz {
     using AgentDetails = details::Agent;
 
-    class AgentPtr : public lib::MObject {
+    class Agent : public lib::MObject {
     public:
-        explicit AgentPtr(const std::string& name);
+        explicit Agent(const std::string& name);
 
         bool load_from_string(const std::string& input, size_t mode) override;
     };
+    using AgentPtr = std::shared_ptr<Agent>;
 }

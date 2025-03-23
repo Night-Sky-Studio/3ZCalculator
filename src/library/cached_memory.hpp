@@ -23,7 +23,6 @@ namespace lib {
             auto result = std::any_cast<T>(_content);
             return result;
         }
-        const std::any& raw();
 
         bool is_allocated() const;
 
@@ -36,11 +35,11 @@ namespace lib {
     protected:
         template<typename T>
         void set(T value) {
-            _content.emplace<T>(std::move(value));
+            _content.reset(std::move(value));
         }
 
     private:
-        std::any _content = nullptr;
+        std::unique_ptr<void> _content = nullptr;
         // TODO: make atomic
         size_t _unused_period = 0;
         const std::string _fullname;
@@ -48,6 +47,8 @@ namespace lib {
 
     class ObjectManager {
     public:
+        using ObjectMaker = std::function<MObjectPtr(std::string)>;
+
         static std::unordered_map<size_t, std::string> file_extensions;
         static void init_default_file_extensions() {
             file_extensions = {

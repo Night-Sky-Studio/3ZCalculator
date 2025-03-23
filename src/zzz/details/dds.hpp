@@ -53,10 +53,11 @@ namespace zzz::details {
 namespace zzz {
     using DdsDetails = details::Dds;
 
-    class DdsPtr : public lib::MObject {
+    class Dds : public lib::MObject {
     public:
-        explicit DdsPtr(const std::string& fullname);
+        explicit Dds(const std::string& fullname);
 
         bool load_from_string(const std::string& input, size_t mode) override;
     };
+    using DdsPtr = std::shared_ptr<Dds>;
 }

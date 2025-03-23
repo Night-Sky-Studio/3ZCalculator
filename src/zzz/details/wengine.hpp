@@ -63,10 +63,11 @@ namespace zzz::details {
 namespace zzz {
     using WengineDetails = details::Wengine;
 
-    class WenginePtr : public lib::MObject {
+    class Wengine : public lib::MObject {
     public:
-        explicit WenginePtr(const std::string& name);
+        explicit Wengine(const std::string& name);
 
         bool load_from_string(const std::string& input, size_t mode) override;
     };
+    using WenginePtr = std::shared_ptr<Wengine>;
 }

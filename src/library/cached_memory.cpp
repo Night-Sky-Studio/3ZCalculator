@@ -25,9 +25,7 @@ namespace lib {
         _fullname(std::move(fullname)) {
     }
 
-    const std::any& MObject::raw() { return _content; }
-
-    bool MObject::is_allocated() const { return _content.has_value(); }
+    bool MObject::is_allocated() const { return _content != nullptr; }
 
     bool MObject::load_from_stream(std::istream& is, size_t mode) {
         return load_from_string({ std::istreambuf_iterator(is), {} }, mode);

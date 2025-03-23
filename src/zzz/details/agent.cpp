@@ -106,7 +106,7 @@ namespace zzz::details {
 #include <future>
 
 namespace zzz {
-    AgentPtr::AgentPtr(const std::string& name) :
+    Agent::Agent(const std::string& name) :
         MObject(lib::format("agents/{}", name)) {
     }
 
@@ -207,7 +207,7 @@ namespace zzz {
         return builder.get_product();
     }
 
-    bool AgentPtr::load_from_string(const std::string& input, size_t mode) {
+    bool Agent::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
             auto details = load_from_json(json);

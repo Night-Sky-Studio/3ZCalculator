@@ -5,7 +5,8 @@
 #include <ranges>
 
 //zzz
-#include "zzz/stats_math.hpp"
+#include "zzz/stats.hpp"
+#include "zzz/stats_grid.hpp"
 
 using namespace zzz;
 
@@ -16,25 +17,27 @@ namespace calc {
 
     // TODO: make part of StatsGrid
     double calc_total_atk(const StatsGrid& stats, Tag tag) {
-        return stats.get(StatType::AtkBase) * (1 + stats.get_all(StatType::AtkRatio, tag))
-            + stats.get(StatType::AtkFlat);
+        return stats.get(StatId::AtkBase)
+            * (1 + stats.get(StatId::AtkRatio, tag))
+            + stats.get(StatId::AtkFlat);
     }
 
     double calc_def_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
-        double effective_def = enemy.defense * (1 - stats.get_all(StatType::DefPenRatio, tag))
-            - stats.get_all(StatType::DefPenFlat, tag);
+        double effective_def = enemy.defense
+            * (1 - stats.get_summed(StatId::DefPenRatio, tag))
+            - stats.get_summed(StatId::DefPenFlat, tag);
         return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);
     }
     double calc_dmg_taken_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
         return 1.0
             - enemy.dmg_reduction
-            + stats.get_all(StatType::Vulnerability, tag);
+            + stats.get_summed(StatId::Vulnerability, tag);
     }
     double calc_res_mult(const enemy_t& enemy, const StatsGrid& stats, Element element, Tag tag) {
         return 1.0
             - enemy.res[(size_t) element]
-            + stats.get_all(StatType::ResPen, tag)
-            + stats.get_all(StatType::ResPen + element, tag);
+            + stats.get_summed(StatId::ResPen, tag)
+            + stats.get_summed(StatId::ResPen + element, tag);
     }
     // TODO
     double calc_stun_mult(const enemy_t& enemy, const StatsGrid& stats) {
@@ -49,15 +52,15 @@ namespace calc {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
-        stats.at(StatType::AtkTotal).value = calc_total_atk(stats, skill.tag());
+        stats.at(StatId::AtkTotal) = calc_total_atk(stats, skill.tag());
 
-        double base_dmg = scale.motion_value / 100 * stats.at(StatType::AtkTotal);
+        double base_dmg = scale.motion_value / 100 * stats.at(StatId::AtkTotal);
         double crit_mult = 1.0
-            + stats.get_all(StatType::CritRate, skill.tag())
-            * stats.get_all(StatType::CritDmg, skill.tag());
+            + stats.get_summed(StatId::CritRate, skill.tag())
+            * stats.get_summed(StatId::CritDmg, skill.tag());
         double dmg_ratio_mult = 1.0
-            + stats.get_all(StatType::DmgRatio, skill.tag())
-            + stats.get_all(StatType::DmgRatio + scale.element, skill.tag());
+            + stats.get_summed(StatId::DmgRatio, skill.tag())
+            + stats.get_summed(StatId::DmgRatio + scale.element, skill.tag());
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, skill.tag());
         double def_mult = calc_def_mult(enemy, stats, skill.tag());
@@ -72,17 +75,17 @@ namespace calc {
         StatsGrid stats,
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
-        stats.at(StatType::AtkTotal).value = calc_total_atk(stats, Tag::Anomaly);
+        stats.at(StatId::AtkTotal) = calc_total_atk(stats, Tag::Anomaly);
 
-        double base_dmg = anomaly.scale() / 100 * stats.get(StatType::AtkTotal);
+        double base_dmg = anomaly.scale() / 100 * stats.get(StatId::AtkTotal);
         double crit_mult = 1.0 + (anomaly.can_crit()
-            ? stats.get_only(StatType::CritRate, Tag::Anomaly) * stats.get_only(StatType::CritDmg, Tag::Anomaly)
+            ? stats.get_summed(StatId::CritRate, Tag::Anomaly) * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
             : 0.0);
-        double dmg_ratio_mult = 1.0 + stats.get(StatType::DmgRatio) + stats.get(StatType::DmgRatio + element);
+        double dmg_ratio_mult = 1.0 + stats.get(StatId::DmgRatio) + stats.get(StatId::DmgRatio + element);
         double anomaly_ratio_mult = 1.0
-            + stats.get_only(StatType::DmgRatio, Tag::Anomaly)
-            + stats.get_only(StatType::DmgRatio + element, Tag::Anomaly);
-        double ap_bonus_mult = stats.get(StatType::Ap) / 100.0;
+            + stats.get_summed(StatId::DmgRatio, Tag::Anomaly)
+            + stats.get_summed(StatId::DmgRatio + element, Tag::Anomaly);
+        double ap_bonus_mult = stats.get(StatId::Ap) / 100.0;
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, Tag::Anomaly);
         double def_mult = calc_def_mult(enemy, stats, Tag::Anomaly);

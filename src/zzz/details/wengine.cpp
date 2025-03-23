@@ -90,7 +90,7 @@ namespace zzz::details {
 }
 
 namespace zzz {
-    WenginePtr::WenginePtr(const std::string& name) :
+    Wengine::Wengine(const std::string& name) :
         MObject(lib::format("wengines/{}", name)) {
     }
 
@@ -112,7 +112,7 @@ namespace zzz {
         return builder.get_product();
     }
 
-    bool WenginePtr::load_from_string(const std::string& input, size_t mode) {
+    bool Wengine::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
             auto details = load_from_json(json);

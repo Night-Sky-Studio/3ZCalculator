@@ -55,7 +55,7 @@ namespace zzz::details {
 }
 
 namespace zzz {
-    DdsPtr::DdsPtr(const std::string& fullname) :
+    Dds::Dds(const std::string& fullname) :
         MObject(lib::format("dds/{}")) {
     }
 
@@ -73,7 +73,7 @@ namespace zzz {
         return builder.get_product();
     }
 
-    bool DdsPtr::load_from_string(const std::string& input, size_t mode) {
+    bool Dds::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
             auto details = load_from_json(json);
