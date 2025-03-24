@@ -34,19 +34,16 @@ namespace zzz::details {
         _is_set.name = true;
         return *this;
     }
+
     WengineBuilder& WengineBuilder::set_rarity(Rarity rarity) {
         m_product->m_rarity = rarity;
         _is_set.rarity = true;
         return *this;
     }
-
     WengineBuilder& WengineBuilder::set_speciality(Speciality speciality) {
         m_product->m_speciality = speciality;
         _is_set.speciality = true;
         return *this;
-    }
-    WengineBuilder& WengineBuilder::set_speciality(std::string_view speciality) {
-        return set_speciality(convert::string_to_speciality(speciality));
     }
 
     // TODO: make proper check on main stat
@@ -96,8 +93,8 @@ namespace zzz {
 
         builder.set_id(table.at("id").as_integral());
         builder.set_name(table.at("name").as_string());
-        builder.set_rarity((Rarity) table.at("rarity").as_integral());
-        builder.set_speciality(table.at("speciality").as_string());
+        builder.set_rarity(table.at("rarity").as_integral());
+        builder.set_speciality((Speciality) table.at("speciality").as_string());
 
         const auto& stats = table.at("stats").as_object();
         builder.set_main_stat(StatsGrid::make_from(stats.at("main")));

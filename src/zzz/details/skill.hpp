@@ -45,11 +45,9 @@ namespace zzz::details {
         SkillBuilder& set_name(std::string name);
 
         SkillBuilder& set_tag(Tag tag);
-        SkillBuilder& set_tag(std::string_view tag);
 
         SkillBuilder& add_scale(Skill::scale value);
         SkillBuilder& add_scale(double motion_value, double daze, Element element);
-        SkillBuilder& add_scale(double motion_value, double daze, std::string_view element);
 
         SkillBuilder& add_buff(const StatPtr& buff);
         SkillBuilder& set_buffs(StatsGrid buffs);

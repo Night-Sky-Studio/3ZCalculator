@@ -26,9 +26,6 @@ namespace zzz::details {
         _is_set.tag = true;
         return *this;
     }
-    SkillBuilder& SkillBuilder::set_tag(std::string_view tag) {
-        return set_tag(convert::string_to_tag(tag));
-    }
 
     SkillBuilder& SkillBuilder::add_scale(Skill::scale value) {
         m_product->m_scales.emplace_back(value);
@@ -39,13 +36,6 @@ namespace zzz::details {
             .motion_value = motion_value,
             .daze = daze,
             .element = element
-        });
-    }
-    SkillBuilder& SkillBuilder::add_scale(double motion_value, double daze, std::string_view element) {
-        return add_scale({
-            .motion_value = motion_value,
-            .daze = daze,
-            .element = convert::string_to_element(element)
         });
     }
 

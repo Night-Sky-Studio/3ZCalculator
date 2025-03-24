@@ -62,7 +62,6 @@ namespace zzz::details {
 		AnomalyBuilder& set_scale(double scale);
 
 		AnomalyBuilder& set_element(Element element);
-		AnomalyBuilder& set_element(std::string_view element);
 
 		AnomalyBuilder& add_buff(const StatPtr& value);
 		AnomalyBuilder& set_buffs(StatsGrid stats);

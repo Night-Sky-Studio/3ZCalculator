@@ -126,9 +126,6 @@ namespace calc::details {
 //std
 #include <fstream>
 
-//library
-#include "library/format.hpp"
-
 namespace calc {
     tabulate::Table Calculator::debug_stats(const request_t& request) {
         StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
@@ -173,14 +170,14 @@ namespace calc {
         const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
-        size_t rounded_total_dmg = total_dmg;
+        size_t rounded_total_dmg = (size_t) total_dmg;
 
         dmg_log.add_row({ "ability", "dmg" });
         dmg_log.add_row({ "total", std::to_string(rounded_total_dmg) });
 
         size_t i = 0;
         for (const auto& cell : request.rotation.ptr->details()) {
-            size_t rounded_dmg = dmg_per_ability[i++];
+            size_t rounded_dmg = (size_t) dmg_per_ability[i++];
             dmg_log.add_row({
                 cell.command + ' ' + std::to_string(cell.index),
                 lib::format("{}", rounded_dmg)
@@ -215,6 +212,7 @@ namespace calc {
         dmg_per_ability.reserve(rotation.size());
         for (const auto& [ability_name, index] : rotation) {
             const auto& ability = agent.ability(ability_name);
+            std::cout << ability_name << '\n';
             double dmg;
 
             if (std::holds_alternative<SkillDetails>(ability)) {

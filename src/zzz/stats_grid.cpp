@@ -57,8 +57,8 @@ namespace zzz {
             }
 
             table.add_row({
-                convert::stat_id_to_string(stat->id()),
-                convert::tag_to_string(stat->tag()),
+                (std::string_view) stat->id(),
+                (std::string_view) stat->tag(),
                 value
             });
         }
@@ -100,7 +100,7 @@ namespace zzz {
         auto it = m_content.find(gen_key(id, tag));
         if (it == m_content.end())
             throw FMT_RUNTIME_ERROR("key with id {} and tag {} is not found",
-                convert::stat_id_to_string(id), convert::tag_to_string(tag));
+                (std::string_view)id, (std::string_view) tag);
         return it->second->m_base;
     }
 

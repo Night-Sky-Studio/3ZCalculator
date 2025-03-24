@@ -21,7 +21,7 @@ namespace zzz::details {
         return standard_anomalies.at(key);
     }
     std::string_view Anomaly::get_anomaly_by_element(Element element) {
-        const auto& cstr = anomalies_name[(size_t) element];
+        const auto& cstr = anomalies_name[(size_t) element - 1];
         return { cstr.data(), cstr.size() };
     }
 
@@ -64,9 +64,6 @@ namespace zzz::details {
         m_product->m_element = element;
         _is_set.element = true;
         return *this;
-    }
-    AnomalyBuilder& AnomalyBuilder::set_element(std::string_view element) {
-        return set_element(convert::string_to_element(element));
     }
 
     AnomalyBuilder& AnomalyBuilder::add_buff(const StatPtr& value) {

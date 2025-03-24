@@ -35,10 +35,9 @@ namespace zzz::details {
     public:
         WengineBuilder& set_id(uint64_t id);
         WengineBuilder& set_name(std::string name);
-        WengineBuilder& set_rarity(Rarity rarity);
 
+        WengineBuilder& set_rarity(Rarity rarity);
         WengineBuilder& set_speciality(Speciality speciality);
-        WengineBuilder& set_speciality(std::string_view speciality);
 
         WengineBuilder& set_main_stat(const StatsGrid& main_stat);
         WengineBuilder& set_sub_stat(const StatsGrid& sub_stat);

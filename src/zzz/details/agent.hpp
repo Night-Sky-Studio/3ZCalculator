@@ -52,11 +52,7 @@ namespace zzz::details {
         AgentBuilder& set_name(std::string name);
 
         AgentBuilder& set_speciality(Speciality speciality);
-        AgentBuilder& set_speciality(std::string_view speciality_str);
-
         AgentBuilder& set_element(Element element);
-        AgentBuilder& set_element(std::string_view element_str);
-
         AgentBuilder& set_rarity(Rarity rarity);
 
         AgentBuilder& add_stat(const StatPtr& value);

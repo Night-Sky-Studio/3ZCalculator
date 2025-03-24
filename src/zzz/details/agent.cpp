@@ -45,23 +45,11 @@ namespace zzz::details {
         _is_set.speciality = true;
         return *this;
     }
-    AgentBuilder& AgentBuilder::set_speciality(std::string_view speciality_str) {
-        m_product->m_speciality = convert::string_to_speciality(speciality_str);
-        _is_set.speciality = true;
-        return *this;
-    }
-
     AgentBuilder& AgentBuilder::set_element(Element element) {
         m_product->m_element = element;
         _is_set.element = true;
         return *this;
     }
-    AgentBuilder& AgentBuilder::set_element(std::string_view element_str) {
-        m_product->m_element = convert::string_to_element(element_str);
-        _is_set.element = true;
-        return *this;
-    }
-
     AgentBuilder& AgentBuilder::set_rarity(Rarity rarity) {
         m_product->m_rarity = rarity;
         _is_set.rarity = true;
@@ -116,7 +104,7 @@ namespace zzz {
         builder.set_scale(table.at("scale").as_floating());
 
         if (auto it = table.find("element"); it != table.end())
-            builder.set_element(it->second.as_string());
+            builder.set_element((Element) it->second.as_string());
         else
             builder.set_element(default_element);
 
@@ -144,7 +132,7 @@ namespace zzz {
             return result;
         }
 
-        result.element = convert::string_to_element(array[2].as_string());
+        result.element = array[2].as_string();
 
         return result;
     }
@@ -152,7 +140,7 @@ namespace zzz {
         const auto& table = json.as_object();
         details::SkillBuilder builder;
 
-        auto tag = convert::string_to_tag(table.at("tag").as_string());
+        auto tag = (Tag) table.at("tag").as_string();
 
         builder.set_name(key);
         builder.set_tag(tag);
@@ -179,13 +167,13 @@ namespace zzz {
 
         // basic information
 
-        auto element = convert::string_to_element(table.at("element").as_string());
+        auto element = (Element) table.at("element").as_string();
 
         builder.set_id(table.at("id").as_integral());
         builder.set_name(table.at("name").as_string());
-        builder.set_speciality(table.at("speciality").as_string());
-        builder.set_element(element);
-        builder.set_rarity((Rarity) table.at("rarity").as_integral());
+        builder.set_speciality((Speciality) table.at("speciality").as_string());
+        builder.set_element((Element) element);
+        builder.set_rarity(table.at("rarity").as_integral());
 
         // stats
 

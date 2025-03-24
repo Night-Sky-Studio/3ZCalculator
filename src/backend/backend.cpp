@@ -349,7 +349,13 @@ namespace backend {
         CROW_ROUTE(m_app, "/damage").methods("POST"_method)([this](const crow::request& req) {
             crow::response response;
 
-            try {
+            auto json = utl::json::from_string(req.body);
+            auto unpacked_request = json_to_request(json, m_manager);
+            auto output = post_damage(unpacked_request).to_string(utl::json::Format::MINIMIZED);
+
+            response = { 200, std::move(output) };
+
+            /*try {
                 auto json = utl::json::from_string(req.body);
                 auto unpacked_request = json_to_request(json, m_manager);
                 auto output = post_damage(unpacked_request).to_string(utl::json::Format::MINIMIZED);
@@ -357,7 +363,7 @@ namespace backend {
                 response = { 200, std::move(output) };
             } catch (const std::exception& e) {
                 response = { 400, e.what() };
-            }
+            }*/
 
             response.add_header("Access-Control-Allow-Origin", "*");
             return response;

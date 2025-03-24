@@ -36,7 +36,7 @@ namespace zzz {
         RegularStat result;
 
         result.m_base = json.as_floating();
-        result.m_id = convert::string_to_stat_id(key);
+        result.m_id = key;
 
         return std::make_shared<RegularStat>(std::move(result));
     }
@@ -44,8 +44,8 @@ namespace zzz {
         RegularStat result;
 
         result.m_base = json["val"].as_floating();
-        result.m_id = convert::string_to_stat_id(key);
-        result.m_tag = convert::string_to_tag(json.value_or<std::string>("tag", "universal"));
+        result.m_id = key;
+        result.m_tag = json.value_or<std::string>("tag", "universal");
 
         return std::make_shared<RegularStat>(std::move(result));
     }
