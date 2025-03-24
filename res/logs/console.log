@@ -1,9 +1,23 @@
-(2025-03-24 15:40:26)[INFO    ] Crow/master server is running at http://0.0.0.0:5101 using 2 threads
-(2025-03-24 15:40:26)[INFO    ] Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.
-(2025-03-24 15:40:30)[INFO    ] Request: 127.0.0.1:53772 0000026F6FB75590 HTTP/1.1 POST /damage_detailed
-(2025-03-24 15:40:30)[INFO    ] wengines/14109 is loaded
-(2025-03-24 15:40:30)[INFO    ] agents/1091 is loaded
-(2025-03-24 15:40:30)[INFO    ] dds/31000 is loaded
-(2025-03-24 15:40:30)[INFO    ] rotations/1091/1 is loaded
-(2025-03-24 15:40:30)[INFO    ] dds/32800 is loaded
-(2025-03-24 15:40:30)[INFO    ] Response: 0000026F6FB75590 /damage_detailed 200 1
+(2025-03-24 16:51:24)[INFO    ] Crow/master server is running at http://0.0.0.0:5101 using 2 threads
+(2025-03-24 16:51:24)[INFO    ] Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.
+(2025-03-24 16:51:57)[INFO    ] Request: 127.0.0.1:56413 000002AF42B75640 HTTP/1.1 POST /damage_debug
+(2025-03-24 16:52:00)[INFO    ] dds/32800 is loaded
+(2025-03-24 16:52:00)[INFO    ] dds/31000 is loaded
+(2025-03-24 16:52:00)[INFO    ] wengines/14109 is loaded
+(2025-03-24 16:52:00)[INFO    ] agents/1091 is loaded
+(2025-03-24 16:52:00)[INFO    ] rotations/1091/1 is loaded
+(2025-03-24 16:52:06)[INFO    ] Response: 000002AF42B75640 /damage_debug 200 1
+(2025-03-24 16:52:25)[INFO    ] agents/1091 is deleted
+(2025-03-24 16:52:25)[INFO    ] rotations/1091/1 is deleted
+(2025-03-24 16:52:25)[INFO    ] dds/31000 is deleted
+(2025-03-24 16:52:25)[INFO    ] wengines/14109 is deleted
+(2025-03-24 16:52:25)[INFO    ] dds/32800 is deleted
+(2025-03-24 16:56:00)[INFO    ] Request: 127.0.0.1:56519 000002AF42B777F0 HTTP/1.1 POST /damage
+(2025-03-24 16:56:00)[INFO    ] dds/31000 is loaded
+(2025-03-24 16:56:00)[INFO    ] dds/32800 is loaded
+(2025-03-24 16:56:00)[INFO    ] wengines/14109 is loaded
+(2025-03-24 16:56:00)[INFO    ] agents/1091 is loaded
+(2025-03-24 16:56:00)[INFO    ] rotations/1091/1 is loaded
+(2025-03-24 16:56:00)[INFO    ] Response: 000002AF42B777F0 /damage 200 1
+(2025-03-24 16:56:10)[INFO    ] Request: 127.0.0.1:56525 000002AF42B888A0 HTTP/1.1 POST /damage_debug
+(2025-03-24 16:56:10)[INFO    ] Response: 000002AF42B888A0 /damage_debug 200 1
