@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -65,8 +64,8 @@ namespace zzz {
     public:
         static StatPtr make(double base, StatId id, Tag tag);
 
-        static StatPtr make_from_floating(const std::string& key, const utl::Json& json);
-        static StatPtr make_from_object(const std::string& key, const utl::Json& json);
+        static StatPtr make_from_floating(const utl::Json& json, StatId id);
+        static StatPtr make_from_object(const utl::Json& json, StatId id, Tag tag);
 
         explicit RegularStat();
 
@@ -83,10 +82,9 @@ namespace zzz {
 
         static StatPtr make(double base, formulas_t formulas, StatId id, Tag tag);
         static StatPtr make(double base, const std::string& formula, StatId id, Tag tag);
-        static StatPtr make(const std::string& formula, StatId id, Tag tag);
 
-        static StatPtr make_from_string(const std::string& key, const utl::Json& json);
-        static StatPtr make_from_object(const std::string& key, const utl::Json& json);
+        static StatPtr make_from_string(const utl::Json& json, StatId key);
+        static StatPtr make_from_object(const utl::Json& json, StatId key, Tag tag);
 
         explicit RelativeStat();
 
@@ -104,17 +102,20 @@ namespace zzz {
     };
 
     class StatFactory {
+        struct condition_t {
+            explicit condition_t(std::function<size_t(const utl::Json&)> f);
+
+            std::function<size_t(const utl::Json&)> checker;
+
+            size_t operator()(const utl::Json& json) const;
+        };
+
     public:
-        using StatMaker = std::function<StatPtr(const std::string&, const utl::Json&)>;
-
-        static std::string default_type_name;
-
         static void init_default();
 
-        static bool add_maker(std::string key, StatMaker value);
-        static StatPtr make(const std::string& key, const utl::Json& json);
+        static std::vector<StatPtr> make(const std::string& key, const utl::Json& json);
 
     protected:
-        static std::unordered_map<std::string, StatMaker> m_makers;
+        static std::list<std::tuple<size_t, condition_t>> m_list_of_conditions;
     };
 }

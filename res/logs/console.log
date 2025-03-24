@@ -1,9 +1,15 @@
-(2025-03-24 17:57:32)[INFO    ] Crow/master server is running at http://0.0.0.0:5101 using 2 threads
-(2025-03-24 17:57:32)[INFO    ] Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.
-(2025-03-24 17:57:38)[INFO    ] Request: 127.0.0.1:50761 00000296482E5680 HTTP/1.1 POST /damage_debug
-(2025-03-24 17:57:41)[INFO    ] dds/31000 is loaded
-(2025-03-24 17:57:41)[INFO    ] wengines/14109 is loaded
-(2025-03-24 17:57:41)[INFO    ] dds/32800 is loaded
-(2025-03-24 17:57:41)[INFO    ] agents/1091 is loaded
-(2025-03-24 17:57:41)[INFO    ] rotations/1091/1 is loaded
-(2025-03-24 17:57:47)[INFO    ] Response: 00000296482E5680 /damage_debug 200 1
+(2025-03-24 21:00:49)[INFO    ] Crow/master server is running at http://0.0.0.0:5101 using 2 threads
+(2025-03-24 21:00:49)[INFO    ] Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.
+(2025-03-24 21:01:05)[INFO    ] Request: 127.0.0.1:62741 00000265A6164880 HTTP/1.1 POST /damage_debug
+(2025-03-24 21:01:05)[INFO    ] dds/31000 is loaded
+(2025-03-24 21:01:05)[INFO    ] wengines/14109 is loaded
+(2025-03-24 21:01:05)[INFO    ] dds/32800 is loaded
+(2025-03-24 21:01:05)[INFO    ] agents/1091 is loaded
+(2025-03-24 21:01:05)[INFO    ] rotations/1091/1 is loaded
+(2025-03-24 21:01:05)[INFO    ] Response: 00000265A6164880 /damage_debug 200 1
+(2025-03-24 21:01:08)[INFO    ] Request: 127.0.0.1:62746 00000265A61699B0 HTTP/1.1 POST /damage_debug
+(2025-03-24 21:01:08)[INFO    ] Response: 00000265A61699B0 /damage_debug 200 1
+(2025-03-24 21:01:11)[INFO    ] Request: 127.0.0.1:62748 00000265A6174CA0 HTTP/1.1 POST /damage_debug
+(2025-03-24 21:01:11)[INFO    ] Response: 00000265A6174CA0 /damage_debug 200 1
+(2025-03-24 21:01:14)[INFO    ] Request: 127.0.0.1:62750 00000265A61699B0 HTTP/1.1 POST /damage_debug
+(2025-03-24 21:01:14)[INFO    ] Response: 00000265A61699B0 /damage_debug 200 1

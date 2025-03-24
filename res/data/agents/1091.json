@@ -16,7 +16,7 @@
         "er_base": 1.2,
 
         "ice_ratio": 0.3,
-        "ab_rate": { "base": 0.2, "formulas": "f:crit_rate;m:0.8" }
+        "ab_rate": { "val": 0.2, "formulas": "f:crit_rate;m:0.8" }
     },
 
     "team_buffs": {

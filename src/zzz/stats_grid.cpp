@@ -37,9 +37,11 @@ namespace zzz {
         StatsGrid result;
 
         for (const auto& [k, v] : json.as_object()) {
-            auto stat = StatFactory::make(k, v);
-            stat->m_tag = mandatory_tag;
-            result.set(stat);
+            auto stats_list = StatFactory::make(k, v);
+            for (const auto& it : stats_list) {
+                it->m_tag = mandatory_tag;
+                result.set(it);
+            }
         }
 
         return result;
@@ -131,7 +133,7 @@ namespace zzz {
         add(RegularStat::make(value, id, tag));
     }
     void StatsGrid::add_relative(const std::string& formula, StatId id, Tag tag) {
-        add(RelativeStat::make(formula, id, tag));
+        add(RelativeStat::make(0.0, formula, id, tag));
     }
 
     void StatsGrid::add(const StatsGrid& stat) {

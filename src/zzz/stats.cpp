@@ -158,11 +158,11 @@ namespace zzz {
         return std::make_shared<RegularStat>(std::move(result));
     }
 
-    StatPtr RegularStat::make_from_floating(const std::string& key, const utl::Json& json) {
-        return make(json.as_floating(), (StatId) key, Tag::Universal);
+    StatPtr RegularStat::make_from_floating(const utl::Json& json, StatId id) {
+        return make(json.as_floating(), id, Tag::Universal);
     }
-    StatPtr RegularStat::make_from_object(const std::string& key, const utl::Json& json) {
-        return make(json["val"].as_floating(), (StatId) key, (Tag) json.value_or<std::string>("tag", "universal"));
+    StatPtr RegularStat::make_from_object(const utl::Json& json, StatId id, Tag tag) {
+        return make(json["val"].as_floating(), id, tag);
     }
 
     RegularStat::RegularStat() :
@@ -198,20 +198,12 @@ namespace zzz {
     StatPtr RelativeStat::make(double base, const std::string& formula, StatId id, Tag tag) {
         return make(base, formulas_from_string(formula), id, tag);
     }
-    StatPtr RelativeStat::make(const std::string& formula, StatId id, Tag tag) {
-        return make(0, formula, id, tag);
-    }
 
-    StatPtr RelativeStat::make_from_string(const std::string& key, const utl::Json& json) {
-        return make(json.as_string(), (StatId) key, Tag::Universal);
+    StatPtr RelativeStat::make_from_string(const utl::Json& json, StatId key) {
+        return make(0.0, json.as_string(), key, Tag::Universal);
     }
-    StatPtr RelativeStat::make_from_object(const std::string& key, const utl::Json& json) {
-        return make(
-            json.value_or<double>("base", 0.0),
-            json["formulas"].as_string(),
-            (StatId) key,
-            (Tag) json.value_or<std::string>("tag", "universal")
-        );
+    StatPtr RelativeStat::make_from_object(const utl::Json& json, StatId key, Tag tag) {
+        return make(json.value_or<double>("val", 0.0), json["formulas"].as_string(), key, tag);
     }
 
     RelativeStat::RelativeStat() :
@@ -255,51 +247,149 @@ namespace zzz {
 
     // StatFactory
 
-    std::string StatFactory::default_type_name;
-    std::unordered_map<std::string, StatFactory::StatMaker> StatFactory::m_makers;
+    std::list<std::tuple<size_t, StatFactory::condition_t>> StatFactory::m_list_of_conditions;
+
+    StatFactory::condition_t::condition_t(std::function<size_t(const utl::Json&)> f) :
+        checker(std::move(f)) {
+    }
+    size_t StatFactory::condition_t::operator()(const utl::Json& json) const {
+        return checker(json);
+    }
 
     void StatFactory::init_default() {
-        default_type_name = "regular 5";
-        m_makers = {
-            { "regular 1", RegularStat::make_from_object },
-            { "regular 5", RegularStat::make_from_floating },
-            { "relative 1", RelativeStat::make_from_object },
-            { "relative 3", RelativeStat::make_from_string }
-        };
+        // regular floating
+        m_list_of_conditions.emplace_back(15, condition_t(
+            [](const utl::Json& json) -> size_t { return json.is_floating(); }
+        ));
+        // relative string
+        m_list_of_conditions.emplace_back(23, condition_t(
+            [](const utl::Json& json) -> size_t { return json.is_string(); }
+        ));
+        // regular object
+        m_list_of_conditions.emplace_back(11, condition_t(
+            [](const utl::Json& json) -> size_t {
+                if (!json.is_object())
+                    return 0;
+                const auto& table = json.as_object();
+                auto val_it = table.find("val");
+
+                if (val_it == table.end() || !val_it->second.is_floating())
+                    return 0;
+
+                if (auto tag_it = table.find("tags"); tag_it != table.end())
+                    return tag_it->second.as_array().size();
+
+                return 1;
+            }
+        ));
+        // relative object (when we have val)
+        m_list_of_conditions.emplace_back(210, condition_t(
+            [](const utl::Json& json) -> size_t {
+                if (!json.is_object())
+                    return 0;
+                const auto& table = json.as_object();
+
+                auto val_it = table.find("val");
+                if (val_it == table.end() || !val_it->second.is_string())
+                    return 0;
+
+                if (auto tag_it = table.find("tags"); tag_it != table.end())
+                    return tag_it->second.as_array().size();
+
+                return 1;
+            }
+        ));
+        // relative object (when we have base)
+        m_list_of_conditions.emplace_back(211, condition_t(
+            [](const utl::Json& json) -> size_t {
+                if (!json.is_object())
+                    return 0;
+                const auto& table = json.as_object();
+
+                if (!json.contains("val") || json.contains("formulas"))
+                    return 0;
+
+                if (auto tag_it = table.find("tags"); tag_it != table.end())
+                    return tag_it->second.as_array().size();
+
+                return 1;
+            }
+        ));
     }
 
-    bool StatFactory::add_maker(std::string key, StatMaker value) {
-        auto [_, flag] = m_makers.emplace(std::move(key), std::move(value));
-        return flag;
-    }
+    // TODO: make table of conditions more efficient
+    std::vector<StatPtr> StatFactory::make(const std::string& key, const utl::Json& json) {
+        size_t size = 0, id = 0;
 
-    // TODO: make table of conditions
-    // TODO: make multiple at once
-    StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
-        std::string maker_name;
-        if (json.is_object()) {
-            const auto& table = json.as_object();
-            if (auto it = table.find("type"); it != table.end())
-                maker_name = it->second.as_string();
-            else if (it = table.find("val"); it != table.end()) {
-                if (it->second.is_floating())
-                    maker_name = "regular 1";
-                else if (it->second.is_string())
-                    maker_name = "relative 3";
-                else
-                    throw RUNTIME_ERROR("wrong stat as object definition");
-            } else if (table.contains("base") && table.contains("formulas")) {
-                maker_name = "relative 1";
-            } else
-                return nullptr;
-        } else if (json.is_string()) {
-            maker_name = "relative 3";
-        } else if (json.is_floating()) {
-            maker_name = "regular 5";
-        } else
-            return nullptr;
+        for (const auto& [k, f] : m_list_of_conditions)
+            if ((size = f(json))) {
+                id = k;
+                break;
+            }
 
-        auto it = m_makers.find(maker_name);
-        return it != m_makers.end() ? it->second(key, json) : nullptr;
+        if (!id || !size)
+            throw RUNTIME_ERROR("can't define what stat you have");
+
+        switch (id) {
+        case 15:
+            return { RegularStat::make_from_floating(json, (StatId) key) };
+
+        case 23:
+            return { RelativeStat::make_from_string(json, (StatId) key) };
+
+        case 11: {
+            if (size == 1)
+                return {
+                    RegularStat::make_from_object(json, (StatId) key,
+                        (Tag) json.value_or<std::string>("tag", "universal"))
+                };
+
+            std::vector<StatPtr> result;
+            result.reserve(size);
+
+            const auto& tags = json["tags"].as_array();
+            for (size_t i = 0; i < size; i++)
+                result.emplace_back(RegularStat::make_from_object(json, (StatId) key, (Tag) tags[i].as_string()));
+
+            return result;
+        }
+
+        case 210: {
+            if (size == 1)
+                return {
+                    RelativeStat::make_from_object(json, (StatId) key,
+                        (Tag) json.value_or<std::string>("tag", "universal"))
+                };
+
+            std::vector<StatPtr> result;
+            result.reserve(size);
+
+            const auto& tags = json["tags"].as_array();
+            for (size_t i = 0; i < size; i++)
+                result.emplace_back(RelativeStat::make_from_object(json, (StatId) key, (Tag) tags[i].as_string()));
+
+            return result;
+        }
+
+        case 211: {
+            if (size == 1)
+                return {
+                    RelativeStat::make_from_object(json, (StatId) key,
+                        (Tag) json.value_or<std::string>("tag", "universal"))
+                };
+
+            std::vector<StatPtr> result;
+            result.reserve(size);
+
+            const auto& tags = json["tags"].as_array();
+            for (size_t i = 0; i < size; i++)
+                result.emplace_back(RelativeStat::make_from_object(json, (StatId) key, (Tag) tags[i].as_string()));
+
+            return result;
+        }
+
+        default:
+            throw RUNTIME_ERROR("can't define what stat you have");
+        }
     }
 }

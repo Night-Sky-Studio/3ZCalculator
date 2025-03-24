@@ -23,7 +23,7 @@
         "assault": {
             "scale": 771.0,
             "buffs": {
-                "crit_rate": { "base": 0.4, "formulas": "f:ap*0.016" },
+                "crit_rate": { "val": 0.4, "formulas": "f:ap*0.016" },
                 "crit_dmg": 0.5
             }
         }
