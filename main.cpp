@@ -2,7 +2,7 @@
 #include <string>
 
 //math
-#include "math/parser.hpp"
+#include "math/RpnParser.hpp"
 
 //backend
 #include "backend/backend.hpp"
@@ -21,8 +21,8 @@ int main(int argc, char** argv) {
 	server.run();*/
 
 	std::string s = "4 + 18 / (9 - 3)";
-	auto tokens = math::Parser::tokenize(s);
-	auto rpn = math::Parser::shunting_yard_algorithm(tokens);
+	auto tokens = math::RpnParser::tokenize(s);
+	auto rpn = math::RpnParser::shunting_yard_algorithm(tokens);
 
 	return 0;
 }

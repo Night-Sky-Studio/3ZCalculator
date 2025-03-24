@@ -1,4 +1,4 @@
-#include "math/parser.hpp"
+#include "math/rpn.hpp"
 
 //std
 #include <charconv>
@@ -12,9 +12,9 @@
 #include "library/format.hpp"
 #include "library/string_funcs.hpp"
 
-using namespace math::parser;
+using namespace lib::rpn_parser;
 
-namespace math::details {
+namespace lib::rpn_details {
     constexpr frozen::unordered_set<TokenType, 10> primitive_tokens = {
         Plus, Minus, Star, Slash, Percent,
         Equal, Less, More, LParen, RParen
@@ -63,8 +63,8 @@ namespace math::details {
     }
 }
 
-namespace math {
-    token_list Parser::tokenize(std::string what) {
+namespace lib {
+    token_list RpnParser::tokenize(std::string what) {
         token_list result;
         what = lib::remove_chars(what, " \t\n");
 
@@ -72,17 +72,17 @@ namespace math {
         while (i < what.size()) {
             char c = what[i];
 
-            if (details::primitive_tokens.contains((TokenType) c)) {
+            if (rpn_details::primitive_tokens.contains((TokenType) c)) {
                 di = 1;
                 result.emplace_back((TokenType) c, std::string(1, c));
             } else if ((c >= '0' && c <= '9') || c == '-') {
                 token_t token;
-                std::tie(token.number, token.literal, di) = details::parse_number(i, what);
+                std::tie(token.number, token.literal, di) = rpn_details::parse_number(i, what);
                 token.type = Number;
                 result.emplace_back(std::move(token));
             } else if (isalpha(c)) {
                 token_t token;
-                std::tie(token.literal, di) = details::parse_literal(i, what);
+                std::tie(token.literal, di) = rpn_details::parse_literal(i, what);
                 token.type = Variable;
                 result.emplace_back(std::move(token));
             }
@@ -93,13 +93,13 @@ namespace math {
 
         return result;
     }
-    rpn_t Parser::shunting_yard_algorithm(const token_list& infix) {
+    rpn_t RpnParser::shunting_yard_algorithm(const token_list& infix) {
         rpn_t queue;
         std::stack<token_t> stack;
 
         auto get_precedence = [](TokenType type) {
-            auto it = details::precedence.find(type);
-            return it != details::precedence.end() ? it->second : 0;
+            auto it = rpn_details::precedence.find(type);
+            return it != rpn_details::precedence.end() ? it->second : 0;
         };
 
         for (auto token : infix) {
@@ -114,7 +114,7 @@ namespace math {
                 }
                 // pop '('
                 stack.pop();
-            } else if (details::math_operators.contains(token.type)) {
+            } else if (rpn_details::math_operators.contains(token.type)) {
                 size_t own_precedence = get_precedence(token.type);
                 while (!stack.empty()) {
                     auto& top = stack.top();

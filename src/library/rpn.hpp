@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace math::parser {
+namespace lib::rpn_parser {
     enum TokenType : uint8_t {
         None   = 0,
         Plus   = '+', Minus  = '-', Star = '*', Slash = '/', Percent = '%',
@@ -26,10 +26,10 @@ namespace math::parser {
     using rpn_t = std::queue<token_t>;
 }
 
-namespace math {
-    class Parser {
+namespace lib {
+    class RpnParser {
     public:
-        static parser::token_list tokenize(std::string what);
-        static parser::rpn_t shunting_yard_algorithm(const parser::token_list& infix);
+        static rpn_parser::token_list tokenize(std::string what);
+        static rpn_parser::rpn_t shunting_yard_algorithm(const rpn_parser::token_list& infix);
     };
 }

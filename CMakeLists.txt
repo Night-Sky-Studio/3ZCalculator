@@ -54,8 +54,7 @@ add_executable(3ZCalculator
 
     "src/library/cached_memory.cpp"
     "src/library/logger.cpp"
-
-    "src/math/parser.cpp"
+    "src/library/rpn.cpp"
     
     "src/zzz/stats.cpp"
     "src/zzz/stats_grid.cpp"
