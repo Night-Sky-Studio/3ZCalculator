@@ -206,7 +206,12 @@ namespace zzz {
         return make(json.as_string(), (StatId) key, Tag::Universal);
     }
     StatPtr RelativeStat::make_from_object(const std::string& key, const utl::Json& json) {
-        return make(json["val"].as_string(), (StatId) key, (Tag) json.value_or<std::string>("tag", "universal"));
+        return make(
+            json.value_or<double>("base", 0.0),
+            json["formulas"].as_string(),
+            (StatId) key,
+            (Tag) json.value_or<std::string>("tag", "universal")
+        );
     }
 
     RelativeStat::RelativeStat() :
@@ -258,7 +263,7 @@ namespace zzz {
         m_makers = {
             { "regular 1", RegularStat::make_from_object },
             { "regular 5", RegularStat::make_from_floating },
-            { "relative 1", RegularStat::make_from_object },
+            { "relative 1", RelativeStat::make_from_object },
             { "relative 3", RelativeStat::make_from_string }
         };
     }
@@ -268,11 +273,31 @@ namespace zzz {
         return flag;
     }
 
+    // TODO: make table of conditions
     StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
-        const auto& maker_key = json.is_object()
-            ? json.value_or<std::string>("type", "regular") + ' ' + std::to_string((size_t) json.type())
-            : default_type_name;
-        auto it = m_makers.find(maker_key);
+        std::string maker_name;
+        if (json.is_object()) {
+            const auto& table = json.as_object();
+            if (auto it = table.find("type"); it != table.end())
+                maker_name = it->second.as_string();
+            else if (it = table.find("val"); it != table.end()) {
+                maker_name = it->second.is_floating()
+                    ? "regular 1"
+                    : it->second.is_string()
+                    ? "relative 3"
+                    : ""; // error otherwise
+            } else if (table.contains("base") && table.contains("formulas")) {
+                maker_name = "relative 1";
+            } else
+                return nullptr;
+        } else if (json.is_string()) {
+            maker_name = "relative 3";
+        } else if (json.is_floating()) {
+            maker_name = "regular 5";
+        } else
+            return nullptr;
+
+        auto it = m_makers.find(maker_name);
         return it != m_makers.end() ? it->second(key, json) : nullptr;
     }
 }

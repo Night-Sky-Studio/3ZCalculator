@@ -250,7 +250,7 @@ namespace calc {
                 dmg = details::calc_regular_dmg(skill, cell.index - 1, stats, enemy);
                 tag = skill.tag();
                 if (skill.max_index() > 1)
-                    cell.command += lib::format(" {}", cell.index);
+                    cell.command += std::to_string(cell.index);
             } else if (std::holds_alternative<AnomalyDetails>(ability)) {
                 const auto& anomaly = std::get<AnomalyDetails>(ability);
                 dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);

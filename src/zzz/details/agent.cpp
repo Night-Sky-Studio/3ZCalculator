@@ -24,6 +24,7 @@ namespace zzz::details {
     Element Agent::element() const { return m_element; }
     Rarity Agent::rarity() const { return m_rarity; }
     const StatsGrid& Agent::stats() const { return m_stats; }
+    const StatsGrid& Agent::team_buffs() const { return m_team_buffs; }
 
     const Ability& Agent::ability(const std::string& name) const { return m_abilities.at(lib::hash(name)); }
 
@@ -62,6 +63,15 @@ namespace zzz::details {
     }
     AgentBuilder& AgentBuilder::set_stats(StatsGrid stats) {
         m_product->m_stats = std::move(stats);
+        return *this;
+    }
+
+    AgentBuilder& AgentBuilder::add_team_buff(const StatPtr& value) {
+        m_product->m_team_buffs.set(value);
+        return *this;
+    }
+    AgentBuilder& AgentBuilder::set_team_buffs(StatsGrid stats) {
+        m_product->m_team_buffs = std::move(stats);
         return *this;
     }
 
@@ -172,13 +182,20 @@ namespace zzz {
         builder.set_id(table.at("id").as_integral());
         builder.set_name(table.at("name").as_string());
         builder.set_speciality((Speciality) table.at("speciality").as_string());
-        builder.set_element((Element) element);
+        builder.set_element(element);
         builder.set_rarity(table.at("rarity").as_integral());
 
         // stats
 
         auto stats = StatsGrid::make_from(table.at("stats"));
         builder.set_stats(std::move(stats));
+
+        // team buffs
+
+        if (auto it = table.find("team_buffs"); it != table.end()) {
+            auto team_buffs = StatsGrid::make_from(it->second);
+            builder.set_team_buffs(std::move(team_buffs));
+        }
 
         // anomalies
 
