@@ -1,47 +1,49 @@
 {
-    "final": {
-        "priority": 1,
-        "vals": ["opener", "baseline x2", "burst"]
-    },
+    "rotations": {
+        "final": {
+            "priority": 1,
+            "vals": [ "burst" ]
+        },
 
-    "opener": {
-        "priority": 2,
-        "vals": ["hisetsu 1", "kazahana_phys_skip", "shimotsuki 3"]
-    },
-    "baseline": {
-        "priority": 2,
-        "vals": [
-            "kazahana_full x4",
-            "hisetsu_full",
-            "kazahana_phys_skip",
-            "kazahana_full x3",
-            "hisetsu 1",
-            "frostburn",
-            "shimotsuki 3",
-            "shatter"
-        ]
-    },
-    "burst": {
-        "priority": 2,
-        "vals": ["lingering_snow 1", "frostburn", "shimotsuki 3", "shatter"]
-    },
+        "opener": {
+            "priority": 2,
+            "vals": [ "hisetsu 1", "kazahana_phys_skip", "shimotsuki 3" ]
+        },
+        "baseline": {
+            "priority": 2,
+            "vals": [
+                "kazahana_full x4",
+                "hisetsu_full",
+                "kazahana_phys_skip",
+                "kazahana_full x3",
+                "hisetsu 1",
+                "frostburn",
+                "shimotsuki 3",
+                "shatter"
+            ]
+        },
+        "burst": {
+            "priority": 2,
+            "vals": [ "lingering_snow 1", "frostburn", "shimotsuki 3", "shatter" ]
+        },
 
-    "kazahana_phys_skip": {
-        "priority": 3,
-        "vals": ["kazahana 3", "kazahana 4", "kazahana 5"]
-    },
-    "kazahana_full": {
-        "priority": 3,
-        "vals": [
-            "kazahana 1",
-            "kazahana 2",
-            "kazahana 3",
-            "kazahana 4",
-            "kazahana 5"
-        ]
-    },
-    "hisetsu_full": {
-        "priority": 3,
-        "vals": ["hisetsu 1", "hisetsu 2"]
+        "kazahana_phys_skip": {
+            "priority": 3,
+            "vals": [ "kazahana 3", "kazahana 4", "kazahana 5" ]
+        },
+        "kazahana_full": {
+            "priority": 3,
+            "vals": [
+                "kazahana 1",
+                "kazahana 2",
+                "kazahana 3",
+                "kazahana 4",
+                "kazahana 5"
+            ]
+        },
+        "hisetsu_full": {
+            "priority": 3,
+            "vals": [ "hisetsu 1", "hisetsu 2" ]
+        }
     }
 }

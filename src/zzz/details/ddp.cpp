@@ -37,7 +37,7 @@ namespace zzz::combat::drive_disc_info {
         StatId::ImpactRatio
     };
 
-    constexpr frozen::unordered_map<StatId, std::array<double, 3>, 18> main_stat_conversion_table = {
+    constexpr frozen::unordered_map<StatId::Enum, std::array<double, 3>, 18> main_stat_conversion_table = {
         { StatId::HpFlat, { 734, 1468, 2200 } },
         { StatId::AtkFlat, { 104, 212, 316 } },
         { StatId::DefFlat, { 60, 124, 184 } },
@@ -57,7 +57,7 @@ namespace zzz::combat::drive_disc_info {
         { StatId::ErRatio, { 0.2, 0.4, 0.6 } },
         { StatId::ImpactRatio, { 0.06, 0.12, 0.18 } },
     };
-    constexpr frozen::unordered_map<StatId, std::array<double, 3>, 10> sub_stat_convertion_table = {
+    constexpr frozen::unordered_map<StatId::Enum, std::array<double, 3>, 10> sub_stat_convertion_table = {
         { StatId::AtkFlat, { 7, 15, 19 } },
         { StatId::AtkRatio, { 0.01, 0.02, 0.03 } },
         { StatId::HpFlat, { 39, 79, 112 } },

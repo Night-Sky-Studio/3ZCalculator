@@ -3,6 +3,7 @@
 //std
 #include <charconv>
 #include <concepts>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -57,6 +58,27 @@ namespace lib {
         }
 
         return src;
+    }
+
+    inline std::string remove_chars(const std::string& src, const std::string& charset) {
+        size_t size = src.size();
+        std::set on_removal(charset.begin(), charset.end());
+
+        // calculating skipping characters to not make realloc during removal process
+        for (char c : src) {
+            if (on_removal.contains(c))
+                size--;
+        }
+
+        std::string result;
+        result.reserve(size);
+
+        for (char c : src) {
+            if (!on_removal.contains(c))
+                result.push_back(c);
+        }
+
+        return result;
     }
 
     // TODO: error handling

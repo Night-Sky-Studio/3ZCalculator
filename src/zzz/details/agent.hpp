@@ -33,6 +33,7 @@ namespace zzz::details {
         Element element() const;
         Rarity rarity() const;
         const StatsGrid& stats() const;
+        const StatsGrid& team_buffs() const;
 
         const Ability& ability(const std::string& name) const;
 
@@ -42,7 +43,7 @@ namespace zzz::details {
         Speciality m_speciality;
         Element m_element;
         Rarity m_rarity;
-        StatsGrid m_stats;
+        StatsGrid m_stats, m_team_buffs;
         std::unordered_map<size_t, Ability> m_abilities;
     };
 
@@ -52,15 +53,14 @@ namespace zzz::details {
         AgentBuilder& set_name(std::string name);
 
         AgentBuilder& set_speciality(Speciality speciality);
-        AgentBuilder& set_speciality(std::string_view speciality_str);
-
         AgentBuilder& set_element(Element element);
-        AgentBuilder& set_element(std::string_view element_str);
-
         AgentBuilder& set_rarity(Rarity rarity);
 
         AgentBuilder& add_stat(const StatPtr& value);
         AgentBuilder& set_stats(StatsGrid stats);
+
+        AgentBuilder& add_team_buff(const StatPtr& value);
+        AgentBuilder& set_team_buffs(StatsGrid stats);
 
         AgentBuilder& add_skill(Skill skill);
         AgentBuilder& add_anomaly(Anomaly anomaly);

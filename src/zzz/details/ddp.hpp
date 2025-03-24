@@ -2,7 +2,6 @@
 
 //std
 #include <cstdint>
-#include <memory>
 
 //library
 #include "library/builder.hpp"

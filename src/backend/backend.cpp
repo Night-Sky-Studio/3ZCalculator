@@ -128,15 +128,15 @@ namespace backend {
             what.rotation.id = table.at("rotation").as_integral();
         else {
             const auto& array = table.at("rotation").as_array();
-            zzz::RotationDetails rotation;
+            zzz::details::RotationBuilder builder;
 
             for (const auto& it : array) {
                 auto splitted = lib::split_as_copy(it.as_string(), ' ');
                 auto index = splitted.size() > 1 ? std::stoul(splitted[1]) : 0;
-                rotation.emplace_back(splitted[0], index);
+                builder.add_cell({ splitted[0], index });
             }
 
-            what.rotation->set(std::move(rotation));
+            what.rotation->set(builder.get_product());
         }
 
         // ddps and dds_count
@@ -155,11 +155,11 @@ namespace backend {
 
             builder.set_disc_id(disc_id);
             builder.set_slot(current_disk + 1);
-            builder.set_rarity((zzz::Rarity) v.at("rarity").as_integral());
+            builder.set_rarity(v.at("rarity").as_integral());
 
-            builder.set_main_stat((zzz::StatId) stats[0].as_integral(), levels[0].as_integral());
+            builder.set_main_stat(stats[0].as_integral(), levels[0].as_integral());
             for (size_t i = 1; i < 5; i++)
-                builder.add_sub_stat((zzz::StatId) stats[i].as_integral(), levels[i].as_integral());
+                builder.add_sub_stat(stats[i].as_integral(), levels[i].as_integral());
 
             what.ddps[current_disk++] = builder.get_product();
 
@@ -346,6 +346,20 @@ namespace backend {
         CROW_ROUTE(m_app, "/")([] {
             return "3Z Calculator Backend";
         });
+#ifdef DEBUG_STATUS
+        CROW_ROUTE(m_app, "/damage_debug").methods("POST"_method)([this](const crow::request& req) {
+            crow::response response;
+
+            auto json = utl::json::from_string(req.body);
+            auto unpacked_request = json_to_request(json, m_manager);
+            auto output = post_damage_detailed(unpacked_request).to_string(utl::json::Format::PRETTY);
+
+            response = { 200, std::move(output) };
+
+            response.add_header("Access-Control-Allow-Origin", "*");
+            return response;
+        });
+#endif
         CROW_ROUTE(m_app, "/damage").methods("POST"_method)([this](const crow::request& req) {
             crow::response response;
 

@@ -13,7 +13,12 @@
         "impact_base": 86.0,
         "am_base": 116.0,
         "ap": 328.0,
-        "ice_ratio": 0.3
+        "ice_ratio": 0.3,
+        "ab_rate": { "base": 0.2, "formulas": "f:crit_rate;m:0.8" }
+    },
+
+    "team_buffs": {
+        "ab_rate": 0.2
     },
 
     "anomalies": {

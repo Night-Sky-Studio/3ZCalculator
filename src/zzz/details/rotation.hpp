@@ -3,9 +3,12 @@
 //std
 #include <cstdint>
 #include <list>
+#include <span>
 #include <string>
+#include <vector>
 
 //library
+#include "library/builder.hpp"
 #include "library/cached_memory.hpp"
 
 namespace zzz::details {
@@ -13,7 +16,35 @@ namespace zzz::details {
         std::string command;
         uint64_t index;
     };
-    using Rotation = std::list<rotation_cell>;
+
+    class Rotation {
+        friend class RotationBuilder;
+
+    public:
+        std::span<uint64_t> teammates();
+        std::span<const rotation_cell> cells() const;
+
+        const rotation_cell& operator[](size_t index) const;
+        size_t size() const;
+
+    protected:
+        std::vector<uint64_t> m_teammates;
+        std::vector<rotation_cell> m_content;
+    };
+
+    class RotationBuilder : public lib::IBuilder<Rotation> {
+    public:
+        RotationBuilder& add_teammate(uint64_t id);
+
+        RotationBuilder& add_cell(rotation_cell cell);
+        RotationBuilder& set_content(std::span<const rotation_cell> content);
+
+        bool is_built() const override;
+        Rotation&& get_product() override;
+
+    private:
+        std::list<rotation_cell> _temporary_content;
+    };
 }
 
 namespace zzz {
