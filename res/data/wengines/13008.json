@@ -1,0 +1,12 @@
+{
+    "id": 13008,
+    "name": "Weeping Gemini",
+    "speciality": "anomaly",
+    "rarity": 3,
+
+    "stats": {
+        "main": { "atk_base": 594.0 },
+        "sub": { "atk_ratio": 0.25 },
+        "passive": { "ap": 184 }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "id": 31800,
+    "name": "Chaos Jazz",
+
+    "set_bonus": [
+        { "ap": 30.0 },
+        { 
+            "fire_dmg_ratio": 0.15, 
+            "electro_dmg_ratio": 0.15,
+            "dmg_ratio": { "val": 0.2, "tag": "ex_special" }
+        }
+    ]
+}

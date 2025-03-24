@@ -59,7 +59,7 @@ namespace calc::details {
 
         double base_dmg = scale.motion_value / 100 * stats.at(StatId::AtkTotal);
         double crit_mult = 1.0
-            + stats.get_summed(StatId::CritRate, skill.tag())
+            + std::min(stats.get_summed(StatId::CritRate, Tag::Anomaly), 100.0)
             * stats.get_summed(StatId::CritDmg, skill.tag());
         double dmg_ratio_mult = 1.0
             + stats.get_summed(StatId::DmgRatio, skill.tag())
@@ -82,7 +82,8 @@ namespace calc::details {
 
         double base_dmg = anomaly.scale() / 100 * stats.get(StatId::AtkTotal);
         double crit_mult = 1.0 + (anomaly.can_crit()
-            ? stats.get_summed(StatId::CritRate, Tag::Anomaly) * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
+            ? std::min(stats.get_summed(StatId::CritRate, Tag::Anomaly), 100.0)
+            * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
             : 0.0);
         double dmg_ratio_mult = 1.0 + stats.get(StatId::DmgRatio) + stats.get(StatId::DmgRatio + element);
         double anomaly_ratio_mult = 1.0

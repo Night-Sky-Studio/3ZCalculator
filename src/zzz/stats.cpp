@@ -274,6 +274,7 @@ namespace zzz {
     }
 
     // TODO: make table of conditions
+    // TODO: make multiple at once
     StatPtr StatFactory::make(const std::string& key, const utl::Json& json) {
         std::string maker_name;
         if (json.is_object()) {
@@ -281,11 +282,12 @@ namespace zzz {
             if (auto it = table.find("type"); it != table.end())
                 maker_name = it->second.as_string();
             else if (it = table.find("val"); it != table.end()) {
-                maker_name = it->second.is_floating()
-                    ? "regular 1"
-                    : it->second.is_string()
-                    ? "relative 3"
-                    : ""; // error otherwise
+                if (it->second.is_floating())
+                    maker_name = "regular 1";
+                else if (it->second.is_string())
+                    maker_name = "relative 3";
+                else
+                    throw RUNTIME_ERROR("wrong stat as object definition");
             } else if (table.contains("base") && table.contains("formulas")) {
                 maker_name = "relative 1";
             } else

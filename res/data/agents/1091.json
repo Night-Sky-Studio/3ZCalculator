@@ -13,6 +13,8 @@
         "impact_base": 86.0,
         "am_base": 116.0,
         "ap": 328.0,
+        "er_base": 1.2,
+
         "ice_ratio": 0.3,
         "ab_rate": { "base": 0.2, "formulas": "f:crit_rate;m:0.8" }
     },
@@ -70,7 +72,7 @@
                 [0.0, 407.7],
                 [0.0, 514.4],
                 [0.0, 193.2]
-            ]            
+            ]
         },
         "falling_petals": {
             "tag": "followup_assist",
