@@ -61,8 +61,8 @@ namespace zzz {
 		std::map<size_t, StatPtr> m_content;
 
 	private:
-		//static StatPtr _no_value;
-
 		void _copy_from(const StatsGrid& another);
+
+		StatPtr _sum_stats_as_copy(const StatPtr& l, const StatPtr& r);
 	};
 }

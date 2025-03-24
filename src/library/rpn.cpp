@@ -1,4 +1,4 @@
-#include "math/rpn.hpp"
+#include "library/rpn.hpp"
 
 //std
 #include <charconv>
@@ -15,33 +15,21 @@
 using namespace lib::rpn_parser;
 
 namespace lib::rpn_details {
-    constexpr frozen::unordered_set<TokenType, 10> primitive_tokens = {
+    constexpr frozen::unordered_set<TokenType, 14> primitive_tokens = {
         Plus, Minus, Star, Slash, Percent,
-        Equal, Less, More, LParen, RParen
+        Equal, Less, More, LParen, RParen, And, Or,
+        LessEq, MoreEq
     };
-    constexpr frozen::unordered_set<TokenType, 8> math_operators = {
-        Plus, Minus, Star, Slash, Percent, Less, More, Equal
+    constexpr frozen::unordered_set<TokenType, 12> math_operators = {
+        Plus, Minus, Star, Slash, Percent, Less, More, Equal, And, Or, LessEq, MoreEq
     };
-    constexpr frozen::unordered_map<TokenType, size_t, 8> precedence = {
-        { Plus, 1 }, { Minus, 1 },
-        { Star, 2 }, { Slash, 2 }, { Percent, 2 },
-        { Less, 3 }, { More, 3 }, { Equal, 4 }
+    constexpr frozen::unordered_map<TokenType, size_t, 12> precedence = {
+        { And, 1 }, { Or, 1 },
+        { Plus, 2 }, { Minus, 2 },
+        { Star, 3 }, { Slash, 3 }, { Percent, 3 },
+        { Less, 4 }, { More, 4 }, { LessEq, 4 }, { MoreEq, 4 },
+        { Equal, 5 }
     };
-
-    bool is_floating(size_t index, const std::string& src) {
-        bool result = true;
-        char c;
-
-        do {
-            c = src[index];
-            index++;
-
-            if (c == '.')
-                result = true;
-        } while (isdigit(c) || c == '-');
-
-        return result;
-    }
 
     std::tuple<double, std::string, size_t> parse_number(size_t index, const std::string& src) {
         double number;
@@ -66,21 +54,25 @@ namespace lib::rpn_details {
 namespace lib {
     token_list RpnParser::tokenize(std::string what) {
         token_list result;
-        what = lib::remove_chars(what, " \t\n");
+        what = remove_chars(what, " \t\n");
 
         size_t i = 0, di;
         while (i < what.size()) {
-            char c = what[i];
-
-            if (rpn_details::primitive_tokens.contains((TokenType) c)) {
+            if (what[i] == '<' && what[i + 1] == '=') {
+                di = 2;
+                result.emplace_back(LessEq, "<=");
+            } else if (what[i] == '>' && what[i + 1] == '=') {
+                di = 2;
+                result.emplace_back(MoreEq, ">=");
+            } else if (rpn_details::primitive_tokens.contains((TokenType) what[i])) {
                 di = 1;
-                result.emplace_back((TokenType) c, std::string(1, c));
-            } else if ((c >= '0' && c <= '9') || c == '-') {
+                result.emplace_back((TokenType) what[i], std::string(1, what[i]));
+            } else if ((what[i] >= '0' && what[i] <= '9') || what[i] == '-') {
                 token_t token;
                 std::tie(token.number, token.literal, di) = rpn_details::parse_number(i, what);
                 token.type = Number;
                 result.emplace_back(std::move(token));
-            } else if (isalpha(c)) {
+            } else if (isalpha(what[i])) {
                 token_t token;
                 std::tie(token.literal, di) = rpn_details::parse_literal(i, what);
                 token.type = Variable;
@@ -94,7 +86,7 @@ namespace lib {
         return result;
     }
     rpn_t RpnParser::shunting_yard_algorithm(const token_list& infix) {
-        rpn_t queue;
+        rpn_t rpn;
         std::stack<token_t> stack;
 
         auto get_precedence = [](TokenType type) {
@@ -104,12 +96,12 @@ namespace lib {
 
         for (auto token : infix) {
             if (token.type == Number || token.type == Variable) {
-                queue.emplace(std::move(token));
+                rpn.emplace_back(std::move(token));
             } else if (token.type == LParen) { // '('
                 stack.emplace(std::move(token));
             } else if (token.type == RParen) { // ')'
                 while (!stack.empty() && stack.top().type != LParen) {
-                    queue.push(std::move(stack.top()));
+                    rpn.emplace_back(std::move(stack.top()));
                     stack.pop();
                 }
                 // pop '('
@@ -121,7 +113,7 @@ namespace lib {
                     if (top.type == LParen || own_precedence > get_precedence(top.type))
                         break;
 
-                    queue.push(std::move(top));
+                    rpn.emplace_back(std::move(top));
                     stack.pop();
                 }
                 stack.push(std::move(token));
@@ -133,10 +125,11 @@ namespace lib {
             if (stack.top().type == LParen)
                 break;
 
-            queue.emplace(std::move(stack.top()));
+            rpn.emplace_back(std::move(stack.top()));
             stack.pop();
         }
 
-        return queue;
+        rpn.shrink_to_fit();
+        return rpn;
     }
 }

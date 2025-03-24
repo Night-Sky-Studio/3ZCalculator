@@ -1,9 +1,6 @@
 ﻿//std
 #include <string>
 
-//math
-#include "math/RpnParser.hpp"
-
 //backend
 #include "backend/backend.hpp"
 
@@ -15,14 +12,10 @@ int main(int argc, char** argv) {
 	if (argc > 1)
 		global::PATH = argv[1];
 
-	/*backend::Backend server;
+	backend::Backend server;
 
 	server.init();
-	server.run();*/
-
-	std::string s = "4 + 18 / (9 - 3)";
-	auto tokens = math::RpnParser::tokenize(s);
-	auto rpn = math::RpnParser::shunting_yard_algorithm(tokens);
+	server.run();
 
 	return 0;
 }

@@ -5,6 +5,6 @@
     "element": "phys",
     "rarity": 4,
     "stats": {
-        "flat_atk": "cond:ap>=120;func:flat_atk=(ap-120)*2;max:600"
+        "flat_atk": "c:ap>=120;f:(ap-120)*2;m:600"
     }
 }

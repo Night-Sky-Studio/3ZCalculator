@@ -7,6 +7,8 @@
 //lib
 #include "library/format.hpp"
 
+using namespace zzz::stats_details;
+
 namespace zzz {
     size_t gen_key(StatId id, Tag tag) {
         return uint8_t(id) << 8 | size_t(tag);
@@ -120,35 +122,108 @@ namespace zzz {
         size_t key = gen_key(stat->m_id, stat->m_tag);
         auto it = m_content.find(key);
         if (it != m_content.end())
-            it->second->m_base += stat->m_base;
+            it->second = _sum_stats_as_copy(it->second, stat);
         else
             m_content.emplace(key, stat);
     }
 
     void StatsGrid::add_regular(double value, StatId id, Tag tag) {
-        RegularStat on_emplace;
-
-        on_emplace.m_base = value;
-        on_emplace.m_id = id;
-        on_emplace.m_tag = tag;
-
-        add(std::make_shared<RegularStat>(std::move(on_emplace)));
+        add(RegularStat::make(value, id, tag));
     }
-    void StatsGrid::add_relative(const std::string& formula, StatId id, Tag tag) {}
+    void StatsGrid::add_relative(const std::string& formula, StatId id, Tag tag) {
+        add(RelativeStat::make(formula, id, tag));
+    }
 
     void StatsGrid::add(const StatsGrid& stat) {
-        for (const auto& [k, v] : stat.m_content) {
-            auto it = m_content.find(k);
-            if (it != m_content.end())
-                it->second->m_base += v->m_base;
-            else
-                m_content.emplace(k, v->copy_as_ptr());
-        }
+        for (const auto& v : stat.m_content | std::views::values)
+            add(v);
     }
 
     void StatsGrid::_copy_from(const StatsGrid& another) {
         m_content.clear();
         for (const auto& [k, v] : another.m_content)
             m_content.emplace(k, v->copy_as_ptr());
+    }
+
+    // TODO: make it smaller and split between stats
+    StatPtr StatsGrid::_sum_stats_as_copy(const StatPtr& l, const StatPtr& r) {
+        StatPtr result;
+
+        if (l->_type == 1 && r->_type == 1) {
+            result = RegularStat::make(l->m_base + r->m_base, l->m_id, l->m_tag);
+        } else if (l->_type == 1 && r->_type == 2) {
+            auto lr = std::dynamic_pointer_cast<RelativeStat>(l);
+
+            result = RelativeStat::make(
+                l->m_base + r->m_base,
+                lr->formulas(),
+                l->m_id,
+                l->m_tag
+            );
+        } else if (l->_type == 2 && r->_type == 1) {
+            auto rr = std::dynamic_pointer_cast<RelativeStat>(r);
+
+            result = RelativeStat::make(
+                l->m_base + r->m_base,
+                rr->formulas(),
+                l->m_id,
+                l->m_tag
+            );
+        } else if (l->_type == 2 && r->_type == 2) {
+            auto lr = std::dynamic_pointer_cast<RelativeStat>(l);
+            auto rr = std::dynamic_pointer_cast<RelativeStat>(r);
+
+            RelativeStat::formulas_t formulas;
+            const auto& lf = lr->formulas();
+            const auto& rf = rr->formulas();
+
+            { // conditions
+                auto lt = lf.find('c');
+                auto rt = rf.find('c');
+
+                if (lt != lf.end() && rt == rf.end()) {
+                    formulas['c'] = lt->second;
+                } else if (lt == lf.end() && rt != rf.end()) {
+                    formulas['c'] = rt->second;
+                } else if (lt != lf.end() && rt != rf.end()) {
+                    formulas['c'] = sum_rpns(lt->second, rt->second,
+                        { .type = lib::rpn_parser::TokenType::And });
+                }
+            }
+
+            { // functions
+                formulas['f'] = sum_rpns(lf.at('f'), rf.at('f'),
+                    { .type = lib::rpn_parser::TokenType::Plus });
+            }
+
+            { // max
+                auto lt = lf.find('m');
+                auto rt = rf.find('m');
+
+                if (lt != lf.end() && rt == rf.end()) {
+                    formulas['m'] = lt->second;
+                } else if (lt == lf.end() && rt != rf.end()) {
+                    formulas['c'] = rt->second;
+                } else if (lt != lf.end() && rt != rf.end()) {
+                    formulas['c'] = optimized_rpn_t {
+                        lookup_token_t {
+                            .type = lib::rpn_parser::Number,
+                            .value = std::max(std::get<double>(lt->second[0].value),
+                                std::get<double>(rt->second[0].value))
+                        }
+                    };
+                }
+            }
+
+            result = RelativeStat::make(
+                l->m_base + r->m_base,
+                std::move(formulas),
+                l->id(),
+                l->tag()
+            );
+        } else
+            throw RUNTIME_ERROR("wrong sum variant");
+
+        return result;
     }
 }

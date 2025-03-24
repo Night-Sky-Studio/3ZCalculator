@@ -34,7 +34,6 @@ namespace zzz {
         template<std::integral T>
         constexpr Element(T val) : _val((Enum) val) {}
         constexpr explicit Element(std::string_view val) : _val(_from_string(val)) {}
-        explicit Element(const std::string& val) : _val(_from_string(val)) {}
 
         // assignment
 
@@ -108,7 +107,6 @@ namespace zzz {
         template<std::integral T>
         constexpr Tag(T val) : _val((Enum) val) {}
         constexpr explicit Tag(std::string_view val) : _val(_from_string(val)) {}
-        explicit Tag(const std::string& val) : _val(_from_string(val)) {}
 
         // assignment
 
@@ -194,7 +192,6 @@ namespace zzz {
         template<std::integral T>
         constexpr Speciality(T val) : _val((Enum) val) {}
         constexpr explicit Speciality(std::string_view val) : _val(_from_string(val)) {}
-        explicit Speciality(const std::string& val) : _val(_from_string(val)) {}
 
         // assignment
 
@@ -268,7 +265,6 @@ namespace zzz {
         }
         constexpr Rarity(char val) : _val(_from_char(val)) {}
         constexpr explicit Rarity(std::string_view val) : _val(_from_string(val)) {}
-        explicit Rarity(const std::string& val) : _val(_from_string(val)) {}
 
         // assignment
 
@@ -386,7 +382,6 @@ namespace zzz {
         constexpr StatId(Enum val) : _val(val) {}
         constexpr StatId(size_t val) : _val((Enum) val) {}
         constexpr explicit StatId(std::string_view val) : _val(_from_string(val)) {}
-        explicit StatId(const std::string& val) : _val(_from_string(val)) {}
 
         // assignment
 
