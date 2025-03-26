@@ -1,0 +1,6 @@
+{
+    "id": 32400,
+    "name": "Thunder Metal",
+
+    "set_bonus": [{ "electric_dmg_ratio": 0.1 }, { "atk_ratio": 0.28 }]
+}

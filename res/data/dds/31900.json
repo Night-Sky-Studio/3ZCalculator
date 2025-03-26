@@ -1,0 +1,6 @@
+{
+    "id": 31900,
+    "name": "Proto Punk",
+
+    "set_bonus": [{ "shield_effect": 0.15 }, { "dmg_ratio": 0.15 }]
+}

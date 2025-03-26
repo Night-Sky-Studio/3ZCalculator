@@ -1,0 +1,6 @@
+{
+    "id": 31600,
+    "name": "Swing Jazz",
+
+    "set_bonus": [{ "er_ratio": 0.2 }, { "dmg_ratio": 0.15 }]
+}

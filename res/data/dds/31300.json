@@ -1,0 +1,6 @@
+{
+    "id": 31000,
+    "name": "Freedom Blues",
+
+    "set_bonus": [{ "ap": 30.0 }, { "ab_pen": 0.2 }]
+}

@@ -56,8 +56,8 @@ add_executable(3ZCalculator
     "src/library/logger.cpp"
     "src/library/rpn.cpp"
     
-    "src/zzz/stats.cpp"
-    "src/zzz/stats_grid.cpp"
+    #"src/zzz/stats/basic.cpp"
+    #"src/zzz/stats/grid.cpp"
 
     "src/zzz/details/agent.cpp"
     "src/zzz/details/anomaly.cpp"
@@ -70,7 +70,7 @@ add_executable(3ZCalculator
     "src/calc/calculator.cpp"
 
     "src/backend/backend.cpp"
-)
+ "src/zzz/stats/regular.cpp" "src/zzz/stats/grid.cpp" "src/zzz/stats/relative.cpp")
 
 target_include_directories(3ZCalculator PRIVATE src)
 

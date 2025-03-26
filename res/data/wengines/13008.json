@@ -7,6 +7,6 @@
     "stats": {
         "main": { "atk_base": 594.0 },
         "sub": { "atk_ratio": 0.25 },
-        "passive": { "ap": 184 }
+        "passive": { "ap": 184.0 }
     }
 }

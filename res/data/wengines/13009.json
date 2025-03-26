@@ -5,8 +5,8 @@
     "rarity": 3,
 
     "stats": {
-        "main": { "atk_base": 594 },
-        "sub": { "ap": 75 },
+        "main": { "atk_base": 594.0 },
+        "sub": { "ap": 75.0 },
         "passive": { "atk_ratio": 0.16, "dmg_ratio": 0.25 }
     }
 }

@@ -1,0 +1,6 @@
+{
+    "id": 32600,
+    "name": "Fanged Metal",
+
+    "set_bonus": [{ "phys_dmg_ratio": 0.1 }, { "dng_ratio": 0.35 }]
+}

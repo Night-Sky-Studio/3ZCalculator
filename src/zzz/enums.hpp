@@ -151,6 +151,7 @@ namespace zzz {
             return it != from_string_table.end() ? it->second : Universal;
         }
 
+        // TODO: make common tag for assists
         static constexpr std::array<frozen::string, 13> to_string_table = {
             "universal",
             "anomaly",

@@ -1,0 +1,6 @@
+{
+    "id": 31200,
+    "name": "Shockstar Disco",
+
+    "set_bonus": [{ "impact_ratio": 0.06 }, { "impact_ratio": 0.2 }]
+}

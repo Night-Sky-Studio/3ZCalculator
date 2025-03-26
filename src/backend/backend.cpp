@@ -303,7 +303,7 @@ namespace backend {
         lib::ObjectManager::init_default_file_extensions();
         zzz::StatFactory::init_default();
 
-        _init_logger(true);
+        //_init_logger(true);
         _init_object_manager();
         _init_crow_app();
     }
