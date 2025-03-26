@@ -26,11 +26,13 @@ namespace lib::rpn_parser {
 }
 
 namespace lib {
-    using rpn_t = std::vector<rpn_parser::token_t>;
+    using rpn_token_type = rpn_parser::TokenType;
+    using rpn_token_t = rpn_parser::token_t;
+    using tokenized_rpn_t = std::vector<rpn_token_t>;
 
     class RpnParser {
     public:
         static rpn_parser::token_list tokenize(std::string what);
-        static rpn_t shunting_yard_algorithm(const rpn_parser::token_list& infix);
+        static tokenized_rpn_t shunting_yard_algorithm(const rpn_parser::token_list& infix);
     };
 }

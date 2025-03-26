@@ -21,6 +21,6 @@ namespace zzz {
         double value() const override;
 
     protected:
-        void add(const StatPtr& another) override;
+        StatPtr add_as_copy(const StatPtr& another) override;
     };
 }

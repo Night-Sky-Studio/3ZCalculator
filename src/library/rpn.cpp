@@ -85,8 +85,8 @@ namespace lib {
 
         return result;
     }
-    rpn_t RpnParser::shunting_yard_algorithm(const token_list& infix) {
-        rpn_t rpn;
+    tokenized_rpn_t RpnParser::shunting_yard_algorithm(const token_list& infix) {
+        tokenized_rpn_t rpn;
         std::stack<token_t> stack;
 
         auto get_precedence = [](TokenType type) {

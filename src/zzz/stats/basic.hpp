@@ -45,7 +45,8 @@ namespace zzz {
             _type(type) {
         }
 
-        virtual void add(const StatPtr& another) = 0;
+        // assume that this->m_unique == another.m_unique
+        virtual StatPtr add_as_copy(const StatPtr& another) = 0;
 
     private:
         size_t _type;

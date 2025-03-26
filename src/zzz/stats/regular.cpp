@@ -6,6 +6,9 @@
 //library
 #include "library/format.hpp"
 
+//zzz
+#include "zzz/stats/relative.hpp"
+
 namespace zzz {
     StatPtr RegularStat::make(StatId id, Tag tag, bool conditional, double base) {
         return std::make_unique<RegularStat>(id, tag, conditional, base);
@@ -38,22 +41,40 @@ namespace zzz {
     }
 
     StatPtr RegularStat::copy() const {
-        return std::make_unique<RegularStat>(m_unique.id, m_unique.tag, m_unique.conditional, m_base);
+        return std::make_unique<RegularStat>(*this);
     }
 
     double RegularStat::value() const { return m_base; }
 
-    void RegularStat::add(const StatPtr& another) {
+    StatPtr RegularStat::add_as_copy(const StatPtr& another) {
+        StatPtr result;
+
         switch (another->type()) {
         case 1:
-            m_base += another->base();
+            result = make(
+                m_unique.id,
+                m_unique.tag,
+                m_unique.conditional,
+                m_base + another->base()
+            );
             break;
 
-        case 2:
-            throw RUNTIME_ERROR("TODO");
+        case 2: {
+            auto ptr = dynamic_cast<const RelativeStat&>(*another);
+            result = RelativeStat::make(
+                m_unique.id,
+                m_unique.tag,
+                m_unique.conditional,
+                m_base + ptr.base(),
+                ptr.formulas()
+            );
+        }
+        break;
 
         default:
             throw RUNTIME_ERROR("wrong another.type()");
         }
+
+        return result;
     }
 }

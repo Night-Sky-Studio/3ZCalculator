@@ -69,7 +69,7 @@ namespace zzz {
         size_t key = stat->qualifier().hash();
         auto it = m_content.find(key);
         if (it != m_content.end())
-            it->second->add(stat);
+            it->second = it->second->add_as_copy(stat);
         else
             m_content.emplace(key, stat->copy());
     }
