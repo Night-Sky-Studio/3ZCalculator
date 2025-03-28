@@ -10,7 +10,7 @@
 #include "library/cached_memory.hpp"
 
 //zzz
-#include "zzz/stats_grid.hpp"
+#include "zzz/stats/grid.hpp"
 
 namespace zzz::details {
     class Dds {
@@ -20,8 +20,8 @@ namespace zzz::details {
         uint64_t id() const;
         const std::string& name() const;
 
-        const StatsGrid& p2() const;
-        const StatsGrid& p4() const;
+        const StatsGrid& pc2() const;
+        const StatsGrid& pc4() const;
 
     protected:
         uint64_t m_id;
@@ -33,8 +33,8 @@ namespace zzz::details {
     public:
         DdsBuilder& set_id(uint64_t id);
         DdsBuilder& set_name(std::string name);
-        DdsBuilder& set_p2(StatsGrid bonus);
-        DdsBuilder& set_p4(StatsGrid bonus);
+        DdsBuilder& set_pc2(StatsGrid bonus);
+        DdsBuilder& set_pc4(StatsGrid bonus);
 
         bool is_built() const override;
         Dds&& get_product() override;

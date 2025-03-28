@@ -1,0 +1,17 @@
+{
+    "id": 31800,
+    "name": "Chaos Jazz",
+
+    "set_bonus": {
+        "2pc": [["Ap", 30.0]],
+        "4pc": [
+            ["FireRatio", 0.15],
+            ["ElectricRatio", 0.15],
+            ["DmgRatio", "ExSpecial", 0.2],
+            ["DmgRatio", "QuickAssist", 0.2],
+            ["DmgRatio", "FollowupAssist", 0.2],
+            ["DmgRatio", "DefensiveAssist", 0.2],
+            ["DmgRatio", "EvasiveAssist", 0.2]
+        ]
+    }
+}

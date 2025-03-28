@@ -1,0 +1,15 @@
+{
+    "id": 13009,
+    "name": "Electro-Lip Gloss",
+    "speciality": "Anomaly",
+    "rarity": 3,
+
+    "stats": {
+        "main": [["AtkBase", 594.0]],
+        "sub": [["Ap", 75.0]],
+        "passive": [
+            ["AtkRatioCombat", 0.16],
+            ["DmgRatio", 0.25]
+        ]
+    }
+}

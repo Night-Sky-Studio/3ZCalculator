@@ -1,0 +1,9 @@
+{
+    "id": 32200,
+    "name": "Inferno Metal",
+
+    "set_bonus": {
+        "2pc": [["FireRatio", 0.1]],
+        "4pc": [["CritRate", 0.28]]
+    }
+}

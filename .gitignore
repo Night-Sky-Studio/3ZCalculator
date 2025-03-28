@@ -3,6 +3,8 @@
 .idea/*
 cmake-build-debug/*
 out/*
-res/*.log
+*.log
 vcpkg_installed/*
 Folder.DotSettings.user
+*.xlsx
+/.vscode

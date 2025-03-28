@@ -39,7 +39,7 @@ namespace zzz::details {
     }
 
     const std::unordered_map<size_t, Anomaly> Anomaly::standard_anomalies = {
-        make_as_pair("assault", 731.0, Element::Physical),
+        make_as_pair("assault", 731.0, Element::Phys),
         make_as_pair("burn", 50.0 * 20, Element::Fire),
         make_as_pair("shatter", 500.0, Element::Ice),
         make_as_pair("shock", 125.0 * 10, Element::Electric),

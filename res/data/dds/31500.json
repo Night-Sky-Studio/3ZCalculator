@@ -1,0 +1,9 @@
+{
+    "id": 31500,
+    "name": "Soul Rock",
+
+    "set_bonus": {
+        "2pc": [["DefRatio", 0.16]],
+        "4pc": []
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "id": 32300,
+    "name": "Chaotic Metal",
+
+    "set_bonus": {
+        "2pc": [["EtherRatio", 0.1]],
+        "4pc": [["CritDmg", 0.53]]
+    }
+}

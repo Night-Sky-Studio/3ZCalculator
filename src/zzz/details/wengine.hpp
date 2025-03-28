@@ -9,8 +9,7 @@
 
 //zzz
 #include "zzz/enums.hpp"
-#include "zzz/stats.hpp"
-#include "zzz/stats_grid.hpp"
+#include "zzz/stats/grid.hpp"
 
 namespace zzz::details {
     class Wengine {

@@ -1,10 +1,110 @@
 {
     "id": 1261,
     "name": "Jane Doe",
-    "speciality": "anomaly",
-    "element": "phys",
+    "speciality": "Anomaly",
+    "element": "Phys",
     "rarity": 4,
-    "stats": {
-        "flat_atk": "c:ap>=120;f:(ap-120)*2;m:600"
+    "stats": [
+        ["HpBase", 7789.0],
+        ["DefBase", 607.0],
+        ["AtkBase", 881.0],
+        ["CritRate", 0.05],
+        ["CritDmg", 0.5],
+        ["ImpactBase", 86.0],
+        ["AmBase", 150.0],
+        ["Ap", 112.0],
+        ["ErBase", 1.2],
+
+        ["AbRate", 0.55],
+        ["AtkFlat", 0.0, "c:Ap>=120;f:(Ap-120)*2;m:600"]
+    ],
+
+    "anomalies": {
+        "assault": {
+            "scale": 771.0,
+            "buffs": [
+                ["CritRate", 0.4, "f:Ap*0.016"],
+                ["CritDmg", 0.5]
+            ]
+        }
+    },
+
+    "skills": {
+        "dancing_blades": {
+            "tag": "Basic",
+            "scales": [
+                [72.4, 23.0],
+                [125.0, 78.4],
+                [167.1, 90.3],
+                [327.3, 164.7],
+                [197.8, 103.9],
+                [582.8, 300.1]
+            ]
+        },
+        "salchow_jump": {
+            "tag": "Basic",
+            "scales": [
+                [602.2, 344.7],
+                [323.0, 184.5]
+            ]
+        },
+
+        "edge_jump": {
+            "tag": "Dash",
+            "scales": [
+                [143.0, 54.5],
+                [143.0, 54.5]
+            ]
+        },
+        "phantom_thrust": {
+            "tag": "Counter",
+            "scale": [209.0, 78.7]
+        },
+        "swift_shadow": {
+            "tag": "Counter",
+            "scales": [
+                [683.3, 344.7],
+                [683.3, 344.7]
+            ]
+        },
+        "swift_shadow_dance": {
+            "tag": "Counter",
+            "scale": [774.2, 371.8]
+        },
+
+        "dark_thorn": {
+            "tag": "QuickAssist",
+            "scale": [239.1, 179.7]
+        },
+        "last_defense": {
+            "tag": "DefensiveAssist",
+            "scales": [
+                [0.0, 407.7],
+                [0.0, 514.4],
+                [0.0, 250.4]
+            ]
+        },
+        "gale_sweep": {
+            "tag": "FollowupAssist",
+            "scale": [692.0, 448.6]
+        },
+
+        "aerial_sweep": {
+            "tag": "Special",
+            "scale": [116.1, 87.5]
+        },
+        "tail_swipe": {
+            "tag": "ExSpecial",
+            "scale": [1150.0, 702.4]
+        },
+
+        "flowers_of_sin": {
+            "tag": "Chain",
+            "scale": [1266.2, 356.4]
+        },
+        "final_curtain": {
+            "tag": "Ultimate",
+            "scale": [2941.3, 280.0]
+        }
     }
 }

@@ -1,0 +1,12 @@
+{
+    "id": 31100,
+    "name": "Puffer Electro",
+
+    "set_bonus": {
+        "2pc": [["DefPenRatio", 0.08]],
+        "4pc": [
+            ["DmgRatio", "Ultimate", 0.2],
+            ["AtkRatioCombat", 0.15]
+        ]
+    }
+}

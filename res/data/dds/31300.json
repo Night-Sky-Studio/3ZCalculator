@@ -1,0 +1,9 @@
+{
+    "id": 31000,
+    "name": "Freedom Blues",
+
+    "set_bonus": {
+        "2pc": [["Ap", 30.0]],
+        "4pc": [["AbPen", 0.2]]
+    }
+}
