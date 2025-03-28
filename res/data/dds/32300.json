@@ -3,7 +3,7 @@
     "name": "Chaotic Metal",
 
     "set_bonus": {
-        "2pc": [["EtherDmgRatio", 0.1]],
+        "2pc": [["EtherRatio", 0.1]],
         "4pc": [["CritDmg", 0.53]]
     }
 }

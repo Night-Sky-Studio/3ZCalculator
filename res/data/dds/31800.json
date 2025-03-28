@@ -5,8 +5,8 @@
     "set_bonus": {
         "2pc": [["Ap", 30.0]],
         "4pc": [
-            ["FireDmgRatio", 0.15],
-            ["ElectroDmgRatio", 0.15],
+            ["FireRatio", 0.15],
+            ["ElectricRatio", 0.15],
             ["DmgRatio", "ExSpecial", 0.2],
             ["DmgRatio", "QuickAssist", 0.2],
             ["DmgRatio", "FollowupAssist", 0.2],

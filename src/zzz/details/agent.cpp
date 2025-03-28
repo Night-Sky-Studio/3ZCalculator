@@ -163,7 +163,7 @@ namespace zzz {
         }
 
         if (auto it = table.find("buffs"); it != table.end()) {
-            auto buffs = StatsGrid::make_from(it->second.as_array(), tag);
+            auto buffs = StatsGrid::make_from(it->second, tag);
             builder.set_buffs(std::move(buffs));
         }
 

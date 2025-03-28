@@ -16,7 +16,7 @@
         ["ErBase", 1.2],
 
         ["AbRate", 0.55],
-        ["FlatAtk", 0.0, "c:Ap>=120;f:(Ap-120)*2;m:600"]
+        ["AtkFlat", 0.0, "c:Ap>=120;f:(Ap-120)*2;m:600"]
     ],
 
     "anomalies": {

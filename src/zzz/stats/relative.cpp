@@ -90,16 +90,16 @@ namespace zzz {
             return make(
                 (StatId) json[0].as_string(),
                 tag,
-                json[2].as_floating(),
-                json[3].as_string()
+                json[1].as_floating(),
+                json[2].as_string()
             );
 
         case 4:
             return make(
                 (StatId) json[0].as_string(),
                 (Tag) json[1].as_string(),
-                json[3].as_floating(),
-                json[4].as_string()
+                json[2].as_floating(),
+                json[3].as_string()
             );
 
         default:

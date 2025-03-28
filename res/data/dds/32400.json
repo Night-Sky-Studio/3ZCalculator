@@ -3,7 +3,7 @@
     "name": "Thunder Metal",
 
     "set_bonus": {
-        "2pc": [["ElectricDmgRatio", 0.1]],
+        "2pc": [["ElectricRatio", 0.1]],
         "4pc": [["AtkRatioCombat", 0.28]]
     }
 }

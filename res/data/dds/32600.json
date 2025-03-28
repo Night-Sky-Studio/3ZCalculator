@@ -3,7 +3,7 @@
     "name": "Fanged Metal",
 
     "set_bonus": {
-        "2pc": [["PhysDmgRatio", 0.1]],
+        "2pc": [["PhysRatio", 0.1]],
         "4pc": [["DmgRatio", 0.35]]
     }
 }

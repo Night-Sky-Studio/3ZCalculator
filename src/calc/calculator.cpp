@@ -118,9 +118,9 @@ namespace calc::details {
             const auto& dds = value->details();
 
             if (count == 2)
-                result.add(dds.p2());
+                result.add(dds.pc2());
             else if (count == 4)
-                result.add(dds.p4());
+                result.add(dds.pc4());
         }
 
         return result;
@@ -146,9 +146,9 @@ namespace calc {
             const auto& dds = value->details();
 
             if (count == 2)
-                dds_stats.add(dds.p2());
+                dds_stats.add(dds.pc2());
             else if (count == 4)
-                dds_stats.add(dds.p4());
+                dds_stats.add(dds.pc4());
         }
 
         summed_stats.add(agent_stats);
@@ -256,7 +256,7 @@ namespace calc {
                 dmg = details::calc_regular_dmg(skill, cell.index - 1, stats, enemy);
                 tag = skill.tag();
                 if (skill.max_index() > 1)
-                    cell.command += std::to_string(cell.index);
+                    cell.command += ' ' + std::to_string(cell.index);
             } else if (std::holds_alternative<AnomalyDetails>(ability)) {
                 const auto& anomaly = std::get<AnomalyDetails>(ability);
                 dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);

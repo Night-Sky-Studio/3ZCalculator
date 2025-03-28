@@ -6,7 +6,7 @@
 
     "stats": {
         "main": [["AtkBase", 684.0]],
-        "sub": [["PenRatio", 0.24]],
+        "sub": [["DefPenRatio", 0.24]],
         "passive": [
             ["AtkRatioCombat", 0.12],
             ["Ap", 0.75]

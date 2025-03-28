@@ -19,9 +19,7 @@
         ["AbRate", 0.2, "f:CritRate;m:0.8"]
     ],
 
-    "team_buffs": {
-        "ab_rate": 0.2
-    },
+    "team_buffs": [["AbRate", 0.2]],
 
     "anomalies": {
         "frostburn": {
@@ -47,10 +45,10 @@
                 [1717.2, 97.2],
                 [4282.8, 567.0]
             ],
-            "buffs": {
-                "dmg_ratio": 0.6,
-                "ice_res_pen": 0.3
-            }
+            "buffs": [
+                ["DmgRatio", 0.6],
+                ["IceResPen", 0.3]
+            ]
         },
 
         "fuyubachi": {
