@@ -9,12 +9,12 @@
 namespace zzz {
     class RegularStat : public IStat {
     public:
-        static StatPtr make(StatId id, Tag tag, bool conditional, double base);
+        static StatPtr make(StatId id, Tag tag, double base);
         // [StatId (str), Tag (str, optional, Universal as default), is_conditional (bool), value (number)]
         // length is either 3 or 4
-        static StatPtr make_from(const utl::json::Array& array);
+        static StatPtr make_from(const utl::Json& json, Tag tag);
 
-        RegularStat(StatId id, Tag tag, bool conditional, double base);
+        RegularStat(StatId id, Tag tag, double base);
 
         StatPtr copy() const override;
 

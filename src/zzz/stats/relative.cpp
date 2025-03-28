@@ -56,11 +56,7 @@ namespace zzz {
             }
 
             if (it.type() == Variable) {
-                stack.emplace(variables.get_value({
-                    .id = it.variable(),
-                    .tag = Tag::Universal,
-                    .conditional = false
-                }));
+                stack.emplace(variables.get_value({ .id = it.variable(), .tag = Tag::Universal }));
                 continue;
             }
 
@@ -69,11 +65,7 @@ namespace zzz {
             double lhs = stack.top();
             stack.pop();
 
-            auto op = lib::math_ops.find(it.type());
-            if (op == lib::math_ops.end())
-                throw RUNTIME_ERROR("wrong rpn token");
-
-            stack.emplace(op->second(lhs, rhs));
+            stack.emplace(lib::switch_math_op(lhs, rhs, (char) it.type()));
         }
 
         if (stack.size() > 1)
@@ -84,30 +76,30 @@ namespace zzz {
 }
 
 namespace zzz {
-    StatPtr RelativeStat::make(StatId id, const Tag& tag, bool conditional, double base, formulas_t formulas) {
-        return std::make_unique<RelativeStat>(id, tag, conditional, base, std::move(formulas));
+    StatPtr RelativeStat::make(StatId id, const Tag& tag, double base, formulas_t formulas) {
+        return std::make_unique<RelativeStat>(id, tag, base, std::move(formulas));
     }
-    StatPtr RelativeStat::make(StatId id, const Tag& tag, bool conditional, double base, const std::string& formulas) {
-        return make(id, tag, conditional, base, make_formulas(formulas));
+    StatPtr RelativeStat::make(StatId id, const Tag& tag, double base, const std::string& formulas) {
+        return make(id, tag, base, make_formulas(formulas));
     }
-    StatPtr RelativeStat::make_from(const utl::json::Array& array) {
-        switch (array.size()) {
-        case 4:
+    StatPtr RelativeStat::make_from(const utl::Json& json, Tag tag) {
+        const auto& as_array = json.as_array();
+
+        switch (as_array.size()) {
+        case 3:
             return make(
-                (StatId) array[0].as_string(),
-                Tag::Universal,
-                array[1].as_bool(),
-                array[2].as_floating(),
-                array[3].as_string()
+                (StatId) json[0].as_string(),
+                tag,
+                json[2].as_floating(),
+                json[3].as_string()
             );
 
-        case 5:
+        case 4:
             return make(
-                (StatId) array[0].as_string(),
-                (Tag) array[1].as_string(),
-                array[2].as_bool(),
-                array[3].as_floating(),
-                array[4].as_string()
+                (StatId) json[0].as_string(),
+                (Tag) json[1].as_string(),
+                json[3].as_floating(),
+                json[4].as_string()
             );
 
         default:
@@ -115,15 +107,15 @@ namespace zzz {
         }
     }
 
-    RelativeStat::RelativeStat(StatId id, const Tag& tag, bool conditional, double base, formulas_t formulas) :
-        IStat(id, tag, conditional, base, 2),
+    RelativeStat::RelativeStat(StatId id, const Tag& tag, double base, formulas_t formulas) :
+        IStat(id, tag, base, 2),
         m_formulas(std::move(formulas)) {
     }
-    RelativeStat::RelativeStat(StatId id, const Tag& tag, bool conditional, double base, const std::string& formulas) :
-        RelativeStat(id, tag, conditional, base, make_formulas(formulas)) {
+    RelativeStat::RelativeStat(StatId id, const Tag& tag, double base, const std::string& formulas) :
+        RelativeStat(id, tag, base, make_formulas(formulas)) {
     }
     RelativeStat::RelativeStat(const RelativeStat& another) :
-        IStat(another.m_unique.id, another.m_unique.tag, another.m_unique.conditional, another.m_base, 2),
+        IStat(another.m_unique.id, another.m_unique.tag, another.m_base, 2),
         m_formulas(another.m_formulas),
         m_lookup_table(another.m_lookup_table) {
     }
@@ -163,7 +155,6 @@ namespace zzz {
             result = make(
                 m_unique.id,
                 m_unique.tag,
-                m_unique.conditional,
                 m_base + another->base(),
                 m_formulas
             );

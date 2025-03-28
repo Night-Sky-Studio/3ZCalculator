@@ -12,7 +12,7 @@
 namespace zzz {
     class StatsGrid {
     public:
-        static StatsGrid make_from(const utl::json::Array& array);
+        static StatsGrid make_from(const utl::Json& json, Tag tag = Tag::Universal);
 
         StatsGrid() = default;
 
@@ -22,13 +22,15 @@ namespace zzz {
         StatsGrid(StatsGrid&& another) noexcept;
         StatsGrid& operator=(StatsGrid&& another) noexcept;
 
-        double get_value(qualifier_t qualifier) const;
+        double get_value(qualifier_t key) const;
         // replaces ptr of stat if it exists
         void set(StatPtr&& value);
 
+        bool contains(qualifier_t key) const;
+
         // emplaces element as regular stat with base 0.0 if it doesn't exist
-        IStat& at(qualifier_t qualifier);
-        const IStat& at(qualifier_t qualifier) const;
+        IStat& at(qualifier_t key);
+        const IStat& at(qualifier_t key) const;
 
         // adds value of stat if it exists
         // otherwise emplaces it

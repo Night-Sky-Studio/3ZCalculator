@@ -57,8 +57,8 @@ namespace zzz::details {
         return *this;
     }
 
-    AgentBuilder& AgentBuilder::add_stat(const StatPtr& value) {
-        m_product->m_stats.set(value);
+    AgentBuilder& AgentBuilder::add_stat(StatPtr&& value) {
+        m_product->m_stats.set(std::move(value));
         return *this;
     }
     AgentBuilder& AgentBuilder::set_stats(StatsGrid stats) {
@@ -66,8 +66,8 @@ namespace zzz::details {
         return *this;
     }
 
-    AgentBuilder& AgentBuilder::add_team_buff(const StatPtr& value) {
-        m_product->m_team_buffs.set(value);
+    AgentBuilder& AgentBuilder::add_team_buff(StatPtr&& value) {
+        m_product->m_team_buffs.set(std::move(value));
         return *this;
     }
     AgentBuilder& AgentBuilder::set_team_buffs(StatsGrid stats) {
@@ -119,9 +119,9 @@ namespace zzz {
             builder.set_element(default_element);
 
         if (auto it = table.find("buffs"); it != table.end()) {
-            auto buffs = StatsGrid::make_from(it->second, Tag::Anomaly);
-            bool can_crit = buffs.contains(StatId::CritRate, Tag::Anomaly)
-                && buffs.contains(StatId::CritDmg, Tag::Anomaly);
+            auto buffs = StatsGrid::make_from(it->second.as_array(), Tag::Anomaly);
+            bool can_crit = buffs.contains({ StatId::CritRate, Tag::Anomaly })
+                && buffs.contains({ StatId::CritDmg, Tag::Anomaly });
 
             builder.set_buffs(std::move(buffs));
             builder.set_crit(can_crit);
@@ -163,7 +163,7 @@ namespace zzz {
         }
 
         if (auto it = table.find("buffs"); it != table.end()) {
-            auto buffs = StatsGrid::make_from(it->second, tag);
+            auto buffs = StatsGrid::make_from(it->second.as_array(), tag);
             builder.set_buffs(std::move(buffs));
         }
 
@@ -187,13 +187,13 @@ namespace zzz {
 
         // stats
 
-        auto stats = StatsGrid::make_from(table.at("stats"));
+        auto stats = StatsGrid::make_from(table.at("stats").as_array());
         builder.set_stats(std::move(stats));
 
         // team buffs
 
         if (auto it = table.find("team_buffs"); it != table.end()) {
-            auto team_buffs = StatsGrid::make_from(it->second);
+            auto team_buffs = StatsGrid::make_from(it->second.as_array());
             builder.set_team_buffs(std::move(team_buffs));
         }
 

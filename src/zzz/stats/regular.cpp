@@ -10,25 +10,25 @@
 #include "zzz/stats/relative.hpp"
 
 namespace zzz {
-    StatPtr RegularStat::make(StatId id, Tag tag, bool conditional, double base) {
-        return std::make_unique<RegularStat>(id, tag, conditional, base);
+    StatPtr RegularStat::make(StatId id, Tag tag, double base) {
+        return std::make_unique<RegularStat>(id, tag, base);
     }
-    StatPtr RegularStat::make_from(const utl::json::Array& array) {
-        switch (array.size()) {
-        case 3:
+    StatPtr RegularStat::make_from(const utl::Json& json, Tag tag) {
+        const auto& as_array = json.as_array();
+
+        switch (as_array.size()) {
+        case 2:
             return make(
-                (StatId) array[0].as_string(),
-                Tag::Universal,
-                array[1].as_bool(),
-                array[2].as_floating()
+                (StatId) json[0].as_string(),
+                tag,
+                json[2].as_floating()
             );
 
-        case 4:
+        case 3:
             return make(
-                (StatId) array[0].as_string(),
-                (Tag) array[1].as_string(),
-                array[2].as_bool(),
-                array[3].as_floating()
+                (StatId) json[0].as_string(),
+                (Tag) json[1].as_string(),
+                json[3].as_floating()
             );
 
         default:
@@ -36,8 +36,8 @@ namespace zzz {
         }
     }
 
-    RegularStat::RegularStat(StatId id, Tag tag, bool conditional, double base) :
-        IStat(id, tag, conditional, base, 1) {
+    RegularStat::RegularStat(StatId id, Tag tag, double base) :
+        IStat(id, tag, base, 1) {
     }
 
     StatPtr RegularStat::copy() const {
@@ -54,7 +54,6 @@ namespace zzz {
             result = make(
                 m_unique.id,
                 m_unique.tag,
-                m_unique.conditional,
                 m_base + another->base()
             );
             break;
@@ -64,12 +63,11 @@ namespace zzz {
             result = RelativeStat::make(
                 m_unique.id,
                 m_unique.tag,
-                m_unique.conditional,
                 m_base + ptr.base(),
                 ptr.formulas()
             );
+            break;
         }
-        break;
 
         default:
             throw RUNTIME_ERROR("wrong another.type()");

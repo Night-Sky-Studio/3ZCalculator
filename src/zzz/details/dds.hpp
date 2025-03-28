@@ -10,7 +10,7 @@
 #include "library/cached_memory.hpp"
 
 //zzz
-#include "zzz/stats_grid.hpp"
+#include "zzz/stats/grid.hpp"
 
 namespace zzz::details {
     class Dds {

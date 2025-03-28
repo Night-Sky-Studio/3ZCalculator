@@ -17,8 +17,8 @@
 #include "zzz/details/anomaly.hpp"
 #include "zzz/details/skill.hpp"
 #include "zzz/enums.hpp"
-#include "zzz/stats.hpp"
-#include "zzz/stats_grid.hpp"
+#include "zzz/stats/basic.hpp"
+#include "zzz/stats/grid.hpp"
 
 namespace zzz::details {
     using Ability = std::variant<Skill, Anomaly>;
@@ -56,10 +56,10 @@ namespace zzz::details {
         AgentBuilder& set_element(Element element);
         AgentBuilder& set_rarity(Rarity rarity);
 
-        AgentBuilder& add_stat(const StatPtr& value);
+        AgentBuilder& add_stat(StatPtr&& value);
         AgentBuilder& set_stats(StatsGrid stats);
 
-        AgentBuilder& add_team_buff(const StatPtr& value);
+        AgentBuilder& add_team_buff(StatPtr&& value);
         AgentBuilder& set_team_buffs(StatsGrid stats);
 
         AgentBuilder& add_skill(Skill skill);

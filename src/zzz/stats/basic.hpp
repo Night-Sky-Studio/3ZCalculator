@@ -12,9 +12,8 @@ namespace zzz {
     struct qualifier_t {
         StatId id;
         Tag tag;
-        bool conditional;
 
-        size_t hash() const { return size_t(id) << 16 | size_t(tag) << 8 | conditional; }
+        size_t hash() const { return size_t(id) | size_t(tag) << 8; }
     };
 
     class IStat {
@@ -39,8 +38,8 @@ namespace zzz {
         const qualifier_t m_unique;
         double m_base;
 
-        explicit IStat(StatId id, Tag tag, bool conditional, double base, size_t type) :
-            m_unique({ .id = id, .tag = tag, .conditional = conditional }),
+        IStat(StatId id, Tag tag, double base, size_t type) :
+            m_unique({ .id = id, .tag = tag }),
             m_base(base),
             _type(type) {
         }

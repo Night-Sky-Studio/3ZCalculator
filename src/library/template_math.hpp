@@ -1,31 +1,49 @@
 #pragma once
 
-//std
-#include <functional>
-
-//frozen
-#include "frozen/map.h"
-
-#define DO_DOUBLE_MATH_OP(CH, OP) { CH, lib::do_math_op<double, OP<double>> }
+//library
+#include "library/format.hpp"
 
 namespace lib {
-    template<typename T, typename TFunctor>
-    T do_math_op(T l, T r) {
-        return TFunctor()(l, r);
-    }
+    inline double switch_math_op(double lhs, double rhs, char code) {
+        switch (code) {
+        case '+':
+            return lhs + rhs;
 
-    // based on rpn_tokens
-    constexpr frozen::map<char, std::function<double(double, double)>, 12> math_ops = {
-        DO_DOUBLE_MATH_OP('+', std::plus),
-        DO_DOUBLE_MATH_OP('-', std::minus),
-        DO_DOUBLE_MATH_OP('*', std::multiplies),
-        DO_DOUBLE_MATH_OP('/', std::divides),
-        DO_DOUBLE_MATH_OP('=', std::equal_to),
-        DO_DOUBLE_MATH_OP('<', std::less),
-        DO_DOUBLE_MATH_OP(0x80, std::less_equal),
-        DO_DOUBLE_MATH_OP('>', std::greater),
-        DO_DOUBLE_MATH_OP(0x81, std::greater_equal),
-        DO_DOUBLE_MATH_OP('&', std::logical_and),
-        DO_DOUBLE_MATH_OP('|', std::logical_or)
-    };
+        case '-':
+            return lhs - rhs;
+
+        case '*':
+            return lhs * rhs;
+
+        case '/':
+            return lhs / rhs;
+
+        case '%':
+            return std::fmod(lhs, rhs);
+
+        case '=':
+            return fabs(lhs - rhs) < DBL_EPSILON;
+
+        case '<':
+            return lhs < rhs;
+
+        case 0x80: // <=
+            return lhs <= rhs;
+
+        case '>':
+            return lhs > rhs;
+
+        case 0x81: // >=
+            return lhs >= rhs;
+
+        case '&':
+            return (bool) lhs && (bool) rhs;
+
+        case '|':
+            return (bool) lhs || (bool) rhs;
+
+        default:
+            throw RUNTIME_ERROR("this math operator doesn't exist");
+        }
+    }
 }
