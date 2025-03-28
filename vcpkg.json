@@ -1,5 +1,6 @@
 {
-  "dependencies": [
-    "crow"
-  ]
+    "dependencies": [
+        "crow",
+        "magic-enum"
+    ]
 }

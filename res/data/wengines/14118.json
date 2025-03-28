@@ -1,0 +1,15 @@
+{
+    "id": 14118,
+    "name": "Fusion Compiler",
+    "speciality": "Anomaly",
+    "rarity": 4,
+
+    "stats": {
+        "main": [["AtkBase", 684.0]],
+        "sub": [["DefPenRatio", 0.24]],
+        "passive": [
+            ["AtkRatioCombat", 0.12],
+            ["Ap", 0.75]
+        ]
+    }
+}

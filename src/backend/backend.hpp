@@ -15,10 +15,6 @@
 //library
 #include "library/cached_memory.hpp"
 
-//calculator
-//#include "calc/calculator.hpp"
-//#include "calc/details.hpp"
-
 //backend
 #include "library/logger.hpp"
 

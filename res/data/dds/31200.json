@@ -1,0 +1,9 @@
+{
+    "id": 31200,
+    "name": "Shockstar Disco",
+
+    "set_bonus": {
+        "2pc": [["ImpactRatio", 0.06]],
+        "4pc": [["DazeRatio", 0.2]]
+    }
+}

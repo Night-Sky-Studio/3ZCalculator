@@ -12,8 +12,8 @@ namespace zzz::details {
     uint64_t Dds::id() const { return m_id; }
     const std::string& Dds::name() const { return m_name; }
 
-    const StatsGrid& Dds::p2() const { return m_set_bonuses[0]; }
-    const StatsGrid& Dds::p4() const { return m_set_bonuses[1]; }
+    const StatsGrid& Dds::pc2() const { return m_set_bonuses[0]; }
+    const StatsGrid& Dds::pc4() const { return m_set_bonuses[1]; }
 
     // DdsBuilder
 
@@ -27,12 +27,12 @@ namespace zzz::details {
         _is_set.name = true;
         return *this;
     }
-    DdsBuilder& DdsBuilder::set_p2(StatsGrid bonus) {
+    DdsBuilder& DdsBuilder::set_pc2(StatsGrid bonus) {
         m_product->m_set_bonuses[0] = std::move(bonus);
         _is_set.p2 = true;
         return *this;
     }
-    DdsBuilder& DdsBuilder::set_p4(StatsGrid bonus) {
+    DdsBuilder& DdsBuilder::set_pc4(StatsGrid bonus) {
         m_product->m_set_bonuses[1] = std::move(bonus);
         _is_set.p4 = true;
         return *this;
@@ -62,9 +62,9 @@ namespace zzz {
         builder.set_id(table.at("id").as_integral());
         builder.set_name(table.at("name").as_string());
 
-        const auto& set_bonuses = table.at("set_bonus").as_array();
-        builder.set_p2(StatsGrid::make_from(set_bonuses[0]));
-        builder.set_p4(StatsGrid::make_from(set_bonuses[1]));
+        const auto& set_bonuses = table.at("set_bonus").as_object();
+        builder.set_pc2(StatsGrid::make_from(set_bonuses.at("2pc")));
+        builder.set_pc4(StatsGrid::make_from(set_bonuses.at("4pc")));
 
         return builder.get_product();
     }

@@ -11,7 +11,7 @@
 
 namespace zzz::details::wengine_info {
     // ms - main stat
-    constexpr frozen::unordered_set ms_limits = { StatId::AtkBase };
+    constexpr frozen::unordered_set<StatId::Enum, 1> ms_limits = { StatId::AtkBase };
 }
 
 namespace zzz::details {

@@ -1,0 +1,12 @@
+{
+    "id": 32500,
+    "name": "Polar Metal",
+
+    "set_bonus": {
+        "2pc": [["IceRatio", 0.1]],
+        "4pc": [
+            ["DmgRatio", "Basic", 0.4],
+            ["DmgRatio", "Dash", 0.4]
+        ]
+    }
+}

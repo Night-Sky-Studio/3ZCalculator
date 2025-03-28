@@ -22,6 +22,7 @@ namespace calc {
         static detailed_result_t eval_detailed(const request_t& request);
 
 #ifdef DEBUG_STATUS
+        // TODO
         static tabulate::Table debug_stats(const request_t& request);
         static tabulate::Table debug_damage(const request_t& request, const result_t& damage);
 #endif

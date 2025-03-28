@@ -8,8 +8,7 @@
 #include "library/format.hpp"
 
 //zzz
-#include "zzz/stats.hpp"
-#include "zzz/stats_grid.hpp"
+#include "zzz/stats/grid.hpp"
 
 using namespace zzz;
 
@@ -20,27 +19,31 @@ namespace calc::details {
 
     // TODO: make part of StatsGrid
     double calc_total_atk(const StatsGrid& stats, Tag tag) {
-        return stats.get(StatId::AtkBase)
+        /*return stats.get(StatId::AtkBase)
             * (1 + stats.get(StatId::AtkRatio, tag))
-            + stats.get(StatId::AtkFlat);
+            + stats.get(StatId::AtkFlat);*/
+        return 0.0;
     }
 
     double calc_def_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
-        double effective_def = enemy.defense
+        /*double effective_def = enemy.defense
             * (1 - stats.get_summed(StatId::DefPenRatio, tag))
             - stats.get_summed(StatId::DefPenFlat, tag);
-        return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);
+        return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);*/
+        return 0.0;
     }
     double calc_dmg_taken_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
-        return 1.0
+        /*return 1.0
             - enemy.dmg_reduction
-            + stats.get_summed(StatId::Vulnerability, tag);
+            + stats.get_summed(StatId::Vulnerability, tag);*/
+        return 0.0;
     }
     double calc_res_mult(const enemy_t& enemy, const StatsGrid& stats, Element element, Tag tag) {
-        return 1.0
+        /*return 1.0
             - enemy.res[(size_t) element]
             + stats.get_summed(StatId::ResPen, tag)
-            + stats.get_summed(StatId::ResPen + element, tag);
+            + stats.get_summed(StatId::ResPen + element, tag);*/
+        return 0.0;
     }
     // TODO
     double calc_stun_mult(const enemy_t& enemy, const StatsGrid& stats) {
@@ -52,14 +55,14 @@ namespace calc::details {
         size_t index,
         StatsGrid stats,
         const enemy_t& enemy) {
-        const auto& scale = skill.scales()[index];
+        /*const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
         stats.at(StatId::AtkTotal) = calc_total_atk(stats, skill.tag());
 
         double base_dmg = scale.motion_value / 100 * stats.at(StatId::AtkTotal);
         double crit_mult = 1.0
-            + stats.get_summed(StatId::CritRate, skill.tag())
+            + std::min(stats.get_summed(StatId::CritRate, Tag::Anomaly), 100.0)
             * stats.get_summed(StatId::CritDmg, skill.tag());
         double dmg_ratio_mult = 1.0
             + stats.get_summed(StatId::DmgRatio, skill.tag())
@@ -70,19 +73,21 @@ namespace calc::details {
         double res_mult = calc_res_mult(enemy, stats, scale.element, skill.tag());
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
-        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;
+        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;*/
+        return 0.0;
     }
     double calc_anomaly_dmg(
         const AnomalyDetails& anomaly,
         Element element,
         StatsGrid stats,
         const enemy_t& enemy) {
-        stats.add(anomaly.buffs());
+        /*stats.add(anomaly.buffs());
         stats.at(StatId::AtkTotal) = calc_total_atk(stats, Tag::Anomaly);
 
         double base_dmg = anomaly.scale() / 100 * stats.get(StatId::AtkTotal);
         double crit_mult = 1.0 + (anomaly.can_crit()
-            ? stats.get_summed(StatId::CritRate, Tag::Anomaly) * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
+            ? std::min(stats.get_summed(StatId::CritRate, Tag::Anomaly), 100.0)
+            * stats.get_summed(StatId::CritDmg, Tag::Anomaly)
             : 0.0);
         double dmg_ratio_mult = 1.0 + stats.get(StatId::DmgRatio) + stats.get(StatId::DmgRatio + element);
         double anomaly_ratio_mult = 1.0
@@ -96,7 +101,8 @@ namespace calc::details {
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
         return base_dmg * crit_mult * dmg_ratio_mult * anomaly_ratio_mult * ap_bonus_mult * buff_level_mult *
-            dmg_taken_mult * def_mult * res_mult * stun_mult;
+            dmg_taken_mult * def_mult * res_mult * stun_mult;*/
+        return 0.0;
     }
 
     StatsGrid calc_stats(const request_t& request) {
@@ -112,9 +118,9 @@ namespace calc::details {
             const auto& dds = value->details();
 
             if (count == 2)
-                result.add(dds.p2());
+                result.add(dds.pc2());
             else if (count == 4)
-                result.add(dds.p4());
+                result.add(dds.pc4());
         }
 
         return result;
@@ -140,9 +146,9 @@ namespace calc {
             const auto& dds = value->details();
 
             if (count == 2)
-                dds_stats.add(dds.p2());
+                dds_stats.add(dds.pc2());
             else if (count == 4)
-                dds_stats.add(dds.p4());
+                dds_stats.add(dds.pc4());
         }
 
         summed_stats.add(agent_stats);
@@ -153,13 +159,13 @@ namespace calc {
         tabulate::Table stats_log;
 
         stats_log.add_row({ "agent", "wengine", "ddp", "dds", "total" });
-        stats_log.add_row({
+        /*stats_log.add_row({
             agent_stats.get_debug_table(),
             wengine_stats.get_debug_table(),
             ddp_stats.get_debug_table(),
             dds_stats.get_debug_table(),
             summed_stats.get_debug_table()
-        });
+        });*/
 
         std::fstream debug_file("stats.log", std::ios::out);
         stats_log.print(debug_file);
@@ -250,7 +256,7 @@ namespace calc {
                 dmg = details::calc_regular_dmg(skill, cell.index - 1, stats, enemy);
                 tag = skill.tag();
                 if (skill.max_index() > 1)
-                    cell.command += std::to_string(cell.index);
+                    cell.command += ' ' + std::to_string(cell.index);
             } else if (std::holds_alternative<AnomalyDetails>(ability)) {
                 const auto& anomaly = std::get<AnomalyDetails>(ability);
                 dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);

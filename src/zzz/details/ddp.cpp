@@ -3,11 +3,16 @@
 //frozen
 #include "frozen/unordered_map.h"
 #include "frozen/unordered_set.h"
+
+//library
 #include "library/format.hpp"
+
+//zzz
+#include "zzz/stats/regular.hpp"
 
 namespace zzz::combat::drive_disc_info {
     // mss4 - main stat slot 4
-    constexpr frozen::unordered_set mss4_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 6> mss4_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
@@ -16,7 +21,7 @@ namespace zzz::combat::drive_disc_info {
         StatId::CritDmg
     };
     // mss5 - main stat slot 5
-    constexpr frozen::unordered_set mss5_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 9> mss5_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
@@ -28,7 +33,7 @@ namespace zzz::combat::drive_disc_info {
         StatId::EtherRatio
     };
     // mss6 - main stat slot 6
-    constexpr frozen::unordered_set mss6_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 6> mss6_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
@@ -121,11 +126,10 @@ namespace zzz::combat {
         if (!drive_disc_info::check_ms_limits(m_product->m_slot, type))
             throw RUNTIME_ERROR("for this slot main stat doesn't exist");
 
-        m_product->m_stats.add_regular(
-            drive_disc_info::main_stat_conversion_table.at(type)[(size_t) m_product->m_rarity - 2],
-            type,
-            Tag::Universal
-        );
+        m_product->m_stats.add(RegularStat::make(
+            type, Tag::Universal,
+            drive_disc_info::main_stat_conversion_table.at(type)[(size_t) m_product->m_rarity - 2]
+        ));
         _main_stat_id = type;
         return *this;
     }
@@ -136,11 +140,10 @@ namespace zzz::combat {
             throw RUNTIME_ERROR("you can't have same main and sub stat");
 
         size_t rarity_index = (size_t) m_product->m_rarity - 2;
-        m_product->m_stats.add_regular(
-            drive_disc_info::sub_stat_convertion_table.at(type)[rarity_index] * (level + 1),
-            type,
-            Tag::Universal
-        );
+        m_product->m_stats.add(RegularStat::make(
+            type, Tag::Universal,
+            drive_disc_info::sub_stat_convertion_table.at(type)[rarity_index] * (level + 1)
+        ));
         _current_sub_stat++;
         return *this;
     }

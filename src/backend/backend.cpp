@@ -30,6 +30,7 @@
 #endif
 
 namespace fs = std::filesystem;
+using namespace zzz;
 
 namespace global {
     extern std::string PATH;
@@ -46,22 +47,22 @@ namespace backend::details {
     static const std::unordered_map<std::string, object_maker> associated_folders = {
         {
             "agents", {
-                .func = [](const std::string& name) { return std::make_shared<zzz::Agent>(name); }
+                .func = [](const std::string& name) { return std::make_shared<Agent>(name); }
             }
         },
         {
             "wengines", {
-                .func = [](const std::string& name) { return std::make_shared<zzz::Wengine>(name); }
+                .func = [](const std::string& name) { return std::make_shared<Wengine>(name); }
             }
         },
         {
             "dds", {
-                .func = [](const std::string& name) { return std::make_shared<zzz::Dds>(name); }
+                .func = [](const std::string& name) { return std::make_shared<Dds>(name); }
             }
         },
         {
             "rotations", {
-                .func = [](const std::string& name) { return std::make_shared<zzz::Rotation>(name); },
+                .func = [](const std::string& name) { return std::make_shared<Rotation>(name); },
                 .is_recursive = true
             }
         }
@@ -146,7 +147,7 @@ namespace backend {
 
         for (const auto& it : table.at("discs").as_array()) {
             const auto& v = it.as_object();
-            zzz::combat::DdpBuilder builder;
+            combat::DdpBuilder builder;
 
             uint64_t disc_id = v.at("id").as_integral();
 
@@ -157,9 +158,15 @@ namespace backend {
             builder.set_slot(current_disk + 1);
             builder.set_rarity(v.at("rarity").as_integral());
 
-            builder.set_main_stat(stats[0].as_integral(), levels[0].as_integral());
+            builder.set_main_stat(
+                stats[0].is_integral() ? (StatId) stats[0].as_integral() : (StatId) stats[0].as_string(),
+                levels[0].as_integral()
+            );
             for (size_t i = 1; i < 5; i++)
-                builder.add_sub_stat(stats[i].as_integral(), levels[i].as_integral());
+                builder.add_sub_stat(
+                    stats[i].is_integral() ? (StatId) stats[i].as_integral() : (StatId) stats[i].as_string(),
+                    levels[i].as_integral()
+                );
 
             what.ddps[current_disk++] = builder.get_product();
 
@@ -196,19 +203,19 @@ namespace backend {
         if (what.rotation.ptr == nullptr)
             rotation_future = source.get_async(lib::format("rotations/{}/{}", what.agent.id, what.rotation.id));
 
-        std::list<std::tuple<zzz::DdsPtr&, std::future<lib::MObjectPtr>>> dds_futures;
+        std::list<std::tuple<DdsPtr&, std::future<lib::MObjectPtr>>> dds_futures;
         for (auto& [id, ptr] : what.dds_list)
             dds_futures.emplace_back(ptr, source.get_async(lib::format("dds/{}", id)));
 
         try {
-            what.agent.ptr = std::static_pointer_cast<zzz::Agent>(agent_future.get());
-            what.wengine.ptr = std::static_pointer_cast<zzz::Wengine>(wengine_future.get());
+            what.agent.ptr = std::static_pointer_cast<Agent>(agent_future.get());
+            what.wengine.ptr = std::static_pointer_cast<Wengine>(wengine_future.get());
 
             if (what.rotation.ptr == nullptr)
-                what.rotation.ptr = std::static_pointer_cast<zzz::Rotation>(rotation_future.get());
+                what.rotation.ptr = std::static_pointer_cast<Rotation>(rotation_future.get());
 
             for (auto& [ptr, future] : dds_futures)
-                ptr = std::static_pointer_cast<zzz::Dds>(future.get());
+                ptr = std::static_pointer_cast<Dds>(future.get());
         } catch (const std::runtime_error& e) {
             CROW_LOG_ERROR << lib::format("error: {}", e.what());
         }
@@ -301,9 +308,8 @@ namespace backend {
         crow::logger::setLogLevel(crow::LogLevel::INFO);
 
         lib::ObjectManager::init_default_file_extensions();
-        zzz::StatFactory::init_default();
 
-        _init_logger(true);
+        //_init_logger(true);
         _init_object_manager();
         _init_crow_app();
     }
