@@ -22,7 +22,7 @@ namespace lib {
             return std::fmod(lhs, rhs);
 
         case '=':
-            return fabs(lhs - rhs) < DBL_EPSILON;
+            return std::fabs(lhs - rhs) < DBL_EPSILON;
 
         case '<':
             return lhs < rhs;

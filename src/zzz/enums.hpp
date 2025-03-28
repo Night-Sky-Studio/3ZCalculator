@@ -1,14 +1,12 @@
 #pragma once
 
 //std
-#include <array>
 #include <concepts>
 #include <cstdint>
 #include <string>
 
-//frozen
-#include "frozen/string.h"
-#include "frozen/unordered_map.h"
+//magic_enum
+#include "magic_enum/magic_enum.hpp"
 
 //lib
 #include "library/format.hpp"
@@ -18,7 +16,7 @@ namespace zzz {
     public:
         enum class Enum : uint8_t {
             None,
-            Physical,
+            Phys,
             Fire,
             Ice,
             Electric,
@@ -63,22 +61,11 @@ namespace zzz {
         constexpr bool operator==(Enum another) const { return _val == another; }
 
     private:
-        static constexpr frozen::unordered_map<frozen::string, Enum, 5> from_string_table = {
-            { "phys", Physical }, { "fire", Fire }, { "ice", Ice }, { "electric", Electric }, { "ether", Ether }
-        };
         static constexpr Enum _from_string(std::string_view str) {
-            auto it = from_string_table.find(str);
-            return it != from_string_table.end() ? it->second : None;
+            return magic_enum::enum_cast<Enum>(str).value_or(None);
         }
-
-        static constexpr std::array<frozen::string, 6> to_string_table = {
-            "none", "phys", "fire", "ice", "electric", "ether"
-        };
         static constexpr std::string_view _to_string(Enum val) {
-            const auto& cstr = (size_t) val < to_string_table.size()
-                ? to_string_table[(size_t) val]
-                : to_string_table.front();
-            return { cstr.data(), cstr.end() };
+            return magic_enum::enum_name(val);
         }
 
         Enum _val;
@@ -86,6 +73,7 @@ namespace zzz {
 }
 
 namespace zzz {
+    // TODO: make common tag for assists
     class Tag {
     public:
         enum class Enum : uint8_t {
@@ -136,36 +124,11 @@ namespace zzz {
         constexpr bool operator==(Enum another) const { return _val == another; }
 
     private:
-        static constexpr frozen::unordered_map<frozen::string, Enum, 13> from_string_table = {
-            { "universal", Universal },
-            { "anomaly", Anomaly },
-            { "basic", Basic },
-            { "dash", Dash }, { "counter", Counter },
-            { "quick_assist", QuickAssist }, { "followup_assist", FollowupAssist },
-            { "defensive_assist", DefensiveAssist }, { "evasive_assist", EvasiveAssist },
-            { "special", Special }, { "ex_special", ExSpecial },
-            { "chain", Chain }, { "ultimate", Ultimate }
-        };
         static constexpr Enum _from_string(std::string_view str) {
-            auto it = from_string_table.find(str);
-            return it != from_string_table.end() ? it->second : Universal;
+            return magic_enum::enum_cast<Enum>(str).value_or(Universal);
         }
-
-        // TODO: make common tag for assists
-        static constexpr std::array<frozen::string, 13> to_string_table = {
-            "universal",
-            "anomaly",
-            "basic",
-            "dash", "counter",
-            "quick_assist", "followup_assist", "defensive_assist", "evasive_assist",
-            "special", "ex_special",
-            "chain", "ultimate"
-        };
         static constexpr std::string_view _to_string(Enum val) {
-            const auto& cstr = (size_t) val < to_string_table.size()
-                ? to_string_table[(size_t) val]
-                : to_string_table.front();
-            return { cstr.data(), cstr.end() };
+            return magic_enum::enum_name(val);
         }
 
         Enum _val;
@@ -222,26 +185,11 @@ namespace zzz {
         constexpr bool operator==(Enum another) const { return _val == another; }
 
     private:
-        static constexpr frozen::unordered_map<frozen::string, Enum, 5> from_string_table = {
-            { "attack", Attack },
-            { "anomaly", Anomaly },
-            { "stun", Stun },
-            { "support", Support },
-            { "defense", Defense }
-        };
         static constexpr Enum _from_string(std::string_view str) {
-            auto it = from_string_table.find(str);
-            return it != from_string_table.end() ? it->second : None;
+            return magic_enum::enum_cast<Enum>(str).value_or(None);
         }
-
-        static constexpr std::array<frozen::string, 6> to_string_table = {
-            "none", "attack", "anomaly", "stun", "support", "defense"
-        };
         static constexpr std::string_view _to_string(Enum val) {
-            const auto& cstr = (size_t) val < to_string_table.size()
-                ? to_string_table[(size_t) val]
-                : to_string_table.front();
-            return { cstr.data(), cstr.end() };
+            return magic_enum::enum_name(val);
         }
 
         Enum _val;
@@ -300,22 +248,11 @@ namespace zzz {
         constexpr bool operator==(Enum another) const { return _val == another; }
 
     private:
-        static constexpr frozen::unordered_map<frozen::string, Enum, 3> from_string_table = {
-            { "B", B }, { "A", A }, { "S", S }
-        };
         static constexpr Enum _from_string(std::string_view str) {
-            auto it = from_string_table.find(str);
-            return it != from_string_table.end() ? it->second : NotSet;
+            return magic_enum::enum_cast<Enum>(str).value_or(NotSet);
         }
-
-        static constexpr std::array<frozen::string, 5> to_string_table = {
-            "not_set", "not_set", "B", "A", "S"
-        };
         static constexpr std::string_view _to_string(Enum val) {
-            const auto& cstr = (size_t) val < to_string_table.size()
-                ? to_string_table[(size_t) val]
-                : to_string_table.front();
-            return { cstr.data(), cstr.end() };
+            return magic_enum::enum_name(val);
         }
 
         static constexpr Enum _from_char(char c) {
@@ -352,17 +289,30 @@ namespace zzz {
     public:
         enum class Enum : uint8_t {
             None,
-            HpTotal, HpBase, HpRatio, HpFlat,
-            AtkTotal, AtkBase, AtkRatio, AtkFlat,
-            DefTotal, DefBase, DefRatio, DefFlat,
+            // HpTotal = (HpBase (1 + HpRatio) + HpFlat) * HpRatioCombat + HpFlatCombat
+            HpTotal, HpBase, HpRatio, HpFlat, HpRatioCombat, HpFlatCombat,
+            // AtkTotal = (AtkBase (1 + AtkRatio) + AtkFlat) * AtkRatioCombat + AtkFlatCombat
+            AtkTotal, AtkBase, AtkRatio, AtkFlat, AtkRatioCombat, AtkFlatCombat,
+            // DefTotal = (DefBase (1 + DefRatio) + DefFlat) * DefRatioCombat + DefFlatCombat
+            DefTotal, DefBase, DefRatio, DefFlat, DefRatioCombat, DefFlatCombat,
+
+            // AmTotal = (AmBase (1 + AmRatio) + AmFlat) * AmRatioCombat + AmFlatCombat
+            AmTotal, AmBase, AmRatio, AmFlat, AmRatioCombat, AmFlatCombat,
+            // anomaly proficiency, anomaly buildup rate and penetration
+            Ap, AbRate, AbPen,
 
             CritRate, CritDmg,
-            DefPenRatio, DefPenFlat,
-            // anomaly proficiency, anomaly mastery, anomaly buildup rate and penetration
-            Ap, AmTotal, AmBase, AmRatio, AbRate, AbPen,
 
+            // same as PenRatio and PenFlat respectively
+            DefPenRatio, DefPenFlat,
+
+            // ImpactTotal = ImpactBase * (1 + ImpactRatio)
             ImpactTotal, ImpactBase, ImpactRatio,
+            DazeRatio,
+
+            // ErTotal = ErBase * ErRatio
             ErTotal, ErBase, ErRatio,
+
             ShieldEffect, ReceivedDmgReduction, Vulnerability,
 
             DmgRatio,
@@ -412,48 +362,11 @@ namespace zzz {
         constexpr bool operator==(Enum another) const { return _val == another; }
 
     private:
-        static constexpr frozen::unordered_map<frozen::string, Enum, 44> from_string_table = {
-            { "none", None },
-            { "hp_total", HpTotal }, { "hp_base", HpBase }, { "hp_ratio", HpRatio }, { "hp_flat", HpFlat },
-            { "atk_total", AtkTotal }, { "atk_base", AtkBase }, { "atk_ratio", AtkRatio }, { "atk_flat", AtkFlat },
-            { "def_total", DefTotal }, { "def_base", DefBase }, { "def_ratio", DefRatio }, { "def_flat", DefFlat },
-            { "crit_rate", CritRate }, { "crit_dmg", CritDmg },
-            { "def_pen_ratio", DefPenRatio }, { "def_pen_flat", DefPenFlat },
-            { "ap", Ap }, { "am_total", AmTotal }, { "am_base", AmBase }, { "am_ratio", AmRatio },
-            { "ab_rate", AbRate }, { "ab_pen", AbPen },
-            { "impact_total", ImpactTotal }, { "impact_base", ImpactBase }, { "impact_ratio", ImpactRatio },
-            { "er_total", ErTotal }, { "er_base", ErBase }, { "er_ratio", ErRatio },
-            { "shield_effect", ShieldEffect }, { "received_dmg_reduction", ReceivedDmgReduction },
-            { "vulnerability", Vulnerability },
-            { "dmg_ratio", DmgRatio }, { "phys_ratio", PhysRatio }, { "fire_ratio", FireRatio },
-            { "ice_ratio", IceRatio }, { "electric_ratio", ElectricRatio }, { "ether_ratio", EtherRatio },
-            { "res_pen", ResPen }, { "phys_res_pen", PhysResPen }, { "fire_res_pen", FireResPen },
-            { "ice_res_pen", IceResPen }, { "electric_res_pen", ElectricResPen }, { "ether_res_pen", EtherResPen }
-        };
         static constexpr Enum _from_string(std::string_view str) {
-            auto it = from_string_table.find(str);
-            return it != from_string_table.end() ? it->second : None;
+            return magic_enum::enum_cast<Enum>(str).value_or(None);
         }
-
-        static constexpr std::array<frozen::string, 44> to_string_table = {
-            "none",
-            "hp_total", "hp_base", "hp_ratio", "hp_flat",
-            "atk_total", "atk_base", "atk_ratio", "atk_flat",
-            "def_total", "def_base", "def_ratio", "def_flat",
-            "crit_rate", "crit_dmg",
-            "def_pen_ratio", "def_pen_flat",
-            "ap", "am_total", "am_base", "am_ratio", "ab_rate", "ab_pen",
-            "impact_total", "impact_base", "impact_ratio",
-            "er_total", "er_base", "er_ratio",
-            "shield_effect", "received_dmg_reduction", "vulnerability",
-            "dmg_ratio", "phys_ratio", "fire_ratio", "ice_ratio", "electric_ratio", "ether_ratio",
-            "res_pen", "phys_res_pen", "fire_res_pen", "ice_res_pen", "electric_res_pen", "ether_res_pen"
-        };
         static constexpr std::string_view _to_string(Enum val) {
-            const auto& cstr = (size_t) val < to_string_table.size()
-                ? to_string_table[(size_t) val]
-                : to_string_table.front();
-            return { cstr.data(), cstr.end() };
+            return magic_enum::enum_name(val);
         }
 
         // works only with DmgRatio and ResPen

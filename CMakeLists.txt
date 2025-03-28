@@ -32,6 +32,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(FrozenLib)
 
+# magic enums
+find_package(magic_enum CONFIG REQUIRED)
+
 # tabulate
 FetchContent_Declare(
     tabulate
@@ -56,6 +59,7 @@ add_executable(3ZCalculator
     "src/library/logger.cpp"
     "src/library/rpn.cpp"
 
+    
     "src/zzz/stats/grid.cpp"
     "src/zzz/stats/regular.cpp"
     "src/zzz/stats/relative.cpp"
@@ -81,6 +85,7 @@ target_link_libraries(3ZCalculator PRIVATE
     fmt::fmt
     Crow::Crow
     asio::asio
+    magic_enum::magic_enum
 )
 
 add_compile_definitions(DEBUG_STATUS)

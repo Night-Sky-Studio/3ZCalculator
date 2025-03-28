@@ -12,7 +12,7 @@
 
 namespace zzz::combat::drive_disc_info {
     // mss4 - main stat slot 4
-    constexpr frozen::unordered_set mss4_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 6> mss4_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
@@ -21,7 +21,7 @@ namespace zzz::combat::drive_disc_info {
         StatId::CritDmg
     };
     // mss5 - main stat slot 5
-    constexpr frozen::unordered_set mss5_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 9> mss5_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
@@ -33,7 +33,7 @@ namespace zzz::combat::drive_disc_info {
         StatId::EtherRatio
     };
     // mss6 - main stat slot 6
-    constexpr frozen::unordered_set mss6_limits = {
+    constexpr frozen::unordered_set<StatId::Enum, 6> mss6_limits = {
         StatId::AtkRatio,
         StatId::HpRatio,
         StatId::DefRatio,
