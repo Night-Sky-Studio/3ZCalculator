@@ -145,20 +145,23 @@ namespace zzz {
 
     const formulas_t& RelativeStat::formulas() const { return m_formulas; }
 
-    void RelativeStat::lookup_table(const StatsGrid& stats) { m_lookup_table = &stats; }
+    const StatsGrid* RelativeStat::lookup_table() const { return m_lookup_table; }
+    void RelativeStat::lookup_table(const StatsGrid* stats) { m_lookup_table = stats; }
 
     StatPtr RelativeStat::add_as_copy(const StatPtr& another) {
         StatPtr result;
 
         switch (another->type()) {
-        case 1:
+        case 1: {
             result = make(
                 m_unique.id,
                 m_unique.tag,
                 m_base + another->base(),
                 m_formulas
             );
+
             break;
+        }
 
         case 2:
             throw RUNTIME_ERROR("TODO");

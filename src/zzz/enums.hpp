@@ -317,14 +317,14 @@ namespace zzz {
     public:
         enum class Enum : uint8_t {
             None,
-            // HpTotal = (HpBase (1 + HpRatio) + HpFlat) * HpRatioCombat + HpFlatCombat
+            // HpTotal = (HpBase * (1 + HpRatio) + HpFlat) * (1 + HpRatioCombat) + HpFlatCombat
             HpTotal, HpBase, HpRatio, HpFlat, HpRatioCombat, HpFlatCombat,
-            // AtkTotal = (AtkBase (1 + AtkRatio) + AtkFlat) * AtkRatioCombat + AtkFlatCombat
+            // AtkTotal = (AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat
             AtkTotal, AtkBase, AtkRatio, AtkFlat, AtkRatioCombat, AtkFlatCombat,
-            // DefTotal = (DefBase (1 + DefRatio) + DefFlat) * DefRatioCombat + DefFlatCombat
+            // DefTotal = (DefBase * (1 + DefRatio) + DefFlat) * (1 + DefRatioCombat) + DefFlatCombat
             DefTotal, DefBase, DefRatio, DefFlat, DefRatioCombat, DefFlatCombat,
 
-            // AmTotal = (AmBase (1 + AmRatio) + AmFlat) * AmRatioCombat + AmFlatCombat
+            // AmTotal = (AmBase * (1 + AmRatio) + AmFlat) * (1 + AmRatioCombat) + AmFlatCombat
             AmTotal, AmBase, AmRatio, AmFlat, AmRatioCombat, AmFlatCombat,
             // anomaly proficiency, anomaly buildup rate and penetration
             Ap, AbRate, AbPen,
@@ -338,7 +338,7 @@ namespace zzz {
             ImpactTotal, ImpactBase, ImpactRatio,
             DazeRatio,
 
-            // ErTotal = ErBase * ErRatio
+            // ErTotal = ErBase * (1 + ErRatio)
             ErTotal, ErBase, ErRatio,
 
             ShieldEffect, ReceivedDmgReduction, Vulnerability,

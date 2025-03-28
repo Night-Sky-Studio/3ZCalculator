@@ -53,7 +53,8 @@ namespace zzz {
 
         const formulas_t& formulas() const;
 
-        void lookup_table(const StatsGrid& stats);
+        const StatsGrid* lookup_table() const;
+        void lookup_table(const StatsGrid* stats);
 
     protected:
         formulas_t m_formulas;
