@@ -2,8 +2,11 @@
     "id": 32500,
     "name": "Polar Metal",
 
-    "set_bonus": [
-        { "ice_dmg_ratio": 0.1 },
-        { "dmg_ratio": { "val": 0.4, "tags": ["basic", "dash"] } }
-    ]
+    "set_bonus": {
+        "2pc": [["IceDmgRatio", 0.1]],
+        "4pc": [
+            ["DmgRatio", "Basic", 0.4],
+            ["DmgRatio", "Dash", 0.4]
+        ]
+    }
 }

@@ -2,21 +2,16 @@
     "id": 31800,
     "name": "Chaos Jazz",
 
-    "set_bonus": [
-        { "ap": 30.0 },
-        {
-            "fire_dmg_ratio": 0.15,
-            "electro_dmg_ratio": 0.15,
-            "dmg_ratio": {
-                "val": 0.2,
-                "tags": [
-                    "ex_special",
-                    "quick_assist",
-                    "followup_assist",
-                    "defensive_assist",
-                    "evasive_assist"
-                ]
-            }
-        }
-    ]
+    "set_bonus": {
+        "2pc": [["Ap", 30.0]],
+        "4pc": [
+            ["FireDmgRatio", 0.15],
+            ["ElectroDmgRatio", 0.15],
+            ["DmgRatio", "ExSpecial", 0.2],
+            ["DmgRatio", "QuickAssist", 0.2],
+            ["DmgRatio", "FollowupAssist", 0.2],
+            ["DmgRatio", "DefensiveAssist", 0.2],
+            ["DmgRatio", "EvasiveAssist", 0.2]
+        ]
+    }
 }

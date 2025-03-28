@@ -2,11 +2,11 @@
     "id": 31100,
     "name": "Puffer Electro",
 
-    "set_bonus": [
-        { "def_pen_ratio": 0.08 },
-        {
-            "dmg_ratio": { "val": 0.2, "tag": "ultimate" },
-            "atk_ratio": 0.15
-        }
-    ]
+    "set_bonus": {
+        "2pc": [["DefPenRatio", 0.08]],
+        "4pc": [
+            ["DmgRatio", "Ultimate", 0.2],
+            ["AtkRatioCombat", 0.15]
+        ]
+    }
 }

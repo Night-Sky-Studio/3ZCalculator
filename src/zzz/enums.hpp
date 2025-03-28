@@ -62,7 +62,14 @@ namespace zzz {
 
     private:
         static constexpr Enum _from_string(std::string_view str) {
+#ifdef DEBUG_STATUS
+            auto opt = magic_enum::enum_cast<Enum>(str);
+            if (!opt.has_value())
+                throw FMT_RUNTIME_ERROR("can't convert \"{}\" to Element", str);
+            return opt.value();
+#else
             return magic_enum::enum_cast<Enum>(str).value_or(None);
+#endif
         }
         static constexpr std::string_view _to_string(Enum val) {
             return magic_enum::enum_name(val);
@@ -125,7 +132,14 @@ namespace zzz {
 
     private:
         static constexpr Enum _from_string(std::string_view str) {
-            return magic_enum::enum_cast<Enum>(str).value_or(Universal);
+#ifdef DEBUG_STATUS
+            auto opt = magic_enum::enum_cast<Enum>(str);
+            if (!opt.has_value())
+                throw FMT_RUNTIME_ERROR("can't convert \"{}\" to Tag", str);
+            return opt.value();
+#else
+            return magic_enum::enum_cast<Enum>(str).value_or(None);
+#endif
         }
         static constexpr std::string_view _to_string(Enum val) {
             return magic_enum::enum_name(val);
@@ -186,7 +200,14 @@ namespace zzz {
 
     private:
         static constexpr Enum _from_string(std::string_view str) {
+#ifdef DEBUG_STATUS
+            auto opt = magic_enum::enum_cast<Enum>(str);
+            if (!opt.has_value())
+                throw FMT_RUNTIME_ERROR("can't convert \"{}\" to Speciality", str);
+            return opt.value();
+#else
             return magic_enum::enum_cast<Enum>(str).value_or(None);
+#endif
         }
         static constexpr std::string_view _to_string(Enum val) {
             return magic_enum::enum_name(val);
@@ -249,7 +270,14 @@ namespace zzz {
 
     private:
         static constexpr Enum _from_string(std::string_view str) {
-            return magic_enum::enum_cast<Enum>(str).value_or(NotSet);
+#ifdef DEBUG_STATUS
+            auto opt = magic_enum::enum_cast<Enum>(str);
+            if (!opt.has_value())
+                throw FMT_RUNTIME_ERROR("can't convert \"{}\" to Rarity", str);
+            return opt.value();
+#else
+            return magic_enum::enum_cast<Enum>(str).value_or(None);
+#endif
         }
         static constexpr std::string_view _to_string(Enum val) {
             return magic_enum::enum_name(val);
@@ -363,7 +391,14 @@ namespace zzz {
 
     private:
         static constexpr Enum _from_string(std::string_view str) {
+#ifdef DEBUG_STATUS
+            auto opt = magic_enum::enum_cast<Enum>(str);
+            if (!opt.has_value())
+                throw FMT_RUNTIME_ERROR("can't convert \"{}\" to StatId", str);
+            return opt.value();
+#else
             return magic_enum::enum_cast<Enum>(str).value_or(None);
+#endif
         }
         static constexpr std::string_view _to_string(Enum val) {
             return magic_enum::enum_name(val);

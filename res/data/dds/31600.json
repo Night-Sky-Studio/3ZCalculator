@@ -2,5 +2,8 @@
     "id": 31600,
     "name": "Swing Jazz",
 
-    "set_bonus": [{ "er_ratio": 0.2 }, { "dmg_ratio": 0.15 }]
+    "set_bonus": {
+        "2pc": [["ErRatio", 0.2]],
+        "4pc": [["DmgRatio", 0.15]]
+    }
 }

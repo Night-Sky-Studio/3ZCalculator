@@ -1,12 +1,12 @@
 {
     "id": 13003,
     "name": "Rainforest Gourmet",
-    "speciality": "anomaly",
+    "speciality": "Anomaly",
     "rarity": 3,
 
     "stats": {
-        "main": { "atk_base": 594.0 },
-        "sub": { "ap": 75.0 },
-        "passive": { "atk_ratio": 0.4 }
+        "main": [["AtkBase", 594.0]],
+        "sub": [["Ap", 75.0]],
+        "passive": [["AtkRatioCombat", 0.4]]
     }
 }

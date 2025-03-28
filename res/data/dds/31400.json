@@ -2,5 +2,8 @@
     "id": 31400,
     "name": "Hormone Punk",
 
-    "set_bonus": [{ "atk_ratio": 0.1 }, { "atk_ratio": 0.25 }]
+    "set_bonus": {
+        "2pc": [["AtkRatio", 0.1]],
+        "4pc": [["AtkRatioCombat", 0.25]]
+    }
 }
