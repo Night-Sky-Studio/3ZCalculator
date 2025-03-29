@@ -2,7 +2,6 @@
 
 //std
 #include <map>
-#include <string>
 
 //utl
 #include "utl/json.hpp"
@@ -11,9 +10,10 @@
 #include "zzz/stats/basic.hpp"
 
 namespace zzz {
+
     class StatsGrid {
     public:
-        static const std::string atk_flat_formula;
+        static StatPtr make_defined_relative_stat(StatId id, Tag tag);
 
         static StatsGrid make_from(const utl::Json& json, Tag tag = Tag::Universal);
 

@@ -39,11 +39,11 @@ namespace zzz {
 
     class RelativeStat : public IStat {
     public:
-        static StatPtr make(StatId id, const Tag& tag, double base, const std::string& formulas);
+        static StatPtr make(StatId id, const Tag& tag, double base, std::string_view formulas);
         static StatPtr make(StatId id, const Tag& tag, double base, formulas_t formulas);
         static StatPtr make_from(const utl::Json& json, Tag tag);
 
-        RelativeStat(StatId id, const Tag& tag, double base, const std::string& formulas);
+        RelativeStat(StatId id, const Tag& tag, double base, std::string_view formulas);
         RelativeStat(StatId id, const Tag& tag, double base, formulas_t formulas);
         RelativeStat(const RelativeStat& another);
 

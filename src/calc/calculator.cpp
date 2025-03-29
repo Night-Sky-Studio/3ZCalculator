@@ -47,7 +47,7 @@ namespace calc::details {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
-        stats.add(RelativeStat::make(StatId::AtkTotal, Tag::Universal, 0.0, StatsGrid::atk_flat_formula));
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         double base_dmg = scale.motion_value / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0
@@ -62,7 +62,13 @@ namespace calc::details {
         double res_mult = calc_res_mult(enemy, stats, scale.element, skill.tag());
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
-        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;
+        return base_dmg
+            * crit_mult
+            * dmg_ratio_mult
+            * dmg_taken_mult
+            * def_mult
+            * res_mult
+            * stun_mult;
     }
     double calc_anomaly_dmg(
         const AnomalyDetails& anomaly,
@@ -70,7 +76,7 @@ namespace calc::details {
         StatsGrid stats,
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
-        stats.add(RelativeStat::make(StatId::AtkTotal, Tag::Universal, 0.0, StatsGrid::atk_flat_formula));
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         double base_dmg = anomaly.scale() / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0 + (anomaly.can_crit()
@@ -78,15 +84,25 @@ namespace calc::details {
             * stats.get_value({ StatId::CritDmg, Tag::Anomaly })
             : 0.0);
         double dmg_ratio_mult = 1.0
-            + stats.get_summed_value({ StatId::DmgRatio, Tag::Anomaly })
-            + stats.get_summed_value({ StatId::DmgRatio + anomaly.element(), Tag::Anomaly });
+            + stats.get_value({ StatId::DmgRatio, Tag::Universal })
+            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
+        double anomaly_ratio_mult = 1.0
+            + stats.get_value({ StatId::DmgRatio, Tag::Anomaly })
+            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, Tag::Anomaly);
         double def_mult = calc_def_mult(enemy, stats, Tag::Anomaly);
         double res_mult = calc_res_mult(enemy, stats, anomaly.element(), Tag::Anomaly);
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
-        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;
+        return base_dmg
+            * crit_mult
+            * dmg_ratio_mult
+            * anomaly_ratio_mult
+            * dmg_taken_mult
+            * def_mult
+            * res_mult
+            * stun_mult;
     }
 
     StatsGrid calc_stats(const request_t& request) {

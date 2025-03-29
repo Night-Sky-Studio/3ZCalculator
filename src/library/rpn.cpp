@@ -31,7 +31,7 @@ namespace lib::rpn_details {
         { Equal, 5 }
     };
 
-    std::tuple<double, std::string, size_t> parse_number(size_t index, const std::string& src) {
+    std::tuple<double, std::string, size_t> parse_number(size_t index, std::string_view src) {
         double number;
         auto [ptr, ec] = std::from_chars(src.data() + index, src.data() + src.size(), number);
 
@@ -40,11 +40,11 @@ namespace lib::rpn_details {
 
         return { number, std::string(src.data() + index, ptr), (uintptr_t) ptr - ((uintptr_t) src.data() + index) };
     }
-    std::tuple<std::string, size_t> parse_literal(size_t start, const std::string& src) {
+    std::tuple<std::string, size_t> parse_literal(size_t start, std::string_view src) {
         // we already know that index is first alpha character
         size_t i = start + 1;
 
-        while (isalnum(src[i]) || src[i] == '_')
+        while (i < src.size() && (isalnum(src[i]) || src[i] == '_'))
             i++;
 
         return { std::string(src.data() + start, src.data() + i), i - start };
@@ -52,29 +52,29 @@ namespace lib::rpn_details {
 }
 
 namespace lib {
-    token_list RpnParser::tokenize(std::string what) {
+    token_list RpnParser::tokenize(std::string_view what) {
         token_list result;
-        what = remove_chars(what, " \t\n");
+        auto copy = remove_chars(what, " \t\n");
 
         size_t i = 0, di;
-        while (i < what.size()) {
-            if (what[i] == '<' && what[i + 1] == '=') {
+        while (i < copy.size()) {
+            if (copy[i] == '<' && copy[i + 1] == '=') {
                 di = 2;
                 result.emplace_back(LessEq, "<=");
-            } else if (what[i] == '>' && what[i + 1] == '=') {
+            } else if (copy[i] == '>' && copy[i + 1] == '=') {
                 di = 2;
                 result.emplace_back(MoreEq, ">=");
-            } else if (rpn_details::primitive_tokens.contains((TokenType) what[i])) {
+            } else if (rpn_details::primitive_tokens.contains((TokenType) copy[i])) {
                 di = 1;
-                result.emplace_back((TokenType) what[i], std::string(1, what[i]));
-            } else if ((what[i] >= '0' && what[i] <= '9') || what[i] == '-') {
+                result.emplace_back((TokenType) copy[i], std::string(1, copy[i]));
+            } else if ((copy[i] >= '0' && copy[i] <= '9') || copy[i] == '-') {
                 token_t token;
-                std::tie(token.number, token.literal, di) = rpn_details::parse_number(i, what);
+                std::tie(token.number, token.literal, di) = rpn_details::parse_number(i, copy);
                 token.type = Number;
                 result.emplace_back(std::move(token));
-            } else if (isalpha(what[i])) {
+            } else if (isalpha(copy[i])) {
                 token_t token;
-                std::tie(token.literal, di) = rpn_details::parse_literal(i, what);
+                std::tie(token.literal, di) = rpn_details::parse_literal(i, copy);
                 token.type = Variable;
                 result.emplace_back(std::move(token));
             }

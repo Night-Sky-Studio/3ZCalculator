@@ -13,7 +13,7 @@
 using enum lib::rpn_parser::TokenType;
 
 namespace zzz {
-    auto make_formulas(const std::string& source) {
+    auto make_formulas(std::string_view source) {
         formulas_t result;
 
         for (const auto& it : lib::split_as_view(source, ';')) {
@@ -79,7 +79,7 @@ namespace zzz {
     StatPtr RelativeStat::make(StatId id, const Tag& tag, double base, formulas_t formulas) {
         return std::make_unique<RelativeStat>(id, tag, base, std::move(formulas));
     }
-    StatPtr RelativeStat::make(StatId id, const Tag& tag, double base, const std::string& formulas) {
+    StatPtr RelativeStat::make(StatId id, const Tag& tag, double base, std::string_view formulas) {
         return make(id, tag, base, make_formulas(formulas));
     }
     StatPtr RelativeStat::make_from(const utl::Json& json, Tag tag) {
@@ -111,7 +111,7 @@ namespace zzz {
         IStat(id, tag, base, 2),
         m_formulas(std::move(formulas)) {
     }
-    RelativeStat::RelativeStat(StatId id, const Tag& tag, double base, const std::string& formulas) :
+    RelativeStat::RelativeStat(StatId id, const Tag& tag, double base, std::string_view formulas) :
         RelativeStat(id, tag, base, make_formulas(formulas)) {
     }
     RelativeStat::RelativeStat(const RelativeStat& another) :

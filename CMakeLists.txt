@@ -73,6 +73,7 @@ add_executable(3ZCalculator
 
     "src/calc/calculator.cpp"
 
+    "src/backend/impl/details.cpp"
     "src/backend/backend.cpp"
 )
 

@@ -3,17 +3,30 @@
 //std
 #include <ranges>
 
+//frozen
+#include "frozen/string.h"
+#include "frozen/unordered_map.h"
+
 //zzz
-#include "zzz/stats/relative.hpp"
 #include "zzz/stats/regular.hpp"
+#include "zzz/stats/relative.hpp"
+
+using namespace frozen::string_literals;
+
+namespace zzz::details {
+    static constexpr frozen::unordered_map<StatId::Enum, frozen::string, 2> formulas = {
+        { StatId::AtkTotal, "f:(AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat"_s },
+        { StatId::AmTotal, "f:(AmBase * (1 + AmRatio) + AmFlat) * (1 + AmRatioCombat) + AmFlatCombat"_s }
+    };
+}
 
 namespace zzz {
-    // static data
-
-    const std::string StatsGrid::atk_flat_formula =
-        "f:(AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat";
-
     // maker
+
+    StatPtr StatsGrid::make_defined_relative_stat(StatId id, Tag tag) {
+        const auto& formula = details::formulas.at(id);
+        return RelativeStat::make(id, tag, 0.0, { formula.data(), formula.size() });
+    }
 
     StatsGrid StatsGrid::make_from(const utl::Json& json, Tag tag) {
         StatsGrid result;

@@ -60,7 +60,7 @@ namespace lib {
         return src;
     }
 
-    inline std::string remove_chars(const std::string& src, const std::string& charset) {
+    inline std::string remove_chars(std::string_view src, std::string_view charset) {
         size_t size = src.size();
         std::set on_removal(charset.begin(), charset.end());
 
