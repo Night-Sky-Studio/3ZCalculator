@@ -3,10 +3,8 @@
 //std
 #include <iostream>
 #include <ranges>
-#include <thread>
 
 //library
-#include "library/format.hpp"
 #include "library/string_funcs.hpp"
 
 //zzz

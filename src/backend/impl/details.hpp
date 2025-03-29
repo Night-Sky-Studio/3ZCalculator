@@ -8,6 +8,9 @@
 //utl
 #include "utl/json.hpp"
 
+//library
+#include "library/format.hpp"
+
 //calc
 #include "calc/calculator.hpp"
 

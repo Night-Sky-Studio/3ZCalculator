@@ -52,6 +52,9 @@ FetchContent_MakeAvailable(fmt)
 # asio - for crow library
 find_package(Crow CONFIG REQUIRED)
 
+# boost - container
+find_package(Boost 1.86 REQUIRED COMPONENTS container)
+
 add_executable(3ZCalculator
     "main.cpp"
 
@@ -86,6 +89,7 @@ target_link_libraries(3ZCalculator PRIVATE
     Crow::Crow
     asio::asio
     magic_enum::magic_enum
+    Boost::container
 )
 
 add_compile_definitions(DEBUG_STATUS)

@@ -47,7 +47,6 @@ namespace calc::details {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
-        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         double base_dmg = scale.motion_value / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0
@@ -76,7 +75,6 @@ namespace calc::details {
         StatsGrid stats,
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
-        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         double base_dmg = anomaly.scale() / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0 + (anomaly.can_crit()
@@ -213,7 +211,9 @@ namespace calc {
 
         double total_dmg = 0.0;
         std::vector<double> dmg_per_ability;
-        auto stats = details::calc_stats(request);
+
+        StatsGrid stats = details::calc_stats(request);
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         dmg_per_ability.reserve(rotation.size());
         for (size_t i = 0; i < rotation.size(); i++) {
@@ -242,7 +242,9 @@ namespace calc {
 
         double total_dmg = 0.0;
         std::vector<std::tuple<double, Tag, std::string>> info_per_ability;
-        auto stats = details::calc_stats(request);
+
+        StatsGrid stats = details::calc_stats(request);
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         info_per_ability.reserve(rotation.size());
         for (size_t i = 0; i < rotation.size(); i++) {

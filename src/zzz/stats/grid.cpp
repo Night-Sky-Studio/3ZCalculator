@@ -53,11 +53,11 @@ namespace zzz {
     // ctor
 
     StatsGrid::StatsGrid(const StatsGrid& another) noexcept {
-        add(another);
+        _copy_from(another);
     }
     StatsGrid& StatsGrid::operator=(const StatsGrid& another) noexcept {
         m_content.clear();
-        add(another);
+        _copy_from(another);
         return *this;
     }
 
@@ -120,6 +120,11 @@ namespace zzz {
     void StatsGrid::add(const StatsGrid& another) {
         for (const auto& stat : another.m_content | std::views::values)
             add(stat);
+    }
+
+    void StatsGrid::_copy_from(const StatsGrid& another) {
+        for (const auto& [k, v] : another.m_content)
+            m_content.emplace(k, v->copy());
     }
 
     void StatsGrid::_set_lookup_table_if_relative(StatPtr& ptr) {

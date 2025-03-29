@@ -8,12 +8,55 @@
 
 //backend
 #include "backend/impl/details.hpp"
+#include "backend/impl/requests.hpp"
 
 namespace global {
     extern std::string PATH;
 }
 
 namespace fs = std::filesystem;
+
+namespace backend::inline v1_impl {
+    std::string GET_default() {
+        return "3Z Calculator Backend";
+    }
+
+    crow::response PUT_rotation(const crow::request& req) {
+        crow::response response;
+
+        try {
+        } catch (const std::exception& e) {
+        }
+
+        return response;
+    }
+
+    crow::response POST_damage(const crow::request& req, lib::ObjectManager& manager) {
+        crow::response response;
+
+        try {
+            std::string type = req.url_params.get("type");
+
+            auto json = utl::json::from_string(req.body);
+            auto unpacked_request = details::json_to_request(json, manager);
+
+            if (type.empty()) {
+                response.body = details::post_damage(unpacked_request)
+                    .to_string(utl::json::Format::MINIMIZED);
+            } else if (type == "detailed") {
+                response.body = details::post_damage_detailed(unpacked_request)
+                    .to_string(utl::json::Format::MINIMIZED);
+            } else
+                throw FMT_RUNTIME_ERROR("invalid request \"/damage?type={}\"", type);
+
+            response.code = 200;
+        } catch (const std::exception& e) {
+            response = { 500, e.what() };
+        }
+
+        return response;
+    }
+}
 
 namespace backend {
     Backend::~Backend() {
@@ -86,72 +129,14 @@ namespace backend {
         return allocated_objects;
     }
     void Backend::_init_crow_app() {
-        CROW_ROUTE(m_app, "/")([] {
-            return "3Z Calculator Backend";
-        });
+        //CROW_ROUTE(m_app, "/add_rotation").methods("PUT"_method)();
 
-        CROW_ROUTE(m_app, "/add_rotation").methods("PUT"_method)([this](const crow::request& req) {
-            crow::response response;
-
-            try {
-                
-            } catch (const std::exception& e) {
-            }
-
-            return response;
-        });
-
-#ifdef DEBUG_STATUS
-        CROW_ROUTE(m_app, "/damage_debug").methods("POST"_method)([this](const crow::request& req) {
-            crow::response response;
-
-            auto json = utl::json::from_string(req.body);
-            auto unpacked_request = details::json_to_request(json, m_manager);
-            auto output = details::post_damage_detailed(unpacked_request)
-                .to_string(utl::json::Format::PRETTY);
-
-            response = { 200, std::move(output) };
-
-            response.add_header("Access-Control-Allow-Origin", "*");
-            return response;
-        });
-#endif
         CROW_ROUTE(m_app, "/damage").methods("POST"_method)([this](const crow::request& req) {
-            crow::response response;
-
-            try {
-                auto json = utl::json::from_string(req.body);
-                auto unpacked_request = details::json_to_request(json, m_manager);
-                auto output = details::post_damage(unpacked_request)
-                    .to_string(utl::json::Format::MINIMIZED);
-
-                response = { 200, std::move(output) };
-            } catch (const std::exception& e) {
-                response = { 400, e.what() };
-            }
-
-            response.add_header("Access-Control-Allow-Origin", "*");
-            return response;
+            return details::wrap_to_check_execution_time<crow::response>("POST /damage",
+                std::bind(POST_damage, std::cref(req), std::ref(m_manager)));
         });
-        CROW_ROUTE(m_app, "/damage_detailed").methods("POST"_method)([this](const crow::request& req) {
-            crow::response response;
-
-            try {
-                auto json = utl::json::from_string(req.body);
-                auto unpacked_request = details::json_to_request(json, m_manager);
-                auto output = details::post_damage_detailed(unpacked_request)
-                    .to_string(utl::json::Format::MINIMIZED);
-
-                response = { 200, std::move(output) };
-            } catch (const std::exception& e) {
-                response = { 400, e.what() };
-            }
-
-            response.add_header("Access-Control-Allow-Origin", "*");
-            return response;
-        });
-        CROW_ROUTE(m_app, "/refresh").methods("GET"_method)([this] {
+        /*CROW_ROUTE(m_app, "/refresh").methods("POST"_method)([this] {
             return "";
-        });
+        });*/
     }
 }

@@ -23,7 +23,6 @@ namespace backend {
     public:
         static constexpr auto max_thread_load = 2ul;
         static constexpr auto port = 5101;
-        static constexpr frozen::string ip = "192.168.1.2";
 
         Backend() = default;
         ~Backend();
