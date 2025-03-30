@@ -6,7 +6,7 @@ project(
     DESCRIPTION "Calculates damage of ZZZ character with rough approximation"
     HOMEPAGE_URL "https://github.com/Night-Sky-Studio/3ZCalculator"
 )
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 # FetchContent
 include(FetchContent)

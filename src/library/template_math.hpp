@@ -1,10 +1,13 @@
 #pragma once
 
+//std
+#include <cfloat>
+
 //library
 #include "library/format.hpp"
 
 namespace lib {
-    inline double switch_math_op(double lhs, double rhs, char code) {
+    inline double switch_math_op(double lhs, double rhs, uint8_t code) {
         switch (code) {
         case '+':
             return lhs + rhs;

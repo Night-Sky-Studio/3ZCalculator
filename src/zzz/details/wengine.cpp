@@ -86,8 +86,7 @@ namespace zzz::details {
 namespace zzz {
     // Service
 
-    // json has to be root
-    WengineDetails load_from_json(const utl::Json& json) {
+    WengineDetails load_wengine_from_json(const utl::Json& json) {
         const auto& table = json.as_object();
         details::WengineBuilder builder;
 
@@ -116,7 +115,7 @@ namespace zzz {
     bool Wengine::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
-            auto details = load_from_json(json);
+            auto details = load_wengine_from_json(json);
             set(std::move(details));
         } else {
 #ifdef DEBUG_STATUS

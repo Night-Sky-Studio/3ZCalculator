@@ -1,13 +1,17 @@
 #pragma once
 
 //boost
-//#include "boost/container/flat_map.hpp"
+#include "boost/container/flat_map.hpp"
 
 //utl
 #include "utl/json.hpp"
 
 //zzz
 #include "zzz/stats/basic.hpp"
+
+namespace boost {
+    using namespace container;
+}
 
 namespace zzz {
     class StatsGrid {
@@ -48,7 +52,7 @@ namespace zzz {
         // map, because it's lightweight
         // and emplaces new elements faster than unordered_map
         //std::map<size_t, StatPtr> m_content;
-        std::map<size_t, StatPtr> m_content;
+        boost::flat_map<size_t, StatPtr> m_content;
 
     private:
         void _copy_from(const StatsGrid& another);

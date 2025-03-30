@@ -132,7 +132,7 @@ namespace calc::details {
 
 namespace calc {
     tabulate::Table Calculator::debug_stats(const request_t& request) {
-        StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
+        /*StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
 
         agent_stats.add(request.agent->details().stats());
         wengine_stats.add(request.wengine->details().stats());
@@ -157,21 +157,22 @@ namespace calc {
         tabulate::Table stats_log;
 
         stats_log.add_row({ "agent", "wengine", "ddp", "dds", "total" });
-        /*stats_log.add_row({
+        stats_log.add_row({
             agent_stats.get_debug_table(),
             wengine_stats.get_debug_table(),
             ddp_stats.get_debug_table(),
             dds_stats.get_debug_table(),
             summed_stats.get_debug_table()
-        });*/
+        });
 
         std::fstream debug_file("stats.log", std::ios::out);
         stats_log.print(debug_file);
 
-        return stats_log;
+        return stats_log;*/
+        return {};
     }
     tabulate::Table Calculator::debug_damage(const request_t& request, const result_t& damage) {
-        const auto& [total_dmg, dmg_per_ability] = damage;
+        /*const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
         size_t rounded_total_dmg = (size_t) total_dmg;
@@ -191,7 +192,8 @@ namespace calc {
         std::fstream file("dmg.log", std::ios::out);
         dmg_log.print(file);
 
-        return dmg_log;
+        return dmg_log;*/
+        return {};
     }
 }
 #endif

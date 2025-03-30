@@ -123,6 +123,12 @@ namespace zzz {
     }
 
     void StatsGrid::_copy_from(const StatsGrid& another) {
+        m_content.reserve(another.m_content.size());
+        for (size_t i = 0; i < another.m_content.size(); i++) {
+            const auto& [k, v] = *another.m_content.nth(i);
+            m_content.emplace_hint(m_content.begin() + i, k, v->copy());
+        }
+
         for (const auto& [k, v] : another.m_content)
             m_content.emplace(k, v->copy());
     }

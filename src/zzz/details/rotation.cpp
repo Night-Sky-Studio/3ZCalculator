@@ -77,7 +77,7 @@ namespace zzz {
             : 1;
     }
 
-    RotationDetails load_from_json(const utl::Json& json) {
+    RotationDetails load_rotation_from_json(const utl::Json& json) {
         const auto& table = json.as_object();
         using raw_rotations = std::unordered_map<std::string, std::vector<std::string>>;
 
@@ -145,7 +145,7 @@ namespace zzz {
     bool Rotation::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
-            auto details = load_from_json(json);
+            auto details = load_rotation_from_json(json);
             set(std::move(details));
         } else {
 #ifdef DEBUG_STATUS

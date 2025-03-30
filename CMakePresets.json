@@ -19,8 +19,8 @@
             }
         },
         {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
+            "name": "windows-msvc-debug",
+            "displayName": "Windows MSVC Debug",
             "inherits": "windows-base",
             "architecture": {
                 "value": "x64",
@@ -31,41 +31,23 @@
             }
         },
         {
-            "name": "x64-release",
-            "displayName": "x64 Release",
-            "inherits": "x64-debug",
+            "name": "windows-msvc-release",
+            "displayName": "Windows MSVC Release",
+            "inherits": "windows-msvc-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
-        {
-            "name": "x86-debug",
-            "displayName": "x86 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "x86-release",
-            "displayName": "x86 Release",
-            "inherits": "x86-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
+
         {
             "name": "linux-debug",
-            "displayName": "Linux Debug",
+            "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_MAKE_PROGRAM": "ninja"
             },
             "condition": {
                 "type": "equals",
@@ -76,6 +58,26 @@
                 "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
                     "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
                 }
+            }
+        },
+        {
+            "name": "linux-gcc-debug",
+            "displayName": "Linux GCC Debug",
+            "inherits": "linux-debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc-14",
+                "CMAKE_CXX_COMPILER": "g++-14",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "linux-clang-debug",
+            "displayName": "Linux CLang Debug",
+            "inherits": "linux-debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang-20",
+                "CMAKE_CXX_COMPILER": "clang++-20",
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         }
     ]
