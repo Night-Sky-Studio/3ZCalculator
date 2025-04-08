@@ -70,6 +70,8 @@ namespace lib {
 
         void add_object(const MObjectPtr& value);
 
+        void clear();
+
         void free_memory();
 
         void launch();

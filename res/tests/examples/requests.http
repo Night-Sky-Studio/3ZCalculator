@@ -67,3 +67,6 @@ Content-Type: application/json
         "assault"
     ]
 }
+
+###
+POST http://127.0.0.1:5102/refresh HTTP/1.1

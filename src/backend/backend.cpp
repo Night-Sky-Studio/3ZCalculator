@@ -49,6 +49,15 @@ namespace backend::inline v1_impl {
 		return response;
 	}
 
+	crow::response POST_refresh(lib::ObjectManager& manager) {
+		crow::response response;
+
+		manager.clear();
+		details::prepare_object_manager(manager);
+
+		return response;
+	}
+
 	crow::response POST_damage(const crow::request& req, lib::ObjectManager& manager) {
 		crow::response response;
 
@@ -108,7 +117,7 @@ namespace backend {
 		lib::ObjectManager::init_default_file_extensions();
 
 		_init_logger(true);
-		_init_object_manager();
+		details::prepare_object_manager(m_manager);
 		_init_crow_app();
 	}
 
@@ -119,32 +128,6 @@ namespace backend {
 				std::ios::out | std::ios::trunc));
 			m_logger.add_log_stream(*m_log_file);
 		}
-	}
-	size_t Backend::_init_object_manager() {
-		size_t allocated_objects = 0;
-		fs::path res_path = lib::format("{}/data/", global::PATH);
-		if (!exists(res_path) || !is_directory(res_path))
-			throw FMT_RUNTIME_ERROR("resource folder doesn't exist at path \"{}\"", fs::absolute(res_path).string());
-
-		for (const auto& entry : fs::directory_iterator(res_path)) {
-			// ignores non directories
-			if (!entry.is_directory())
-				continue;
-
-			auto maker_it = details::associated_folders.find(entry.path().filename().string());
-			// ignores directories which are not associated with object creator
-			if (maker_it == details::associated_folders.end())
-				continue;
-
-			auto list = maker_it->second.is_recursive
-				? details::recursive_folder_iteration(entry, maker_it->second.func)
-				: details::regular_folder_iteration(entry, maker_it->second.func);
-
-			for (const auto& it : list)
-				m_manager.add_object(it);
-		}
-
-		return allocated_objects;
 	}
 	void Backend::_init_crow_app() {
 		CROW_ROUTE(m_app, "/rotation").methods("PUT"_method)([this](const crow::request& req) {
@@ -160,8 +143,11 @@ namespace backend {
 					return POST_damage(req, m_manager);
 				});
 		});
-		/*CROW_ROUTE(m_app, "/refresh").methods("POST"_method)([this] {
-		    return "";
-		});*/
+		CROW_ROUTE(m_app, "/refresh").methods("POST"_method)([this] {
+			return details::wrap_to_check_execution_time<crow::response>("POST /refresh",
+				[this] {
+					return POST_refresh(m_manager);
+				});
+		});
 	}
 }

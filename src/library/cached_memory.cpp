@@ -77,6 +77,10 @@ namespace lib {
         m_content.emplace(hash(value->_fullname), value);
     }
 
+    void ObjectManager::clear() {
+	    m_content.clear();
+    }
+
     void ObjectManager::free_memory() {
         for (auto& v : m_content | std::views::values)
             v->_content = nullptr;

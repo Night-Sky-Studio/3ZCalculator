@@ -188,6 +188,35 @@ namespace backend::details {
 		}
 	}
 
+	size_t prepare_object_manager(lib::ObjectManager& manager) try {
+		size_t allocated_objects = 0;
+		fs::path res_path = lib::format("{}/data/", global::PATH);
+		if (!exists(res_path) || !is_directory(res_path))
+			throw FMT_RUNTIME_ERROR("resource folder doesn't exist at path \"{}\"", fs::absolute(res_path).string());
+
+		for (const auto& entry : fs::directory_iterator(res_path)) {
+			// ignores non directories
+			if (!entry.is_directory())
+				continue;
+
+			auto maker_it = associated_folders.find(entry.path().filename().string());
+			// ignores directories which are not associated with object creator
+			if (maker_it == associated_folders.end())
+				continue;
+
+			auto list = maker_it->second.is_recursive
+				? recursive_folder_iteration(entry, maker_it->second.func)
+				: regular_folder_iteration(entry, maker_it->second.func);
+
+			for (const auto& it : list)
+				manager.add_object(it);
+		}
+
+		return allocated_objects;
+	} catch (const std::exception& e) {
+		CROW_LOG_ERROR << e.what();
+	}
+
 	// requesters
 
 	calc::request_t json_to_request(const utl::Json& json, lib::ObjectManager& manager) {
