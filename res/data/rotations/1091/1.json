@@ -2,7 +2,7 @@
     "rotations": {
         "final": {
             "priority": 1,
-            "vals": [ "opener", "baseline x20", "burst" ]
+            "vals": [ "burst" ]
         },
 
         "opener": {
