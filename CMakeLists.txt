@@ -9,6 +9,9 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
+# vcpkg
+include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+
 # FetchContent
 include(FetchContent)
 
