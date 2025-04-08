@@ -31,7 +31,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(FrozenLib)
 
 # magic enums
-find_package(magic_enum)
+find_package(magic_enum CONFIG REQUIRED)
 
 # tabulate
 FetchContent_Declare(

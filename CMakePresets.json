@@ -78,6 +78,7 @@
                 "CMAKE_C_COMPILER": "clang-18",
                 "CMAKE_CXX_COMPILER": "clang++-18",
                 "CMAKE_BUILD_TYPE": "Debug",
+                "VCPKG_ROOT": "/home/eil/temp/vcpkg",
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/toolchains"
             },
             "toolchainFile": "${sourceDir}/toolchains/bootstrap.cmake"
