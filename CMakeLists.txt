@@ -7,12 +7,13 @@ project(
     HOMEPAGE_URL "https://github.com/Night-Sky-Studio/3ZCalculator"
 )
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_SCAN_FOR_MODULES 0)
+
+# vcpkg
+include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 # FetchContent
 include(FetchContent)
-
-set(USE_BOOST_KARMA OFF)
-#set(DCMAKE_TOOLCHAIN_FILE "D:/lib/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 # CPM.cmake
 
@@ -52,7 +53,10 @@ FetchContent_MakeAvailable(fmt)
 # asio - for crow library
 find_package(Crow CONFIG REQUIRED)
 
-add_executable(3ZCalculator
+# boost - container
+find_package(Boost 1.86 REQUIRED COMPONENTS container)
+
+add_executable(${PROJECT_NAME}
     "main.cpp"
 
     "src/library/cached_memory.cpp"
@@ -73,18 +77,20 @@ add_executable(3ZCalculator
 
     "src/calc/calculator.cpp"
 
+    "src/backend/impl/details.cpp"
     "src/backend/backend.cpp"
 )
 
-target_include_directories(3ZCalculator PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 
-target_link_libraries(3ZCalculator PRIVATE 
+target_link_libraries(${PROJECT_NAME} PRIVATE 
     frozen-headers
     tabulate::tabulate
     fmt::fmt
     Crow::Crow
     asio::asio
     magic_enum::magic_enum
+    Boost::container
 )
 
 add_compile_definitions(DEBUG_STATUS)

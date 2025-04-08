@@ -47,12 +47,13 @@ namespace test {
 }
 
 namespace global {
-    std::string PATH = "./";
+    std::string PATH;
 }
 
 int main(int argc, char** argv) {
-    if (argc > 1)
-        global::PATH = argv[1];
+    global::PATH = argc > 1
+        ? argv[1]
+        : ".";
 
     backend::Backend server;
     server.init();

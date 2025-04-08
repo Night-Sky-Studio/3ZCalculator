@@ -1,8 +1,7 @@
 #pragma once
 
-//std
-#include <map>
-#include <string>
+//boost
+#include "boost/container/flat_map.hpp"
 
 //utl
 #include "utl/json.hpp"
@@ -10,10 +9,14 @@
 //zzz
 #include "zzz/stats/basic.hpp"
 
+namespace boost {
+    using namespace container;
+}
+
 namespace zzz {
     class StatsGrid {
     public:
-        static const std::string atk_flat_formula;
+        static StatPtr make_defined_relative_stat(StatId id, Tag tag);
 
         static StatsGrid make_from(const utl::Json& json, Tag tag = Tag::Universal);
 
@@ -48,9 +51,12 @@ namespace zzz {
     protected:
         // map, because it's lightweight
         // and emplaces new elements faster than unordered_map
-        std::map<size_t, StatPtr> m_content;
+        //std::map<size_t, StatPtr> m_content;
+        boost::flat_map<size_t, StatPtr> m_content;
 
     private:
+        void _copy_from(const StatsGrid& another);
+
         void _set_lookup_table_if_relative(StatPtr& ptr);
     };
 }

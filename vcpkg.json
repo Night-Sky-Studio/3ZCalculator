@@ -1,6 +1,7 @@
 {
-    "dependencies": [
-        "crow",
-        "magic-enum"
-    ]
+  "dependencies": [
+    "boost-container",
+    "crow",
+    "magic-enum"
+  ]
 }

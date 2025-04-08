@@ -3,17 +3,30 @@
 //std
 #include <ranges>
 
+//frozen
+#include "frozen/string.h"
+#include "frozen/unordered_map.h"
+
 //zzz
-#include "zzz/stats/relative.hpp"
 #include "zzz/stats/regular.hpp"
+#include "zzz/stats/relative.hpp"
+
+using namespace frozen::string_literals;
+
+namespace zzz::details {
+    static constexpr frozen::unordered_map<StatId::Enum, frozen::string, 2> formulas = {
+        { StatId::AtkTotal, "f:(AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat"_s },
+        { StatId::AmTotal, "f:(AmBase * (1 + AmRatio) + AmFlat) * (1 + AmRatioCombat) + AmFlatCombat"_s }
+    };
+}
 
 namespace zzz {
-    // static data
-
-    const std::string StatsGrid::atk_flat_formula =
-        "f:(AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat";
-
     // maker
+
+    StatPtr StatsGrid::make_defined_relative_stat(StatId id, Tag tag) {
+        const auto& formula = details::formulas.at(id);
+        return RelativeStat::make(id, tag, 0.0, { formula.data(), formula.size() });
+    }
 
     StatsGrid StatsGrid::make_from(const utl::Json& json, Tag tag) {
         StatsGrid result;
@@ -40,11 +53,11 @@ namespace zzz {
     // ctor
 
     StatsGrid::StatsGrid(const StatsGrid& another) noexcept {
-        add(another);
+        _copy_from(another);
     }
     StatsGrid& StatsGrid::operator=(const StatsGrid& another) noexcept {
         m_content.clear();
-        add(another);
+        _copy_from(another);
         return *this;
     }
 
@@ -107,6 +120,17 @@ namespace zzz {
     void StatsGrid::add(const StatsGrid& another) {
         for (const auto& stat : another.m_content | std::views::values)
             add(stat);
+    }
+
+    void StatsGrid::_copy_from(const StatsGrid& another) {
+        m_content.reserve(another.m_content.size());
+        for (size_t i = 0; i < another.m_content.size(); i++) {
+            const auto& [k, v] = *another.m_content.nth(i);
+            m_content.emplace_hint(m_content.begin() + i, k, v->copy());
+        }
+
+        for (const auto& [k, v] : another.m_content)
+            m_content.emplace(k, v->copy());
     }
 
     void StatsGrid::_set_lookup_table_if_relative(StatPtr& ptr) {

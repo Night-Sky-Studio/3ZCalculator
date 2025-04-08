@@ -47,7 +47,6 @@ namespace calc::details {
         const auto& scale = skill.scales()[index];
 
         stats.add(skill.buffs());
-        stats.add(RelativeStat::make(StatId::AtkTotal, Tag::Universal, 0.0, StatsGrid::atk_flat_formula));
 
         double base_dmg = scale.motion_value / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0
@@ -62,7 +61,13 @@ namespace calc::details {
         double res_mult = calc_res_mult(enemy, stats, scale.element, skill.tag());
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
-        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;
+        return base_dmg
+            * crit_mult
+            * dmg_ratio_mult
+            * dmg_taken_mult
+            * def_mult
+            * res_mult
+            * stun_mult;
     }
     double calc_anomaly_dmg(
         const AnomalyDetails& anomaly,
@@ -70,7 +75,6 @@ namespace calc::details {
         StatsGrid stats,
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
-        stats.add(RelativeStat::make(StatId::AtkTotal, Tag::Universal, 0.0, StatsGrid::atk_flat_formula));
 
         double base_dmg = anomaly.scale() / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
         double crit_mult = 1.0 + (anomaly.can_crit()
@@ -78,15 +82,25 @@ namespace calc::details {
             * stats.get_value({ StatId::CritDmg, Tag::Anomaly })
             : 0.0);
         double dmg_ratio_mult = 1.0
-            + stats.get_summed_value({ StatId::DmgRatio, Tag::Anomaly })
-            + stats.get_summed_value({ StatId::DmgRatio + anomaly.element(), Tag::Anomaly });
+            + stats.get_value({ StatId::DmgRatio, Tag::Universal })
+            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
+        double anomaly_ratio_mult = 1.0
+            + stats.get_value({ StatId::DmgRatio, Tag::Anomaly })
+            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
 
         double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, Tag::Anomaly);
         double def_mult = calc_def_mult(enemy, stats, Tag::Anomaly);
         double res_mult = calc_res_mult(enemy, stats, anomaly.element(), Tag::Anomaly);
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
-        return base_dmg * crit_mult * dmg_ratio_mult * dmg_taken_mult * def_mult * res_mult * stun_mult;
+        return base_dmg
+            * crit_mult
+            * dmg_ratio_mult
+            * anomaly_ratio_mult
+            * dmg_taken_mult
+            * def_mult
+            * res_mult
+            * stun_mult;
     }
 
     StatsGrid calc_stats(const request_t& request) {
@@ -118,7 +132,7 @@ namespace calc::details {
 
 namespace calc {
     tabulate::Table Calculator::debug_stats(const request_t& request) {
-        StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
+        /*StatsGrid summed_stats, agent_stats, wengine_stats, ddp_stats, dds_stats;
 
         agent_stats.add(request.agent->details().stats());
         wengine_stats.add(request.wengine->details().stats());
@@ -143,21 +157,22 @@ namespace calc {
         tabulate::Table stats_log;
 
         stats_log.add_row({ "agent", "wengine", "ddp", "dds", "total" });
-        /*stats_log.add_row({
+        stats_log.add_row({
             agent_stats.get_debug_table(),
             wengine_stats.get_debug_table(),
             ddp_stats.get_debug_table(),
             dds_stats.get_debug_table(),
             summed_stats.get_debug_table()
-        });*/
+        });
 
         std::fstream debug_file("stats.log", std::ios::out);
         stats_log.print(debug_file);
 
-        return stats_log;
+        return stats_log;*/
+        return {};
     }
     tabulate::Table Calculator::debug_damage(const request_t& request, const result_t& damage) {
-        const auto& [total_dmg, dmg_per_ability] = damage;
+        /*const auto& [total_dmg, dmg_per_ability] = damage;
 
         tabulate::Table dmg_log;
         size_t rounded_total_dmg = (size_t) total_dmg;
@@ -177,7 +192,8 @@ namespace calc {
         std::fstream file("dmg.log", std::ios::out);
         dmg_log.print(file);
 
-        return dmg_log;
+        return dmg_log;*/
+        return {};
     }
 }
 #endif
@@ -197,7 +213,9 @@ namespace calc {
 
         double total_dmg = 0.0;
         std::vector<double> dmg_per_ability;
-        auto stats = details::calc_stats(request);
+
+        StatsGrid stats = details::calc_stats(request);
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         dmg_per_ability.reserve(rotation.size());
         for (size_t i = 0; i < rotation.size(); i++) {
@@ -226,7 +244,9 @@ namespace calc {
 
         double total_dmg = 0.0;
         std::vector<std::tuple<double, Tag, std::string>> info_per_ability;
-        auto stats = details::calc_stats(request);
+
+        StatsGrid stats = details::calc_stats(request);
+        stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
 
         info_per_ability.reserve(rotation.size());
         for (size_t i = 0; i < rotation.size(); i++) {

@@ -55,7 +55,7 @@ namespace zzz::details {
 namespace zzz {
     // Service
 
-    DdsDetails load_from_json(const utl::Json& json) {
+    DdsDetails load_dds_from_json(const utl::Json& json) {
         const auto& table = json.as_object();
         details::DdsBuilder builder;
 
@@ -81,7 +81,7 @@ namespace zzz {
     bool Dds::load_from_string(const std::string& input, size_t mode) {
         if (mode == 1) {
             auto json = utl::json::from_string(input);
-            auto details = load_from_json(json);
+            auto details = load_dds_from_json(json);
             set(std::move(details));
         } else {
 #ifdef DEBUG_STATUS

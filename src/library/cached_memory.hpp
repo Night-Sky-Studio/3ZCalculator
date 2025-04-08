@@ -58,9 +58,9 @@ namespace lib {
         }
 
         // TODO: remake using lifetime in real time, not in cycles
-        static constexpr size_t max_unused_period = 1ul;
+        static constexpr size_t max_unused_period = 12ul;
         // TODO: make sleep time at most (while using multithreading)
-        static constexpr auto sleep_time = std::chrono::milliseconds(100ul);
+        static constexpr auto sleep_time = std::chrono::seconds(10ul);
 
         explicit ObjectManager(size_t file_extension_id = 1);
         ~ObjectManager();

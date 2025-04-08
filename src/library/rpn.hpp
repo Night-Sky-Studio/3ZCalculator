@@ -32,7 +32,7 @@ namespace lib {
 
     class RpnParser {
     public:
-        static rpn_parser::token_list tokenize(std::string what);
+        static rpn_parser::token_list tokenize(std::string_view what);
         static tokenized_rpn_t shunting_yard_algorithm(const rpn_parser::token_list& infix);
     };
 }
