@@ -10,7 +10,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_PLATFORM_NAME": "x64-windows"
             },
             "condition": {
                 "type": "equals",
@@ -47,7 +48,8 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "ninja"
+                "CMAKE_MAKE_PROGRAM": "ninja",
+                "VCPKG_PLATFORM_NAME": "x64-linux"
             },
             "condition": {
                 "type": "equals",

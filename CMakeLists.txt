@@ -31,11 +31,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(FrozenLib)
 
 # magic enums
-CPMAddPackage(
-    NAME magic_enum
-    GITHUB_REPOSITORY Neargye/magic_enum
-    GIT_TAG v0.9.7
-)
+find_package(magic_enum CONFIG REQUIRED)
 
 # tabulate
 FetchContent_Declare(
