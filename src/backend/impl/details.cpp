@@ -215,6 +215,7 @@ namespace backend::details {
 		return allocated_objects;
 	} catch (const std::exception& e) {
 		CROW_LOG_ERROR << e.what();
+        return 0;
 	}
 
 	// requesters
