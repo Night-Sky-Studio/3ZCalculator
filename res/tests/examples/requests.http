@@ -47,3 +47,26 @@ Content-Type: application/json
     ],
     "rotation": 1
 }
+
+###
+PUT http://127.0.0.1:5102/rotation?aid=1261&id=0 HTTP/1.1
+Content-Type: application/json
+
+{
+    "rotation": [
+        "flowers_of_sin",
+        "phantom_thrust",
+        "salchow_jump 1",
+        "assault",
+        "salchow_jump 2",
+        "aerial_sweep_cleanout",
+        "aerial_sweep_cleanout",
+        "assault",
+        "phantom_thrust",
+        "final_curtain",
+        "assault"
+    ]
+}
+
+###
+POST http://127.0.0.1:5102/refresh HTTP/1.1

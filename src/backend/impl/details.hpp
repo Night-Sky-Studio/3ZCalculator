@@ -45,6 +45,8 @@ namespace backend::details {
     // TODO: remake with unordered_map or list
     void prepare_request_composed(calc::request_t& what, lib::ObjectManager& source);
 
+    size_t prepare_object_manager(lib::ObjectManager& manager);
+
     // requesters
 
     calc::request_t json_to_request(const utl::Json& json, lib::ObjectManager& manager);

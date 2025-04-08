@@ -35,7 +35,6 @@ namespace backend {
 
     private:
         void _init_logger(bool use_file);
-        size_t _init_object_manager();
         void _init_crow_app();
     };
 }
