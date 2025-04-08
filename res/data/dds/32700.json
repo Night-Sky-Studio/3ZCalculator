@@ -4,6 +4,6 @@
 
     "set_bonus": {
         "2pc": [["CritDmg", 0.16]],
-        "4pc": [["CritRate", 0.12], ["CritDmg", 0.3]]
+        "4pc": [["CritRate", 0.12], ["CritDmg", 0.0, "c:Am>=115;f:0.3"]]
     }
 }

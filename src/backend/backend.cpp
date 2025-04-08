@@ -133,7 +133,9 @@ namespace backend {
 
         CROW_ROUTE(m_app, "/damage").methods("POST"_method)([this](const crow::request& req) {
             return details::wrap_to_check_execution_time<crow::response>("POST /damage",
-                std::bind(POST_damage, std::cref(req), std::ref(m_manager)));
+	            [req = std::cref(req), this] {
+		            return POST_damage(req, m_manager);
+	            });
         });
         /*CROW_ROUTE(m_app, "/refresh").methods("POST"_method)([this] {
             return "";

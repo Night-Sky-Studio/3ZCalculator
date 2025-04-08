@@ -75,10 +75,12 @@
             "displayName": "Linux CLang Debug",
             "inherits": "linux-debug",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-20",
-                "CMAKE_CXX_COMPILER": "clang++-20",
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
+                "CMAKE_C_COMPILER": "clang-18",
+                "CMAKE_CXX_COMPILER": "clang++-18",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/toolchains"
+            },
+            "toolchainFile": "${sourceDir}/toolchains/bootstrap.cmake"
         }
     ]
 }

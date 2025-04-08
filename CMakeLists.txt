@@ -7,11 +7,10 @@ project(
     HOMEPAGE_URL "https://github.com/Night-Sky-Studio/3ZCalculator"
 )
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
 # FetchContent
 include(FetchContent)
-
-set(USE_BOOST_KARMA OFF)
 
 # CPM.cmake
 
@@ -32,7 +31,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(FrozenLib)
 
 # magic enums
-find_package(magic_enum CONFIG REQUIRED)
+find_package(magic_enum)
 
 # tabulate
 FetchContent_Declare(
