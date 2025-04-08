@@ -1,5 +1,9 @@
 #pragma once
 
+//std
+#include <array>
+#include <span>
+
 //boost
 #include "boost/container/flat_map.hpp"
 
@@ -19,8 +23,10 @@ namespace zzz {
         static StatPtr make_defined_relative_stat(StatId id, Tag tag);
 
         static StatsGrid make_from(const utl::Json& json, Tag tag = Tag::Universal);
+        static StatsGrid make_from(const utl::Json& json, std::span<Tag> tags);
 
         StatsGrid() = default;
+        ~StatsGrid() = default;
 
         StatsGrid(const StatsGrid& another) noexcept;
         StatsGrid& operator=(const StatsGrid& another) noexcept;
@@ -29,8 +35,6 @@ namespace zzz {
         StatsGrid& operator=(StatsGrid&& another) noexcept;
 
         double get_value(qualifier_t key) const;
-        // returns sum of your tag and universal tag
-        double get_summed_value(qualifier_t key) const;
 
         // replaces ptr of stat if it exists
         void set(StatPtr&& value);
@@ -55,6 +59,8 @@ namespace zzz {
         boost::flat_map<size_t, StatPtr> m_content;
 
     private:
+        static constexpr std::array<Tag, 1> default_tags = { Tag::Universal };
+
         void _copy_from(const StatsGrid& another);
 
         void _set_lookup_table_if_relative(StatPtr& ptr);

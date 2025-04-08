@@ -150,10 +150,19 @@ namespace zzz {
         const auto& table = json.as_object();
         details::SkillBuilder builder;
 
-        auto tag = (Tag) table.at("tag").as_string();
+        std::vector<Tag> tags;
+        if (auto it = table.find("tag"); it != table.end() && it->second.is_string())
+	        tags = { (Tag) it->second.as_string() };
+        else if (auto it = table.find("tags"); it != table.end() && it->second.is_array()) {
+	        const auto& array = it->second.as_array();
+	        tags.reserve(array.size());
+	        for (const auto& jt : array)
+		        tags.emplace_back((Tag) jt.as_string());
+        } else
+	        throw FMT_RUNTIME_ERROR("incompatible name or type of tag");
 
         builder.set_name(key);
-        builder.set_tag(tag);
+        builder.set_tags(tags);
 
         if (auto it = table.find("scale"); it != table.end()) {
             builder.add_scale(make_scale_from(it->second, default_element));
@@ -162,10 +171,8 @@ namespace zzz {
                 builder.add_scale(make_scale_from(jt, default_element));
         }
 
-        if (auto it = table.find("buffs"); it != table.end()) {
-            auto buffs = StatsGrid::make_from(it->second, tag);
-            builder.set_buffs(std::move(buffs));
-        }
+        if (auto it = table.find("buffs"); it != table.end())
+	        builder.set_buffs(StatsGrid::make_from(it->second, { tags.data(), tags.size() }));
 
         return builder.get_product();
     }

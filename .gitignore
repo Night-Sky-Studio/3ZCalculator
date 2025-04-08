@@ -9,4 +9,4 @@ Folder.DotSettings.user
 *.xlsx
 /.vscode
 /CMakeUserPresets.json
-**/res/data/rotations/*
+res/data/rotations/*

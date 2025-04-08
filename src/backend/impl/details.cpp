@@ -261,10 +261,17 @@ namespace backend::details {
 		auto [total_dmg, per_ability] = calc::Calculator::eval_detailed(request);
 		json["total"] = total_dmg;
 		utl::json::Array on_emplace;
-		for (auto& [dmg, tag, name] : per_ability) {
+        for (auto& [dmg, tags, name] : per_ability) {
 			utl::json::Array line(3);
 			line[0] = dmg;
-			line[1] = (size_t) tag;
+
+            if (tags.size() == 1)
+                line[1] = (size_t) tags.front();
+            else {
+                for (size_t i = 0; i < tags.size(); i++)
+                    line[1][i] = (size_t) tags[i];
+            }
+
 			line[2] = std::move(name);
 			on_emplace.emplace_back(std::move(line));
 		}

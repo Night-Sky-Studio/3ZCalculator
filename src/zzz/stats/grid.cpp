@@ -1,6 +1,7 @@
 #include "zzz/stats/grid.hpp"
 
 //std
+#include <functional>
 #include <ranges>
 
 //frozen
@@ -12,12 +13,26 @@
 #include "zzz/stats/relative.hpp"
 
 using namespace frozen::string_literals;
+namespace ph = std::placeholders;
 
 namespace zzz::details {
     static constexpr frozen::unordered_map<StatId::Enum, frozen::string, 2> formulas = {
         { StatId::AtkTotal, "f:(AtkBase * (1 + AtkRatio) + AtkFlat) * (1 + AtkRatioCombat) + AtkFlatCombat"_s },
         { StatId::AmTotal, "f:(AmBase * (1 + AmRatio) + AmFlat) * (1 + AmRatioCombat) + AmFlatCombat"_s }
     };
+
+    StatPtr make_relative(const utl::Json& json, Tag tag, const StatsGrid& lookup_table) {
+        auto ptr = RelativeStat::make_from(json, tag);
+
+        // after making relative stat we have to specify lookup table
+        auto relative = dynamic_cast<RelativeStat&>(*ptr);
+        relative.lookup_table(&lookup_table);
+
+        return ptr;
+    }
+    StatPtr make_regular(const utl::Json& json, Tag tag) {
+        return RegularStat::make_from(json, tag);
+    }
 }
 
 namespace zzz {
@@ -33,18 +48,27 @@ namespace zzz {
 
         for (const auto& stat : json.as_array()) {
             const auto& stat_array = stat.as_array();
+            result.set(stat_array.back().is_string()
+                ? details::make_relative(stat_array, tag, result)
+                : details::make_regular(stat_array, tag));
+        }
 
+        return result;
+    }
+    StatsGrid StatsGrid::make_from(const utl::Json& json, std::span<Tag> tags) {
+        StatsGrid result;
+
+        for (const auto& stat : json.as_array()) {
+            const auto& stat_array = stat.as_array();
             // indicator that this is RelativeStat
-            if (stat_array.back().is_string()) {
-                auto ptr = RelativeStat::make_from(stat, tag);
+            std::function<StatPtr(const utl::Json&, Tag)> maker;
+            if (stat_array.back().is_string())
+                maker = [&](const utl::Json& json, Tag tag) { return details::make_relative(json, tag, result); };
+            else
+                maker = details::make_regular;
 
-                // after making relative stat we have to specify lookup table
-                auto relative = dynamic_cast<RelativeStat&>(*ptr);
-                relative.lookup_table(&result);
-
-                result.set(std::move(ptr));
-            } else
-                result.set(RegularStat::make_from(stat, tag));
+            for (const auto& tag : tags)
+                result.set(maker(stat, tag));
         }
 
         return result;
@@ -74,12 +98,6 @@ namespace zzz {
     double StatsGrid::get_value(qualifier_t key) const {
         auto it = m_content.find(key.hash());
         return it != m_content.end() ? it->second->value() : 0.0;
-    }
-    double StatsGrid::get_summed_value(qualifier_t key) const {
-        double result = get_value({ .id = key.id, .tag = Tag::Universal });
-        if (key.tag != Tag::Universal)
-            result += get_value(key);
-        return result;
     }
 
     void StatsGrid::set(StatPtr&& value) {
