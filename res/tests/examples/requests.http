@@ -45,5 +45,5 @@ Content-Type: application/json
             "levels": [15, 1, 1, 2, 0]
         }
     ],
-    "rotation": 0
+    "rotation": 1
 }
