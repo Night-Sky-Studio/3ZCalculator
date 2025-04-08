@@ -159,7 +159,7 @@ namespace zzz {
 	        for (const auto& jt : array)
 		        tags.emplace_back((Tag) jt.as_string());
         } else
-	        throw FMT_RUNTIME_ERROR("incompatible name or type of tag");
+            throw RUNTIME_ERROR("incompatible name or type of tag");
 
         builder.set_name(key);
         builder.set_tags(tags);
