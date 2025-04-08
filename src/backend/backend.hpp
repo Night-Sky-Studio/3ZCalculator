@@ -2,6 +2,7 @@
 
 //std
 #include <fstream>
+#include <optional>
 
 //crow
 #include "crow/app.h"
