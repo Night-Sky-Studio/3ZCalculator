@@ -4,7 +4,7 @@
 
 C++23 and vcpkg required
 
-Tested on MSVC 19/Visual C++23
+Tested on MSVC/Visual C++23
 
 ## Done entities
 
