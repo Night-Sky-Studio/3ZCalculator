@@ -46,14 +46,4 @@ namespace backend::details {
     void prepare_request_composed(calc::request_t& what, lib::ObjectManager& source);
 
     size_t prepare_object_manager(lib::ObjectManager& manager);
-
-    // requesters
-
-    calc::request_t json_to_request(const utl::Json& json, lib::ObjectManager& manager);
-
-    utl::Json calcs_to_json(const calc::Calculator::result_t& calcs);
-    utl::Json calcs_to_detailed_json(const calc::Calculator::result_t& calcs);
-
-    utl::Json post_damage(const calc::request_t& request);
-    utl::Json post_damage_detailed(const calc::request_t& request);
 }

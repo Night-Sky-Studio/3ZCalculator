@@ -1,27 +1,19 @@
 #pragma once
 
-//std
-#include <chrono>
-#include <functional>
-#include <string>
+//lib
+#include "library/cached_memory.hpp"
 
 //crow
-#include "crow/logging.h"
+#include "crow/http_request.h"
+#include "crow/http_response.h"
 
-namespace backend::details {
-    // timers
+namespace backend::methods {
+    std::string get_default();
 
-    template<typename TResult, typename... TArgs>
-    TResult wrap_to_check_execution_time(
-        std::string_view name,
-        std::function<TResult()> func) {
-        auto start = std::chrono::high_resolution_clock::now();
-        auto result = func();
-        std::chrono::duration<double, std::milli> time =
-            std::chrono::high_resolution_clock::now() - start;
+    // TODO: make query options=[increment]
+    crow::response post_refresh(lib::ObjectManager& manager);
 
-        CROW_LOG_INFO << lib::format("{} was dispatched in {} ms", name, time.count());
+    crow::response put_rotation(const crow::request& req);
 
-        return result;
-    }
+    crow::response post_damage(const crow::request& req, lib::ObjectManager& manager);
 }

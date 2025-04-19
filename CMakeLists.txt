@@ -80,6 +80,7 @@ add_executable(${PROJECT_NAME}
     "src/calc/calculator.cpp"
 
     "src/backend/impl/details.cpp"
+    "src/backend/impl/requests.cpp"
     "src/backend/backend.cpp"
 )
 
