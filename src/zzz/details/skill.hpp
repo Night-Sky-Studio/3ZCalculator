@@ -27,7 +27,7 @@ namespace zzz::details {
         };
 
         const std::string& name() const;
-        Tag tag() const;
+        std::span<const Tag> tags() const;
         std::span<const scale> scales() const;
         const StatsGrid& buffs() const;
 
@@ -35,7 +35,7 @@ namespace zzz::details {
 
     protected:
         std::string m_name;
-        Tag m_tag;
+        std::vector<Tag> m_tags;
         std::vector<scale> m_scales;
         StatsGrid m_buffs;
     };
@@ -44,7 +44,8 @@ namespace zzz::details {
     public:
         SkillBuilder& set_name(std::string name);
 
-        SkillBuilder& set_tag(Tag tag);
+        SkillBuilder& add_tag(Tag tag);
+        SkillBuilder& set_tags(std::vector<Tag> tags);
 
         SkillBuilder& add_scale(Skill::scale value);
         SkillBuilder& add_scale(double motion_value, double daze, Element element);

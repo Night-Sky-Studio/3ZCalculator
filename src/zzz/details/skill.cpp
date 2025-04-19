@@ -7,7 +7,7 @@ namespace zzz::details {
     // Skill
 
     const std::string& Skill::name() const { return m_name; }
-    Tag Skill::tag() const { return m_tag; }
+    std::span<const Tag> Skill::tags() const { return { m_tags.data(), m_tags.size() }; }
     std::span<const Skill::scale> Skill::scales() const { return { m_scales.data(), m_scales.size() }; }
     const StatsGrid& Skill::buffs() const { return m_buffs; }
 
@@ -21,10 +21,15 @@ namespace zzz::details {
         return *this;
     }
 
-    SkillBuilder& SkillBuilder::set_tag(Tag tag) {
-        m_product->m_tag = tag;
+    SkillBuilder& SkillBuilder::add_tag(Tag tag) {
+	    m_product->m_tags.emplace_back(tag);
         _is_set.tag = true;
         return *this;
+    }
+    SkillBuilder& SkillBuilder::set_tags(std::vector<Tag> tags) {
+	    m_product->m_tags = std::move(tags);
+	    _is_set.tag = true;
+	    return *this;
     }
 
     SkillBuilder& SkillBuilder::add_scale(Skill::scale value) {

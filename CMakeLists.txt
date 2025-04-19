@@ -59,10 +59,12 @@ find_package(Boost 1.86 REQUIRED COMPONENTS container)
 add_executable(${PROJECT_NAME}
     "main.cpp"
 
+    "src/utl/json.cpp"
+
     "src/library/cached_memory.cpp"
     "src/library/logger.cpp"
     "src/library/rpn.cpp"
-    
+
     "src/zzz/stats/grid.cpp"
     "src/zzz/stats/regular.cpp"
     "src/zzz/stats/relative.cpp"
@@ -78,6 +80,7 @@ add_executable(${PROJECT_NAME}
     "src/calc/calculator.cpp"
 
     "src/backend/impl/details.cpp"
+    "src/backend/impl/requests.cpp"
     "src/backend/backend.cpp"
 )
 

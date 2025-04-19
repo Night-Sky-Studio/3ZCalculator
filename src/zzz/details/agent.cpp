@@ -56,6 +56,11 @@ namespace zzz::details {
         _is_set.rarity = true;
         return *this;
     }
+    AgentBuilder& AgentBuilder::set_faction(Faction faction) {
+        m_product->m_faction = faction;
+        _is_set.rarity = true;
+        return *this;
+    }
 
     AgentBuilder& AgentBuilder::add_stat(StatPtr&& value) {
         m_product->m_stats.set(std::move(value));
@@ -95,7 +100,7 @@ namespace zzz::details {
     }
     Agent&& AgentBuilder::get_product() {
         if (!is_built())
-            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity and stats");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity, faction and stats");
 
         return IBuilder::get_product();
     }
@@ -150,10 +155,19 @@ namespace zzz {
         const auto& table = json.as_object();
         details::SkillBuilder builder;
 
-        auto tag = (Tag) table.at("tag").as_string();
+        std::vector<Tag> tags;
+        if (auto it = table.find("tag"); it != table.end() && it->second.is_string())
+	        tags = { (Tag) it->second.as_string() };
+        else if (auto it = table.find("tags"); it != table.end() && it->second.is_array()) {
+	        const auto& array = it->second.as_array();
+	        tags.reserve(array.size());
+	        for (const auto& jt : array)
+		        tags.emplace_back((Tag) jt.as_string());
+        } else
+            throw RUNTIME_ERROR("incompatible name or type of tag");
 
         builder.set_name(key);
-        builder.set_tag(tag);
+        builder.set_tags(tags);
 
         if (auto it = table.find("scale"); it != table.end()) {
             builder.add_scale(make_scale_from(it->second, default_element));
@@ -162,10 +176,8 @@ namespace zzz {
                 builder.add_scale(make_scale_from(jt, default_element));
         }
 
-        if (auto it = table.find("buffs"); it != table.end()) {
-            auto buffs = StatsGrid::make_from(it->second, tag);
-            builder.set_buffs(std::move(buffs));
-        }
+        if (auto it = table.find("buffs"); it != table.end())
+	        builder.set_buffs(StatsGrid::make_from(it->second, { tags.data(), tags.size() }));
 
         return builder.get_product();
     }
@@ -184,6 +196,7 @@ namespace zzz {
         builder.set_speciality((Speciality) table.at("speciality").as_string());
         builder.set_element(element);
         builder.set_rarity(table.at("rarity").as_integral());
+        builder.set_faction((Faction) table.at("faction").as_string());
 
         // stats
 

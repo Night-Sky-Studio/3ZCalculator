@@ -1,6 +1,7 @@
 #include "calc/calculator.hpp"
 
 //std
+#include <array>
 #include <map>
 #include <ranges>
 
@@ -18,21 +19,30 @@ namespace calc::details {
     constexpr double buff_level_mult = 1.0 + (level - 1.0) / 59.0;
     constexpr double level_coefficient = 794.0;
 
-    double calc_def_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
+    double get_value(const StatsGrid& table, StatId id, std::span<const Tag> tags) {
+        double result = table.get_value({ .id = id, .tag = Tag::Universal });
+
+        for (const auto& tag : tags)
+            result += table.get_value({ .id = id, .tag = tag });
+
+        return result;
+    }
+
+    double calc_def_mult(const enemy_t& enemy, const StatsGrid& stats, std::span<const Tag> tags) {
         double effective_def = enemy.defense
-            * (1 - stats.get_summed_value({ StatId::DefPenRatio, tag }))
-            - stats.get_summed_value({ StatId::DefPenFlat, tag });
+            * (1 - get_value(stats, StatId::DefPenRatio, tags))
+            - get_value(stats, StatId::DefPenFlat, tags);
         return level_coefficient / (std::max(effective_def, 0.0) + level_coefficient);
     }
-    double calc_dmg_taken_mult(const enemy_t& enemy, const StatsGrid& stats, Tag tag) {
+    double calc_dmg_taken_mult(const enemy_t& enemy, const StatsGrid& stats, std::span<const Tag> tags) {
         return 1.0
             - enemy.dmg_reduction
-            + stats.get_summed_value({ StatId::Vulnerability, tag });
+            + get_value(stats, StatId::Vulnerability, tags);
     }
-    double calc_res_mult(const enemy_t& enemy, const StatsGrid& stats, Element element, Tag tag) {
+    double calc_res_mult(const enemy_t& enemy, const StatsGrid& stats, Element element, std::span<const Tag> tags) {
         return 1.0 - enemy.res[element]
-            + stats.get_summed_value({ StatId::ResPen, tag })
-            + stats.get_summed_value({ StatId::ResPen + element, tag });
+            + get_value(stats, StatId::ResPen, tags)
+            + get_value(stats, StatId::ResPen + element, tags);
     }
     // TODO
     double calc_stun_mult(const enemy_t& enemy, const StatsGrid& stats) {
@@ -48,17 +58,17 @@ namespace calc::details {
 
         stats.add(skill.buffs());
 
-        double base_dmg = scale.motion_value / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
+        double base_dmg = scale.motion_value / 100 * stats.get_value({ .id = StatId::AtkTotal, .tag = Tag::Universal });
         double crit_mult = 1.0
-            + std::min(stats.get_summed_value({ StatId::CritRate, skill.tag() }), 100.0)
-            * stats.get_summed_value({ StatId::CritDmg, skill.tag() });
+            + std::min(get_value(stats, StatId::CritRate, skill.tags()), 100.0)
+            * get_value(stats, StatId::CritDmg, skill.tags());
         double dmg_ratio_mult = 1.0
-            + stats.get_summed_value({ StatId::DmgRatio, skill.tag() })
-            + stats.get_summed_value({ StatId::DmgRatio + scale.element, skill.tag() });
+            + get_value(stats, StatId::DmgRatio, skill.tags())
+            + get_value(stats, StatId::DmgRatio + scale.element, skill.tags());
 
-        double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, skill.tag());
-        double def_mult = calc_def_mult(enemy, stats, skill.tag());
-        double res_mult = calc_res_mult(enemy, stats, scale.element, skill.tag());
+        double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, skill.tags());
+        double def_mult = calc_def_mult(enemy, stats, skill.tags());
+        double res_mult = calc_res_mult(enemy, stats, scale.element, skill.tags());
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
         return base_dmg
@@ -76,21 +86,23 @@ namespace calc::details {
         const enemy_t& enemy) {
         stats.add(anomaly.buffs());
 
-        double base_dmg = anomaly.scale() / 100 * stats.get_value({ StatId::AtkTotal, Tag::Universal });
+        static constexpr std::array<Tag, 1> default_anomaly_tag = { Tag::Anomaly };
+
+        double base_dmg = anomaly.scale() / 100 * stats.get_value({ .id = StatId::AtkTotal, .tag = Tag::Universal });
         double crit_mult = 1.0 + (anomaly.can_crit()
-            ? std::min(stats.get_value({ StatId::CritRate, Tag::Anomaly }), 100.0)
-            * stats.get_value({ StatId::CritDmg, Tag::Anomaly })
+            ? std::min(stats.get_value({ .id = StatId::CritRate, .tag = Tag::Anomaly }), 100.0)
+            * stats.get_value({ .id = StatId::CritDmg, .tag = Tag::Anomaly })
             : 0.0);
         double dmg_ratio_mult = 1.0
-            + stats.get_value({ StatId::DmgRatio, Tag::Universal })
-            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
+            + stats.get_value({ .id = StatId::DmgRatio, .tag = Tag::Universal })
+            + stats.get_value({ .id = StatId::DmgRatio + anomaly.element(), .tag = Tag::Universal });
         double anomaly_ratio_mult = 1.0
-            + stats.get_value({ StatId::DmgRatio, Tag::Anomaly })
-            + stats.get_value({ StatId::DmgRatio + anomaly.element(), Tag::Universal });
+            + stats.get_value({ .id = StatId::DmgRatio, .tag = Tag::Anomaly })
+            + stats.get_value({ .id = StatId::DmgRatio + anomaly.element(), .tag = Tag::Universal });
 
-        double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, Tag::Anomaly);
-        double def_mult = calc_def_mult(enemy, stats, Tag::Anomaly);
-        double res_mult = calc_res_mult(enemy, stats, anomaly.element(), Tag::Anomaly);
+        double dmg_taken_mult = calc_dmg_taken_mult(enemy, stats, default_anomaly_tag);
+        double def_mult = calc_def_mult(enemy, stats, default_anomaly_tag);
+        double res_mult = calc_res_mult(enemy, stats, anomaly.element(), default_anomaly_tag);
         double stun_mult = 1.0 + calc_stun_mult(enemy, stats);
 
         return base_dmg
@@ -243,7 +255,7 @@ namespace calc {
         const auto& rotation = request.rotation->details();
 
         double total_dmg = 0.0;
-        std::vector<std::tuple<double, Tag, std::string>> info_per_ability;
+        std::vector<std::tuple<double, std::vector<Tag>, std::string>> info_per_ability;
 
         StatsGrid stats = details::calc_stats(request);
         stats.add(StatsGrid::make_defined_relative_stat(StatId::AtkTotal, Tag::Universal));
@@ -253,23 +265,23 @@ namespace calc {
             auto cell = rotation[i];
             const auto& ability = agent.ability(cell.command);
             double dmg;
-            Tag tag;
+            std::vector<Tag> tags;
 
             if (std::holds_alternative<SkillDetails>(ability)) {
                 const auto& skill = std::get<SkillDetails>(ability);
                 dmg = details::calc_regular_dmg(skill, cell.index - 1, stats, enemy);
-                tag = skill.tag();
+                tags = { skill.tags().begin(), skill.tags().end() };
                 if (skill.max_index() > 1)
                     cell.command += ' ' + std::to_string(cell.index);
             } else if (std::holds_alternative<AnomalyDetails>(ability)) {
                 const auto& anomaly = std::get<AnomalyDetails>(ability);
                 dmg = details::calc_anomaly_dmg(anomaly, agent.element(), stats, enemy);
-                tag = Tag::Anomaly;
+                tags.emplace_back(Tag::Anomaly);
             } else
                 throw RUNTIME_ERROR("ability is neither skill nor anomaly");
 
             total_dmg += dmg;
-            info_per_ability.emplace_back(dmg, tag, std::move(cell.command));
+            info_per_ability.emplace_back(dmg, tags, std::move(cell.command));
         }
 
         return { total_dmg, info_per_ability };

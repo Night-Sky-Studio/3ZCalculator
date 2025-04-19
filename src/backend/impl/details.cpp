@@ -215,61 +215,6 @@ namespace backend::details {
 		return allocated_objects;
 	} catch (const std::exception& e) {
 		CROW_LOG_ERROR << e.what();
-	}
-
-	// requesters
-
-	calc::request_t json_to_request(const utl::Json& json, lib::ObjectManager& manager) {
-		calc::request_t result;
-
-		prepare_request_details(result, json);
-		prepare_request_composed(result, manager);
-
-		return result;
-	}
-
-	utl::Json calcs_to_json(const calc::Calculator::result_t& calcs) {
-		utl::Json result;
-		const auto& [total, per_ability] = calcs; // [double, std::vector<double>]
-
-		result["total"] = total;
-		result["per_ability"] = per_ability;
-
-		return result;
-	}
-	utl::Json calcs_to_detailed_json(const calc::Calculator::result_t& calcs) {
-		utl::Json result;
-		const auto& [total, per_ability] = calcs; // [double, std::vector<double>]
-
-		result["total"] = total;
-
-		return result;
-	}
-
-	utl::Json post_damage(const calc::request_t& request) {
-		utl::Json json;
-
-		auto [total_dmg, per_ability] = calc::Calculator::eval(request);
-		json["total"] = total_dmg;
-		json["per_ability"] = per_ability;
-
-		return json;
-	}
-	utl::Json post_damage_detailed(const calc::request_t& request) {
-		utl::Json json;
-
-		auto [total_dmg, per_ability] = calc::Calculator::eval_detailed(request);
-		json["total"] = total_dmg;
-		utl::json::Array on_emplace;
-		for (auto& [dmg, tag, name] : per_ability) {
-			utl::json::Array line(3);
-			line[0] = dmg;
-			line[1] = (size_t) tag;
-			line[2] = std::move(name);
-			on_emplace.emplace_back(std::move(line));
-		}
-		json["per_ability"] = std::move(on_emplace);
-
-		return json;
+        return 0;
 	}
 }

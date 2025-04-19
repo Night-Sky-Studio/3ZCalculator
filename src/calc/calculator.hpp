@@ -14,7 +14,10 @@ namespace calc {
     class Calculator {
     public:
         using result_t = std::tuple<double, std::vector<double>>;
-        using detailed_result_t = std::tuple<double, std::vector<std::tuple<double, zzz::Tag, std::string>>>;
+        using detailed_result_t = std::tuple<
+            double,
+            std::vector<std::tuple<double, std::vector<zzz::Tag>, std::string>>
+        >;
 
         static const enemy_t enemy;
 
