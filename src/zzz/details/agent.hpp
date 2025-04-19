@@ -6,9 +6,6 @@
 #include <unordered_map>
 #include <variant>
 
-//utl
-#include "utl/json.hpp"
-
 //library
 #include "library/builder.hpp"
 #include "library/cached_memory.hpp"
@@ -43,6 +40,7 @@ namespace zzz::details {
         Speciality m_speciality;
         Element m_element;
         Rarity m_rarity;
+        Faction m_faction;
         StatsGrid m_stats, m_team_buffs;
         std::unordered_map<size_t, Ability> m_abilities;
     };
@@ -55,6 +53,7 @@ namespace zzz::details {
         AgentBuilder& set_speciality(Speciality speciality);
         AgentBuilder& set_element(Element element);
         AgentBuilder& set_rarity(Rarity rarity);
+        AgentBuilder& set_faction(Faction faction);
 
         AgentBuilder& add_stat(StatPtr&& value);
         AgentBuilder& set_stats(StatsGrid stats);
@@ -75,6 +74,7 @@ namespace zzz::details {
             bool speciality : 1 = false;
             bool element    : 1 = false;
             bool rarity     : 1 = false;
+            bool faction    : 1 = false;
         } _is_set;
     };
 }

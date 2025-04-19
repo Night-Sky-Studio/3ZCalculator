@@ -4,6 +4,7 @@
     "speciality": "Anomaly",
     "element": "Phys",
     "rarity": 4,
+    "faction": "CriminalInvestigationSpecialResponseTeam",
     "stats": [
         ["HpBase", 7789.0],
         ["DefBase", 607.0],

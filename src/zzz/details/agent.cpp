@@ -56,6 +56,11 @@ namespace zzz::details {
         _is_set.rarity = true;
         return *this;
     }
+    AgentBuilder& AgentBuilder::set_faction(Faction faction) {
+        m_product->m_faction = faction;
+        _is_set.rarity = true;
+        return *this;
+    }
 
     AgentBuilder& AgentBuilder::add_stat(StatPtr&& value) {
         m_product->m_stats.set(std::move(value));
@@ -95,7 +100,7 @@ namespace zzz::details {
     }
     Agent&& AgentBuilder::get_product() {
         if (!is_built())
-            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity and stats");
+            throw RUNTIME_ERROR("you have to specify id, name, speciality, element, rarity, faction and stats");
 
         return IBuilder::get_product();
     }
@@ -191,6 +196,7 @@ namespace zzz {
         builder.set_speciality((Speciality) table.at("speciality").as_string());
         builder.set_element(element);
         builder.set_rarity(table.at("rarity").as_integral());
+        builder.set_faction((Faction) table.at("faction").as_string());
 
         // stats
 
