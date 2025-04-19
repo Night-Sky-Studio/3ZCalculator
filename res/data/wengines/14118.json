@@ -9,7 +9,7 @@
         "sub": [["DefPenRatio", 0.24]],
         "passive": [
             ["AtkRatioCombat", 0.12],
-            ["Ap", 0.75]
+            ["Ap", 75.0]
         ]
     }
 }
